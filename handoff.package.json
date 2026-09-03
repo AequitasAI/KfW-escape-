@@ -1,0 +1,10 @@
+{
+  "package": "kfw_fantasy_escape_codex_handoff",
+  "workingTitle": "Die Brücke zur Zwei-Programme-Welt",
+  "version": "0.3.0",
+  "date": "2026-09-03",
+  "status": "Codex-ready; openKfW design basis integrated; concept art refs and design-decision handoff added",
+  "language": "de-DE",
+  "brandingSource": "https://github.com/openkfw/design-tokens",
+  "includesConceptReferences": true
+}

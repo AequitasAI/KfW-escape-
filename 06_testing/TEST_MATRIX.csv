@@ -1,0 +1,15 @@
+﻿ID;Bereich;Abnahmekriterium;Priorität
+A01;Join;Player joins via QR/link;P0
+A02;Reconnect;Refresh restores player;P0
+A03;Solver auth;Non-solver action rejected server-side;P0
+A04;Solver decline;Decline rerolls unused player;P0
+A05;Timer;Authoritative 10-minute timer;P0
+A06;Puzzle 1;Unique rune solution;P0
+A07;Puzzle 2;Sliding board solvable + live energy;P0
+A08;Puzzle 3;Exactly four differences;P1
+A09;Puzzle 4;Exactly one of 4096 gear solutions;P0
+A10;Puzzle 5;042 accepted including leading zero;P0
+A11;Finale;Win/loss synchronized;P0
+A12;Host;Skip/reroll/pause works;P0
+A13;A11y;Keyboard/tap alternatives;P1
+A14;Load;30 clients stable;P1

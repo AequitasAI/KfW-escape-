@@ -1,0 +1,26 @@
+{
+  "id": "black_gate_code",
+  "solution": "042",
+  "clues": [
+    {
+      "guess": "682",
+      "text": "Eine Ziffer ist korrekt und an der richtigen Stelle."
+    },
+    {
+      "guess": "614",
+      "text": "Eine Ziffer ist korrekt, aber an der falschen Stelle."
+    },
+    {
+      "guess": "206",
+      "text": "Zwei Ziffern sind korrekt, aber beide falsch platziert."
+    },
+    {
+      "guess": "738",
+      "text": "Keine Ziffer ist korrekt."
+    },
+    {
+      "guess": "780",
+      "text": "Eine Ziffer ist korrekt, aber falsch platziert."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "testmasters_diff",
+  "differences": [
+    {
+      "id": "rune_top_left",
+      "left": "triangle",
+      "right": "diamond"
+    },
+    {
+      "id": "middle_arrow",
+      "left": "right",
+      "right": "left"
+    },
+    {
+      "id": "bottom_gear_spokes",
+      "left": 6,
+      "right": 5
+    },
+    {
+      "id": "container_label",
+      "left": "IV",
+      "right": "VI"
+    }
+  ],
+  "falseClickPenaltyMs": 0,
+  "antiSpamCooldownMs": 750
+}

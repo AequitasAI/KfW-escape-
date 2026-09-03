@@ -1,0 +1,42 @@
+{
+  "id": "archive_runes",
+  "solution": [
+    "flame",
+    "mountain",
+    "hammer",
+    "moon",
+    "river"
+  ],
+  "items": [
+    {
+      "id": "flame",
+      "label": "Flamme",
+      "symbol": "🔥"
+    },
+    {
+      "id": "mountain",
+      "label": "Berg",
+      "symbol": "▲"
+    },
+    {
+      "id": "hammer",
+      "label": "Hammer",
+      "symbol": "⚒"
+    },
+    {
+      "id": "moon",
+      "label": "Mond",
+      "symbol": "☾"
+    },
+    {
+      "id": "river",
+      "label": "Fluss",
+      "symbol": "≈"
+    }
+  ],
+  "clues": [
+    "Der Fluss liegt am äußersten rechten Ende.",
+    "Der Hammer steht unmittelbar links vom Mond.",
+    "Flamme, Berg und Hammer bilden – in genau dieser Reihenfolge – eine zusammenhängende Dreiergruppe."
+  ]
+}
