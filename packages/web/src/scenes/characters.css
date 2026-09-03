@@ -179,12 +179,29 @@
  */
 .dwarf-art--image,
 .guard-art--image {
+  position: relative;
   display: block;
   width: 100%;
-  height: auto;
-  max-height: 100%;
+  /* the layers are stacked, so the box needs the aspect of the artwork */
+  aspect-ratio: 3 / 4;
+}
+
+.dwarf-art__layer,
+.guard-art__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  /* every state stands on the same ground line, whatever the file's aspect */
   object-position: bottom center;
+  opacity: 0;
+  transition: opacity var(--game-dur) var(--game-ease);
+}
+
+.dwarf-art__layer.is-current,
+.guard-art__layer.is-current {
+  opacity: 1;
 }
 
 .dwarf-art--image {
@@ -192,6 +209,7 @@
 }
 
 .guard-art--image {
+  aspect-ratio: 2 / 3;
   filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.65));
   transition: transform var(--game-dur-slow) var(--game-ease-out);
 }

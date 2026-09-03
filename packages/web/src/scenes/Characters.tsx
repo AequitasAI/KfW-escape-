@@ -25,21 +25,39 @@ const INK = '#2b1a10';
 /* ------------------------------------------------------------------ */
 
 export function DwarfArt({ mood, className }: { mood: DwarfMood; className?: string }): JSX.Element {
-  const art = useDwarfArt(mood);
+  // one hook per mood, fixed order, so all three resolve up front
+  const neutral = useDwarfArt('neutral');
+  const skeptical = useDwarfArt('skeptical');
+  const happy = useDwarfArt('happy');
+  const byMood: Record<DwarfMood, string | null> = { neutral, skeptical, happy };
+  const art = byMood[mood];
 
-  // the other moods are fetched up front so the payoff swap does not pop
   useEffect(() => {
     preloadDwarfMoods(DWARF_MOOD_ORDER);
   }, []);
 
   if (art) {
+    /*
+     * All available moods are stacked and cross-faded rather than swapped.
+     * A hard src change flashes on the very frame the machine starts - the one
+     * moment the dwarf is supposed to carry. Duplicate paths are collapsed, so
+     * a single supplied file costs a single layer.
+     */
+    const layers = [...new Set(DWARF_MOOD_ORDER.map((m) => byMood[m]).filter(Boolean))] as string[];
     return (
-      <img
-        src={art}
-        alt=""
-        aria-hidden="true"
+      <span
         className={`dwarf-art dwarf-art--image dwarf-art--${mood}${className ? ` ${className}` : ''}`}
-      />
+        aria-hidden="true"
+      >
+        {layers.map((src) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            className={`dwarf-art__layer${src === art ? ' is-current' : ''}`}
+          />
+        ))}
+      </span>
     );
   }
 
@@ -178,16 +196,26 @@ export function DwarfArt({ mood, className }: { mood: DwarfMood; className?: str
  * science-fiction cue in the whole game.
  */
 export function GuardArt({ open, className }: { open: boolean; className?: string }): JSX.Element {
-  const art = useGuardArt(open);
+  const closedArt = useGuardArt(false);
+  const openArt = useGuardArt(true);
+  const art = open ? openArt : closedArt;
 
   if (art) {
+    const layers = [...new Set([closedArt, openArt].filter(Boolean))] as string[];
     return (
-      <img
-        src={art}
-        alt=""
-        aria-hidden="true"
+      <span
         className={`guard-art guard-art--image${open ? ' is-open' : ''}${className ? ` ${className}` : ''}`}
-      />
+        aria-hidden="true"
+      >
+        {layers.map((src) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            className={`guard-art__layer${src === art ? ' is-current' : ''}`}
+          />
+        ))}
+      </span>
     );
   }
 
