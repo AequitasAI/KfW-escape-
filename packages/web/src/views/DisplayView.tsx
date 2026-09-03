@@ -152,6 +152,7 @@ export function DisplayView(): JSX.Element {
               <div className="display__room-head">
                 <span className="display__station-badge">{puzzle.station}</span>
                 <h2 className="display__room-title">{puzzle.title}</h2>
+                <p className="display__atmosphere">{puzzle.atmosphere}</p>
                 <p className="display__lead">{puzzle.task}</p>
               </div>
 

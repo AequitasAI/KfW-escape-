@@ -11,7 +11,8 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Phase 4 UI / Game Feel
 - [x] Phase 5 Hardening
 - [x] Branding-Entscheidung dokumentiert und umgesetzt (`docs/BRANDING_INTEGRATION.md`)
-- [ ] Finale Fantasy-Art-Assets integriert (bewusst offen, Struktur vorbereitet)
+- [x] Fantasy-Ebene als SVG (Szenen, Betriebszwerg, Schwarzer Wächter)
+- [ ] Finale gerenderte Illustrationen (Drop-in-Pipeline + Prompts liegen bereit)
 
 ## Funktioniert
 
@@ -59,9 +60,14 @@ Siehe `git log -1` auf `claude/mvp-build`.
   Tap-/Keyboard-Alternative zu jeder Drag-Interaktion, Status nie nur über Farbe.
 
 ## Offen / bewusst nicht gemacht
-- **Finale Fantasy-Illustrationen.** Die Szenen sind derzeit prozedurales SVG. Die Layer-Struktur
-  (`bg` / `fx` / `content`) und der Custom-Property-Haken `--scene-image` liegen bereit; ein
-  fertiges Artwork ersetzt den bg-Layer ohne Codeänderung. Siehe `08_assets/ASSET_BRIEF.md`.
+- **Finale gerenderte Illustrationen.** Das Handoff-Paket enthielt kein produktives Artwork – nur
+  zwei als Mood-Referenz deklarierte PNGs; `ASSET_BRIEF.md` untersagt in Zeile 1 sogar ausdrücklich,
+  vor abgestimmter Art Direction finale Illustrationen zu erzeugen. Die Fantasy-Ebene ist deshalb
+  vollständig als handgezeichnetes SVG umgesetzt (acht Szenen, Betriebszwerg mit drei Stimmungen,
+  Schwarzer Wächter). Für gerenderte Bilder liegt eine Drop-in-Pipeline bereit: Datei unter dem
+  vorgegebenen Namen nach `packages/web/public/art/` legen, fertig – eine fehlende Datei zeigt nie
+  ein kaputtes Bild. Fertige Generierungs-Prompts: `08_assets/IMAGE_PROMPTS.md`,
+  Ablauf: `docs/ARTWORK.md`.
 - **Echte openKfW-Tokens.** Das npm-Paket ist EOL und leer, Repository und Demo-Seite waren aus
   der Build-Umgebung nicht erreichbar. Statt eines von der Spec verbotenen Pins auf eine
   deprecated Version liegt ein austauschbarer Token-Contract vor. Einspielen: ein Import,

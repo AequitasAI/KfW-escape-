@@ -24,8 +24,9 @@
 }
 
 /*
- * Drop-in seam for final artwork: set --scene-image on .scene (or per scene id)
- * and the generated SVG is covered by the image without any code change.
+ * Drop-in seam for final artwork. Scene.tsx sets --scene-image as soon as a file
+ * under public/art/scenes/ actually resolves, so a missing asset can never show
+ * a broken image - the generated SVG simply stays visible.
  */
 .scene__bg::after {
   content: '';
@@ -34,6 +35,12 @@
   background-image: var(--scene-image, none);
   background-size: cover;
   background-position: center;
+  opacity: 0;
+  transition: opacity var(--game-dur-slow) var(--game-ease);
+}
+
+.scene--art .scene__bg::after {
+  opacity: 1;
 }
 
 .scene__fx {

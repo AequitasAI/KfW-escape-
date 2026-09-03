@@ -729,8 +729,13 @@
   gap: 0.35rem;
 }
 
-.puzzle--wide .dwarf__art {
-  width: clamp(96px, 9vw, 150px);
+.puzzle--wide .gears__dwarf {
+  right: 2%;
+  bottom: -1.25rem;
+}
+
+.puzzle--wide .dwarf__figure {
+  width: clamp(150px, 14vw, 235px);
 }
 
 .puzzle--wide .dwarf__bubble {
@@ -761,19 +766,13 @@
   max-width: 46rem;
 }
 
-.gate__guard-art {
-  width: clamp(72px, 10vw, 118px);
+.gate__guard-figure {
+  width: clamp(84px, 11vw, 140px);
   flex: none;
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6));
 }
 
-.gate__sword {
-  transform-origin: 100px 148px;
-  transition: transform var(--game-dur-slow) var(--game-ease-out);
-}
-
-.puzzle--gate.is-open .gate__sword {
-  transform: rotate(52deg);
+.puzzle--wide .gate__guard-figure {
+  width: clamp(120px, 13vw, 190px);
 }
 
 .gate__speech-hail {
@@ -929,14 +928,55 @@
 /* Wide (display) tuning                                               */
 /* ------------------------------------------------------------------ */
 
+/*
+ * On 16:9 the gate has to read as one wide tableau: guardian left, his five
+ * statements in the middle, the keypad right. Stacked vertically it ran past
+ * the bottom of the screen.
+ */
+.puzzle--wide.puzzle--gate {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.85fr) minmax(0, 1.6fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+}
+
+.puzzle--wide .gate__guard {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--game-space-1);
+  max-width: none;
+}
+
+.puzzle--wide .gate__panel {
+  display: contents;
+}
+
 .puzzle--wide .gate__slot {
-  width: 78px;
-  height: 100px;
-  font-size: 3rem;
+  width: clamp(52px, 4vw, 72px);
+  height: clamp(68px, 5.4vw, 94px);
+  font-size: clamp(1.9rem, 2.4vw, 2.8rem);
 }
 
 .puzzle--wide .gate__clue {
-  font-size: var(--kfw-font-size-medium);
+  font-size: clamp(0.85rem, 0.95vw, 1.05rem);
+  padding: 0.4rem 0.6rem;
+}
+
+.puzzle--wide .gate__clue-code {
+  font-size: clamp(1rem, 1.2vw, 1.35rem);
+}
+
+.puzzle--wide .gate__keypad {
+  width: min(100%, 260px);
+}
+
+.puzzle--wide .gate__key {
+  min-height: clamp(42px, 3.6vw, 56px);
+}
+
+.puzzle--wide .gate__speech-hail {
+  font-size: clamp(1.4rem, 1.8vw, 2.2rem);
 }
 
 .puzzle--wide .diff__tally-item {

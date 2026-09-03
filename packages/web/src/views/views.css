@@ -164,6 +164,12 @@
   margin-top: 0.25rem;
 }
 
+.stage__atmosphere {
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: color-mix(in srgb, var(--game-fx-rune) 78%, #fff 22%);
+}
+
 .stage__task {
   margin-top: 0.4rem;
   color: var(--game-ui-text-muted);
@@ -458,6 +464,13 @@
 
 .display__room-head {
   text-align: center;
+}
+
+.display__atmosphere {
+  margin-top: 0.5rem;
+  font-style: italic;
+  font-size: clamp(1rem, 0.85rem + 0.65vw, 1.5rem);
+  color: color-mix(in srgb, var(--game-fx-rune) 78%, #fff 22%);
 }
 
 .display__station-badge {

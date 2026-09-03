@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { SCENE_ART, artIsKnownAvailable, probeArt } from './sceneArt.js';
 import './scene.css';
 
 export type SceneId =
@@ -38,8 +39,27 @@ export function Scene({
   children?: ReactNode;
   className?: string;
 }): JSX.Element {
+  const src = SCENE_ART[id];
+  const [hasArt, setHasArt] = useState(() => artIsKnownAvailable(src));
+
+  // If final artwork has been dropped in, it takes over the background layer.
+  // Until then the generated SVG carries the scene on its own.
+  useEffect(() => {
+    let active = true;
+    void probeArt(src).then((available) => {
+      if (active) setHasArt(available);
+    });
+    return () => {
+      active = false;
+    };
+  }, [src]);
+
   return (
-    <div className={`scene scene--${id}${className ? ` ${className}` : ''}`} data-scene={id}>
+    <div
+      className={`scene scene--${id}${hasArt ? ' scene--art' : ''}${className ? ` ${className}` : ''}`}
+      data-scene={id}
+      style={hasArt ? ({ '--scene-image': `url("${src}")` } as React.CSSProperties) : undefined}
+    >
       <div className="scene__bg" aria-hidden="true">
         <SceneArt id={id} />
       </div>
@@ -224,33 +244,127 @@ function TestmastersArt(): JSX.Element {
 function MineArt(): JSX.Element {
   return (
     <svg viewBox={VIEWBOX} preserveAspectRatio="xMidYMid slice" role="presentation">
-      <Sky from="#2a1c12" to="#0a0d14" />
-      {/* rough rock ceiling and walls */}
+      <defs>
+        <linearGradient id="mine-rock" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3b2a1c" />
+          <stop offset="45%" stopColor="#241a13" />
+          <stop offset="100%" stopColor="#0d1017" />
+        </linearGradient>
+        <radialGradient id="mine-forge" cx="50%" cy="60%">
+          <stop offset="0%" stopColor="#ff9a52" stopOpacity="0.32" />
+          <stop offset="55%" stopColor="#c2622c" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#ff9a52" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="mine-lantern" cx="50%" cy="50%">
+          <stop offset="0%" stopColor="#ffd9a0" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#ff9a52" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      <rect width="1600" height="900" fill="url(#mine-rock)" />
+
+      {/* deep gallery behind everything, giving the hall a far wall */}
+      <path d="M300 250 H1300 V760 H300 Z" fill="#120d0a" opacity="0.75" />
       <path
-        d="M0 0 H1600 V210 L1450 260 L1320 190 L1180 250 L1030 195 L880 255 L730 190 L580 250 L430 195 L280 255 L140 200 L0 250 Z"
-        fill="#0e131c"
+        d="M300 250 Q800 190 1300 250 L1300 300 Q800 246 300 300 Z"
+        fill="#1a1310"
       />
-      <path d="M0 900 H1600 V730 L1420 690 L1200 740 L980 700 L760 745 L540 700 L320 745 L120 705 L0 750 Z" fill="#0c1119" />
-      {/* support beams */}
-      {[240, 760, 1300].map((x, i) => (
-        <g key={i} opacity="0.85">
-          <rect x={x} y="250" width="26" height="470" fill="#2a1f16" />
-          <rect x={x - 90} y="240" width="206" height="24" fill="#31241a" />
+
+      {/* hewn rock ceiling with irregular strata */}
+      <path
+        d="M0 0 H1600 V150 L1520 200 L1430 152 L1330 214 L1230 158 L1120 226 L1010 164 L900 232
+           L790 168 L680 228 L570 160 L460 220 L350 156 L240 212 L130 154 L0 208 Z"
+        fill="#0f1219"
+      />
+      <path
+        d="M0 60 H1600 V120 L1400 160 L1180 118 L960 170 L740 122 L520 168 L300 120 L100 162 L0 128 Z"
+        fill="#1b1710"
+        opacity="0.7"
+      />
+
+      {/* rock floor with rubble */}
+      <path
+        d="M0 900 H1600 V748 L1450 712 L1270 756 L1090 718 L900 762 L710 716 L520 758 L330 714
+           L150 756 L0 720 Z"
+        fill="#100c09"
+      />
+      {[...Array(14)].map((_, i) => (
+        <ellipse
+          key={i}
+          cx={60 + i * 118}
+          cy={790 + ((i * 37) % 60)}
+          rx={16 + ((i * 13) % 22)}
+          ry={7 + ((i * 5) % 8)}
+          fill="#1c1510"
+          opacity="0.8"
+        />
+      ))}
+
+      {/* timber pit props */}
+      {[210, 700, 1190].map((x, i) => (
+        <g key={i}>
+          <rect x={x - 110} y="196" width="252" height="30" rx="4" fill="#2f2216" />
+          <rect x={x - 110} y="196" width="252" height="8" rx="4" fill="#3d2d1d" />
+          <rect x={x} y="222" width="34" height="520" fill="#2a1e14" />
+          <rect x={x} y="222" width="10" height="520" fill="#38281a" />
+          {/* iron bracket */}
+          <rect x={x - 6} y="300" width="46" height="12" rx="3" fill="#4a3a28" />
         </g>
       ))}
-      {/* warm forge glow and lanterns */}
-      <ellipse cx="800" cy="520" rx="520" ry="230" fill="#ff9a52" opacity="0.10" />
-      {[180, 620, 1080, 1480].map((x, i) => (
-        <g key={i} className="scene-flicker" style={{ animationDelay: `${i * 0.7}s` }}>
-          <circle cx={x} cy="330" r="9" fill="#ffb266" />
-          <circle cx={x} cy="330" r="34" fill="#ff9a52" opacity="0.16" />
+
+      {/* warm forge glow filling the hall */}
+      <ellipse cx="800" cy="520" rx="700" ry="300" fill="url(#mine-forge)" />
+
+      {/* hanging lanterns */}
+      {[150, 520, 900, 1290, 1520].map((x, i) => (
+        <g key={i} className="scene-flicker" style={{ animationDelay: `${i * 0.63}s` }}>
+          <line x1={x} y1="150" x2={x} y2="286" stroke="#3a2c1e" strokeWidth="3" />
+          <circle cx={x} cy="300" r="52" fill="url(#mine-lantern)" />
+          <path d={`M${x - 13} 288 H${x + 13} L${x + 9} 314 H${x - 9} Z`} fill="#4a3826" />
+          <circle cx={x} cy="300" r="7" fill="#ffd48a" />
         </g>
       ))}
-      {/* crystal cart hint, bottom left */}
-      <g opacity="0.6">
-        <polygon points="90,720 130,650 170,720" fill="#4fe3d0" opacity="0.5" />
-        <polygon points="140,725 175,668 205,725" fill="#4fe3d0" opacity="0.35" />
+
+      {/* mine cart with glowing crystals, foreground left */}
+      <g>
+        <path d="M40 812 H300" stroke="#2b2118" strokeWidth="7" />
+        {[...Array(9)].map((_, i) => (
+          <rect key={i} x={46 + i * 30} y="806" width="9" height="18" fill="#241b13" />
+        ))}
+        <path d="M70 736 H240 L226 806 H84 Z" fill="#2c2118" />
+        <path d="M70 736 H240 L236 752 H74 Z" fill="#3b2c1e" />
+        <circle cx="108" cy="812" r="15" fill="#1d1610" />
+        <circle cx="202" cy="812" r="15" fill="#1d1610" />
+        <g opacity="0.95">
+          <polygon points="104,736 124,690 144,736" fill="#4fe3d0" opacity="0.55" />
+          <polygon points="140,736 166,678 190,736" fill="#4fe3d0" opacity="0.4" />
+          <polygon points="176,736 196,700 214,736" fill="#4fe3d0" opacity="0.5" />
+        </g>
+        <ellipse cx="155" cy="720" rx="105" ry="52" fill="#4fe3d0" opacity="0.12" />
       </g>
+
+      {/* carved stone gate arch, far right - where the machine leads */}
+      <g>
+        <path d="M1360 740 V420 Q1470 330 1580 420 V740 Z" fill="#191d26" />
+        <path d="M1360 740 V420 Q1470 330 1580 420 V440 Q1470 358 1380 440 V740 Z" fill="#252b38" />
+        <rect x="1392" y="452" width="156" height="288" fill="#0b0e14" />
+        {[...Array(5)].map((_, i) => (
+          <line
+            key={i}
+            x1="1392"
+            y1={492 + i * 56}
+            x2="1548"
+            y2={492 + i * 56}
+            stroke="#161b24"
+            strokeWidth="5"
+          />
+        ))}
+        <polygon points="1470,372 1490,398 1470,424 1450,398" fill="#4fe3d0" opacity="0.55" />
+      </g>
+
+      {/* foreground rock shoulders, framing the composition */}
+      <path d="M0 900 V640 Q90 700 130 900 Z" fill="#0a0d13" />
+      <path d="M1600 900 V660 Q1520 720 1490 900 Z" fill="#0a0d13" />
     </svg>
   );
 }

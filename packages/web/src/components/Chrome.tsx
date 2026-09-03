@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { PuzzleMetaView, SolverView, TimerView } from '@kfw-escape/shared';
 import { describeClock, formatClock, useServerClock } from '../lib/useServerClock.js';
 import { sound } from '../lib/sound.js';
+import { DwarfArt, type DwarfMood } from '../scenes/Characters.js';
 import './chrome.css';
 
 /* ------------------------------------------------------------------ */
@@ -185,28 +186,21 @@ export function SolverReveal({ name, onDone }: { name: string; onDone: () => voi
 /* Betriebszwerg - a side character, never a real person               */
 /* ------------------------------------------------------------------ */
 
-export function Dwarf({ line, mood }: { line: string; mood: 'neutral' | 'skeptical' | 'happy' }): JSX.Element {
+export function Dwarf({
+  line,
+  mood,
+}: {
+  line: string;
+  mood: DwarfMood;
+}): JSX.Element {
   return (
     <figure className={`dwarf dwarf--${mood}`}>
       <div className="dwarf__bubble" role="status" aria-live="polite">
         {line}
       </div>
-      <svg className="dwarf__art" viewBox="0 0 120 150" aria-hidden="true">
-        {/* helmet */}
-        <path d="M32 52 Q60 24 88 52 L88 60 L32 60 Z" fill="#5b4a35" />
-        <rect x="30" y="56" width="60" height="8" rx="4" fill="#6d5941" />
-        <circle cx="60" cy="46" r="7" fill="#ffd48a" opacity="0.9" />
-        {/* face */}
-        <rect x="42" y="62" width="36" height="18" rx="6" fill="#d8a684" />
-        <circle cx="52" cy="70" r="2.6" fill="#20242c" />
-        <circle cx="68" cy="70" r="2.6" fill="#20242c" />
-        {/* beard */}
-        <path d="M40 76 Q60 122 80 76 Q72 96 60 100 Q48 96 40 76 Z" fill="#a4622f" />
-        {/* body */}
-        <path d="M34 96 Q60 88 86 96 L92 142 L28 142 Z" fill="#3f5163" />
-        <rect x="28" y="118" width="64" height="10" rx="4" fill="#2a3746" />
-        <rect x="52" y="118" width="16" height="10" rx="3" fill="#c08a3e" />
-      </svg>
+      <div className="dwarf__figure">
+        <DwarfArt mood={mood} />
+      </div>
     </figure>
   );
 }

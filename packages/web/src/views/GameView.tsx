@@ -174,6 +174,7 @@ export function GameView(): JSX.Element {
               <header className="stage__head">
                 <p className="stage__station">{puzzle.station}</p>
                 <h2 className="stage__title">{puzzle.title}</h2>
+                <p className="stage__atmosphere">{puzzle.atmosphere}</p>
                 <p className="stage__task">{puzzle.task}</p>
               </header>
 

@@ -1,0 +1,171 @@
+/* ------------------------------------------------------------------ */
+/* Betriebszwerg                                                       */
+/* ------------------------------------------------------------------ */
+
+.dwarf-art {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
+}
+
+.dwarf-art__lamp-glow {
+  animation: dwarf-lamp 3.6s ease-in-out infinite;
+  transform-origin: 70px 36px;
+}
+
+@keyframes dwarf-lamp {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  62% {
+    opacity: 0.6;
+    transform: scale(0.96);
+  }
+}
+
+/* eyes blink on every mood, which is what stops him reading as a statue */
+.dwarf-art__eyes {
+  animation: dwarf-blink 6.5s ease-in-out infinite;
+  transform-origin: center 58px;
+}
+
+@keyframes dwarf-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  96.5% {
+    transform: scaleY(0.08);
+  }
+}
+
+/* mood: neutral -------------------------------------------------- */
+
+.dwarf-art__mouth {
+  opacity: 0;
+  transition: opacity var(--game-dur) var(--game-ease);
+}
+
+.dwarf-art__thumb {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity var(--game-dur) var(--game-ease-out),
+    transform var(--game-dur) var(--game-ease-out);
+}
+
+.dwarf-art__brow {
+  transition: transform var(--game-dur) var(--game-ease);
+}
+
+/* mood: skeptical ------------------------------------------------- */
+
+.dwarf-art--skeptical .dwarf-art__brow--r {
+  transform: translateY(-5px) rotate(-9deg);
+  transform-origin: 81px 48px;
+}
+
+.dwarf-art--skeptical .dwarf-art__brow--l {
+  transform: translateY(2px);
+}
+
+.dwarf-art--skeptical .dwarf-art__eye {
+  transform: scaleY(0.72);
+  transform-origin: center 58px;
+}
+
+/* mood: happy ----------------------------------------------------- */
+
+.dwarf-art--happy .dwarf-art__mouth {
+  opacity: 1;
+}
+
+.dwarf-art--happy .dwarf-art__brow--l,
+.dwarf-art--happy .dwarf-art__brow--r {
+  transform: translateY(-3px);
+}
+
+.dwarf-art--happy .dwarf-art__thumb {
+  opacity: 1;
+  transform: none;
+}
+
+.dwarf-art--happy .dwarf-art__hand-right {
+  animation: dwarf-cheer 900ms var(--game-ease-out) 2;
+  transform-origin: 104px 134px;
+}
+
+@keyframes dwarf-cheer {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(-8deg);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Schwarzer Wächter                                                   */
+/* ------------------------------------------------------------------ */
+
+.guard-art {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.65));
+}
+
+.guard-art__visor {
+  fill: var(--game-fx-energy);
+  filter: drop-shadow(0 0 8px var(--game-fx-energy-glow));
+  animation: guard-visor 4.2s ease-in-out infinite;
+}
+
+@keyframes guard-visor {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.guard-art__pommel {
+  fill: var(--game-fx-energy);
+  filter: drop-shadow(0 0 6px var(--game-fx-energy-glow));
+}
+
+/* the sword lowers once the code is accepted */
+.guard-art__sword {
+  transform-origin: 121px 140px;
+  transition: transform var(--game-dur-slow) var(--game-ease-out);
+}
+
+.guard-art.is-open .guard-art__sword {
+  transform: rotate(74deg) translateY(6px);
+}
+
+.guard-art.is-open .guard-art__visor {
+  fill: var(--game-fx-seal);
+  animation: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dwarf-art__lamp-glow,
+  .dwarf-art__eyes,
+  .dwarf-art--happy .dwarf-art__hand-right,
+  .guard-art__visor {
+    animation: none !important;
+  }
+}
