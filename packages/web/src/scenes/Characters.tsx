@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { DWARF_MOOD_ORDER, preloadDwarfMoods, useDwarfArt, useGuardArt } from './sceneArt.js';
 import './characters.css';
 
 export type DwarfMood = 'neutral' | 'skeptical' | 'happy';
@@ -13,6 +15,24 @@ export type DwarfMood = 'neutral' | 'skeptical' | 'happy';
  * brass lamp, heavy ginger beard, workshop jacket and tool belt.
  */
 export function DwarfArt({ mood, className }: { mood: DwarfMood; className?: string }): JSX.Element {
+  const art = useDwarfArt(mood);
+
+  // the other moods are fetched up front so the payoff swap does not pop
+  useEffect(() => {
+    preloadDwarfMoods(DWARF_MOOD_ORDER);
+  }, []);
+
+  if (art) {
+    return (
+      <img
+        src={art}
+        alt=""
+        aria-hidden="true"
+        className={`dwarf-art dwarf-art--image dwarf-art--${mood}${className ? ` ${className}` : ''}`}
+      />
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 140 180"
@@ -135,6 +155,19 @@ export function DwarfArt({ mood, className }: { mood: DwarfMood; className?: str
  * no gore, no face. Lowers the sword once the code is accepted.
  */
 export function GuardArt({ open, className }: { open: boolean; className?: string }): JSX.Element {
+  const art = useGuardArt(open);
+
+  if (art) {
+    return (
+      <img
+        src={art}
+        alt=""
+        aria-hidden="true"
+        className={`guard-art guard-art--image${open ? ' is-open' : ''}${className ? ` ${className}` : ''}`}
+      />
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 150 210"

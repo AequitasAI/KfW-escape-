@@ -12,7 +12,8 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Phase 5 Hardening
 - [x] Branding-Entscheidung dokumentiert und umgesetzt (`docs/BRANDING_INTEGRATION.md`)
 - [x] Fantasy-Ebene als SVG (Szenen, Betriebszwerg, Schwarzer Wächter)
-- [ ] Finale gerenderte Illustrationen (Drop-in-Pipeline + Prompts liegen bereit)
+- [x] Acht gerenderte Szenen-Illustrationen eingebunden
+- [ ] Figuren-Illustrationen (Zwerg, Wächter) – Code fertig, Dateien fehlen noch
 
 ## Funktioniert
 
@@ -60,7 +61,13 @@ Siehe `git log -1` auf `claude/mvp-build`.
   Tap-/Keyboard-Alternative zu jeder Drag-Interaktion, Status nie nur über Farbe.
 
 ## Offen / bewusst nicht gemacht
-- **Finale gerenderte Illustrationen.** Das Handoff-Paket enthielt kein produktives Artwork – nur
+- **Figuren-Illustrationen.** Die acht Szenen sind als gerenderte WebP eingebunden. Betriebszwerg
+  und Schwarzer Wächter laufen noch als SVG und fallen gegen die gemalten Hintergründe sichtbar ab.
+  Der Austausch ist vollständig vorbereitet: `character_operations_dwarf[_neutral|_skeptical|_happy]`
+  und `character_black_guard[_open]` nach `packages/web/public/art/characters/` legen, freigestellt
+  mit Transparenz – mehr nicht. Existiert nur eine Zwergendatei, nutzen alle drei Stimmungen sie,
+  damit nie eine Zeichnung neben einer Illustration steht.
+- **Hintergrund zum Artwork.** Das Handoff-Paket enthielt kein produktives Artwork – nur
   zwei als Mood-Referenz deklarierte PNGs; `ASSET_BRIEF.md` untersagt in Zeile 1 sogar ausdrücklich,
   vor abgestimmter Art Direction finale Illustrationen zu erzeugen. Die Fantasy-Ebene ist deshalb
   vollständig als handgezeichnetes SVG umgesetzt (acht Szenen, Betriebszwerg mit drei Stimmungen,

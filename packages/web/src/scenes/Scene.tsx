@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { knownSceneArt, probeSceneArt } from './sceneArt.js';
+import type { ReactNode } from 'react';
+import { useSceneArt } from './sceneArt.js';
 import './scene.css';
 
 export type SceneId =
@@ -39,19 +39,9 @@ export function Scene({
   children?: ReactNode;
   className?: string;
 }): JSX.Element {
-  const [art, setArt] = useState<string | null>(() => knownSceneArt(id));
-
   // If final artwork has been dropped in, it takes over the background layer.
   // Until then the generated SVG carries the scene on its own.
-  useEffect(() => {
-    let active = true;
-    void probeSceneArt(id).then((src) => {
-      if (active) setArt(src);
-    });
-    return () => {
-      active = false;
-    };
-  }, [id]);
+  const art = useSceneArt(id);
 
   return (
     <div

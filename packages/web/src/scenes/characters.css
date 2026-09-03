@@ -161,6 +161,44 @@
   opacity: 1;
 }
 
+/* ------------------------------------------------------------------ */
+/* Image variants                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A dropped-in illustration replaces the SVG entirely. The wrapper keeps the
+ * placement and the idle motion, so the figure sits exactly where the drawn one
+ * did. `contain` plus a bottom anchor means the character stands on the same
+ * ground line whatever aspect ratio the generator produced.
+ */
+.dwarf-art--image,
+.guard-art--image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+}
+
+.dwarf-art--image {
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
+}
+
+.guard-art--image {
+  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.65));
+  transition: transform var(--game-dur-slow) var(--game-ease-out);
+}
+
+/*
+ * Without a dedicated `_open` illustration the sword cannot lower, so the
+ * guardian steps back a touch instead - a small acknowledgement rather than a
+ * fake animation.
+ */
+.guard-art--image.is-open {
+  transform: scale(0.97) translateY(4px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dwarf-art__lamp-glow,
   .dwarf-art__eyes,

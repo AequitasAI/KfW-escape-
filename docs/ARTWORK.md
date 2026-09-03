@@ -2,7 +2,11 @@
 
 ## Stand
 
-Das Handoff-Paket v0.4 enthielt **kein produktives Artwork**. In `08_assets/concept_refs/` liegen
+**Die acht Szenen sind eingebunden** (`packages/web/public/art/scenes/`, WebP, zusammen ~1,1 MB).
+Betriebszwerg und Schwarzer Wächter sind weiterhin SVG, bis freigestellte Figuren-Illustrationen
+vorliegen – der Code dafür ist fertig, es fehlen nur die Dateien.
+
+Das Handoff-Paket v0.4 selbst enthielt **kein produktives Artwork**. In `08_assets/concept_refs/` liegen
 genau zwei PNGs, und die sind im Paket ausdrücklich als Mood-/Qualitätsreferenz deklariert, nicht
 als einzubindende Assets. `08_assets/ASSET_BRIEF.md` beginnt mit dem Satz:
 
@@ -17,7 +21,7 @@ Alle Fantasy-Elemente sind handgezeichnetes SVG:
 
 | Element | Datei |
 |---|---|
-| Acht Szenen (Lobby, 5 Stationen, Brücke, Niederlage) | `packages/web/src/scenes/Scene.tsx` |
+| Acht Szenen – Fallback, falls ein Bild fehlt | `packages/web/src/scenes/Scene.tsx` |
 | Betriebszwerg mit drei Stimmungen | `packages/web/src/scenes/Characters.tsx` |
 | Schwarzer Wächter | `packages/web/src/scenes/Characters.tsx` |
 | Runen, Kabel, Zahnräder, Baupläne, Nummernblock | jeweils die Puzzle-Komponente |

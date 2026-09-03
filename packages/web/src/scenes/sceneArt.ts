@@ -1,11 +1,12 @@
+import { useEffect, useState } from 'react';
 import type { SceneId } from './Scene.js';
 
 /**
  * Drop-in point for final artwork.
  *
- * Every scene renders a generated SVG by default. As soon as a matching file
- * exists under `packages/web/public/art/scenes/`, that image is layered on top
- * and becomes the background - no component change, no puzzle change.
+ * Scenes and characters render generated SVG by default. As soon as a matching
+ * file exists under `packages/web/public/art/`, that image takes over - no
+ * component change, no puzzle change.
  *
  * Any of the extensions below works, so an image straight out of a generator
  * can be dropped in without converting it first.
@@ -28,26 +29,15 @@ export const SCENE_BASENAME: Record<SceneId, string> = {
   defeat: 'scene_defeat',
 };
 
-export const CHARACTER_BASENAME = {
-  dwarf: 'character_operations_dwarf',
-  guard: 'character_black_guard',
-} as const;
+export const DWARF_BASENAME = 'character_operations_dwarf';
+export const GUARD_BASENAME = 'character_black_guard';
 
-function candidates(dir: string, basename: string): string[] {
-  return ART_EXTENSIONS.map((extension) => `/art/${dir}/${basename}.${extension}`);
-}
+/* ------------------------------------------------------------------ */
+/* Resolver                                                            */
+/* ------------------------------------------------------------------ */
 
-export function sceneCandidates(id: SceneId): string[] {
-  return candidates('scenes', SCENE_BASENAME[id]);
-}
-
-/**
- * A missing file must never show a broken image, so each scene is probed once
- * and the result cached. Until an image resolves, the generated SVG stands on
- * its own - which is also the state the MVP ships in.
- */
-const probes = new Map<SceneId, Promise<string | null>>();
-const resolved = new Map<SceneId, string | null>();
+const probes = new Map<string, Promise<string | null>>();
+const resolved = new Map<string, string | null>();
 
 function loads(src: string): Promise<boolean> {
   return new Promise((resolve) => {
@@ -62,27 +52,109 @@ function loads(src: string): Promise<boolean> {
   });
 }
 
-/** Synchronous read of an already probed scene, for the first render. */
-export function knownSceneArt(id: SceneId): string | null {
-  return resolved.get(id) ?? null;
-}
-
-export function probeSceneArt(id: SceneId): Promise<string | null> {
-  const cached = probes.get(id);
+/**
+ * Resolves the first existing file across a priority list of basenames and the
+ * supported extensions. A miss costs one cached 404 and is never retried.
+ */
+export function resolveArt(key: string, dir: string, basenames: string[]): Promise<string | null> {
+  const cached = probes.get(key);
   if (cached) return cached;
 
   const probe = (async () => {
-    for (const src of sceneCandidates(id)) {
-      // sequential on purpose: the common case is the first extension hitting,
-      // and a miss costs nothing but a cached 404
-      if (await loads(src)) return src;
+    for (const basename of basenames) {
+      for (const extension of ART_EXTENSIONS) {
+        const src = `/art/${dir}/${basename}.${extension}`;
+        if (await loads(src)) return src;
+      }
     }
     return null;
   })().then((src) => {
-    resolved.set(id, src);
+    resolved.set(key, src);
     return src;
   });
 
-  probes.set(id, probe);
+  probes.set(key, probe);
   return probe;
+}
+
+/** Synchronous read of an already resolved asset, for the first render. */
+export function knownArt(key: string): string | null {
+  return resolved.get(key) ?? null;
+}
+
+/** React binding: returns the resolved image path, or null while none exists. */
+export function useArt(key: string, dir: string, basenames: string[]): string | null {
+  const [src, setSrc] = useState<string | null>(() => knownArt(key));
+
+  useEffect(() => {
+    let active = true;
+    void resolveArt(key, dir, basenames).then((found) => {
+      if (active) setSrc(found);
+    });
+    return () => {
+      active = false;
+    };
+    // basenames is derived from key by every caller
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, dir]);
+
+  return src;
+}
+
+/* ------------------------------------------------------------------ */
+/* Per-asset helpers                                                   */
+/* ------------------------------------------------------------------ */
+
+export function sceneArtKey(id: SceneId): string {
+  return `scene:${id}`;
+}
+
+export function useSceneArt(id: SceneId): string | null {
+  return useArt(sceneArtKey(id), 'scenes', [SCENE_BASENAME[id]]);
+}
+
+export const DWARF_MOOD_ORDER = ['neutral', 'skeptical', 'happy'] as const;
+
+/**
+ * A mood-specific dwarf wins over the generic one, so a single file is enough
+ * to get started and three files give the full performance.
+ *
+ * Every other dwarf file is listed after that on purpose: mixing a rendered
+ * illustration for one mood with the drawn SVG for the next one inside the same
+ * scene looks broken. As soon as any dwarf image exists, all three moods use an
+ * image - the expression just stops changing.
+ */
+export function dwarfBasenames(mood: string): string[] {
+  const names = [`${DWARF_BASENAME}_${mood}`, DWARF_BASENAME];
+  for (const other of DWARF_MOOD_ORDER) {
+    if (other !== mood) names.push(`${DWARF_BASENAME}_${other}`);
+  }
+  return names;
+}
+
+export function useDwarfArt(mood: string): string | null {
+  return useArt(`dwarf:${mood}`, 'characters', dwarfBasenames(mood));
+}
+
+/**
+ * `_open` is optional. Without it the same figure is shown in both states and
+ * the lowered sword simply does not happen - the copy still changes. Both names
+ * are listed in either direction so a single file of either kind is enough.
+ */
+export function guardBasenames(open: boolean): string[] {
+  return open
+    ? [`${GUARD_BASENAME}_open`, GUARD_BASENAME]
+    : [GUARD_BASENAME, `${GUARD_BASENAME}_open`];
+}
+
+export function useGuardArt(open: boolean): string | null {
+  return useArt(`guard:${open ? 'open' : 'closed'}`, 'characters', guardBasenames(open));
+}
+
+/**
+ * Warms the other dwarf moods so the swap at the payoff moment is instant
+ * rather than a visible pop while the browser fetches.
+ */
+export function preloadDwarfMoods(moods: readonly string[]): void {
+  for (const mood of moods) void resolveArt(`dwarf:${mood}`, 'characters', dwarfBasenames(mood));
 }

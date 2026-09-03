@@ -758,3 +758,51 @@
     flex: 1;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Text over artwork                                                   */
+/* ------------------------------------------------------------------ */
+
+/*
+ * With real illustrations behind them, the centred text screens (intro,
+ * transition, finale, win/loss) sit on painted mountains and glowing runes.
+ * The vignette alone is not enough there, so those blocks carry a soft radial
+ * scrim: dark enough to guarantee contrast, feathered so the artwork still
+ * reads around the text instead of being hidden behind a slab.
+ */
+.stage--message,
+.stage--intro,
+.stage--end,
+.display__message,
+.display__intro,
+.display__end {
+  padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 6vw, 5rem);
+  border-radius: var(--game-radius-l);
+  /*
+   * farthest-side, not a percentage radius: it makes the gradient reach zero
+   * exactly at the element edges. A percentage radius overshoots the box on a
+   * wide screen and leaves a visible horizontal seam across the artwork.
+   */
+  background: radial-gradient(
+    ellipse farthest-side at 50% 50%,
+    rgba(4, 10, 20, 0.88) 0%,
+    rgba(4, 10, 20, 0.78) 38%,
+    rgba(4, 10, 20, 0.42) 68%,
+    rgba(4, 10, 20, 0) 100%
+  );
+}
+
+.stage--message *,
+.stage--intro *,
+.stage--end *,
+.display__message *,
+.display__intro *,
+.display__end * {
+  text-shadow: 0 2px 14px rgba(2, 6, 14, 0.85);
+}
+
+/* the QR panel and rosters bring their own background, no scrim needed */
+.display__lobby,
+.display__room {
+  background: none;
+}
