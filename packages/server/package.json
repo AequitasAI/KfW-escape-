@@ -1,0 +1,28 @@
+{
+  "name": "@kfw-escape/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b tsconfig.json",
+    "typecheck": "tsc -b tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@kfw-escape/shared": "*",
+    "better-sqlite3": "^11.8.1",
+    "cookie": "^1.0.2",
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.5",
+    "@types/qrcode": "^1.5.5",
+    "socket.io-client": "^4.8.1"
+  }
+}

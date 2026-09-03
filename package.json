@@ -13,8 +13,8 @@
     "packages/web"
   ],
   "scripts": {
-    "build": "npm run build -w @kfw-escape/shared && npm run build -w @kfw-escape/server && npm run build -w @kfw-escape/web",
-    "dev": "concurrently -n server,web -c cyan,magenta \"npm run dev -w @kfw-escape/server\" \"npm run dev -w @kfw-escape/web\"",
+    "build": "npm run build -w @kfw-escape/server && npm run build -w @kfw-escape/web",
+    "dev": "npm run build -w @kfw-escape/shared && concurrently -n shared,server,web -c gray,cyan,magenta \"npm run dev -w @kfw-escape/shared\" \"npm run dev -w @kfw-escape/server\" \"npm run dev -w @kfw-escape/web\"",
     "start": "node packages/server/dist/index.js",
     "typecheck": "npm run typecheck -w @kfw-escape/shared && npm run typecheck -w @kfw-escape/server && npm run typecheck -w @kfw-escape/web",
     "test": "vitest run",
