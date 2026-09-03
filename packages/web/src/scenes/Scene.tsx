@@ -195,7 +195,7 @@ function ConnectionArt(): JSX.Element {
         <path
           key={i}
           d={`M180 ${260 + i * 110} C 520 ${200 + i * 130}, 1080 ${360 + i * 90}, 1420 ${300 + i * 100}`}
-          stroke="#4fe3d0"
+          stroke="#f2ae3c"
           strokeWidth="2.5"
           fill="none"
           opacity="0.16"
@@ -203,8 +203,8 @@ function ConnectionArt(): JSX.Element {
           style={{ animationDelay: `${i * 0.4}s` }}
         />
       ))}
-      <ellipse cx="180" cy="460" rx="120" ry="180" fill="#4fe3d0" opacity="0.09" />
-      <ellipse cx="1420" cy="500" rx="120" ry="180" fill="#4fe3d0" opacity="0.06" />
+      <ellipse cx="180" cy="460" rx="120" ry="180" fill="#f2ae3c" opacity="0.09" />
+      <ellipse cx="1420" cy="500" rx="120" ry="180" fill="#f2ae3c" opacity="0.06" />
       <path d="M0 800 H1600 V900 H0 Z" fill="#04101a" />
     </svg>
   );
@@ -325,11 +325,11 @@ function MineArt(): JSX.Element {
         <circle cx="108" cy="812" r="15" fill="#1d1610" />
         <circle cx="202" cy="812" r="15" fill="#1d1610" />
         <g opacity="0.95">
-          <polygon points="104,736 124,690 144,736" fill="#4fe3d0" opacity="0.55" />
-          <polygon points="140,736 166,678 190,736" fill="#4fe3d0" opacity="0.4" />
-          <polygon points="176,736 196,700 214,736" fill="#4fe3d0" opacity="0.5" />
+          <polygon points="104,736 124,690 144,736" fill="#f2ae3c" opacity="0.55" />
+          <polygon points="140,736 166,678 190,736" fill="#f2ae3c" opacity="0.4" />
+          <polygon points="176,736 196,700 214,736" fill="#f2ae3c" opacity="0.5" />
         </g>
-        <ellipse cx="155" cy="720" rx="105" ry="52" fill="#4fe3d0" opacity="0.12" />
+        <ellipse cx="155" cy="720" rx="105" ry="52" fill="#f2ae3c" opacity="0.12" />
       </g>
 
       {/* carved stone gate arch, far right - where the machine leads */}
@@ -348,7 +348,7 @@ function MineArt(): JSX.Element {
             strokeWidth="5"
           />
         ))}
-        <polygon points="1470,372 1490,398 1470,424 1450,398" fill="#4fe3d0" opacity="0.55" />
+        <polygon points="1470,372 1490,398 1470,424 1450,398" fill="#f2ae3c" opacity="0.55" />
       </g>
 
       {/* foreground rock shoulders, framing the composition */}
@@ -398,24 +398,24 @@ function BridgeArt(): JSX.Element {
       {/* the bridge itself, forming out of energy */}
       <path
         d="M60 780 Q800 470 1540 780"
-        stroke="#4fe3d0"
+        stroke="#f2ae3c"
         strokeWidth="10"
         fill="none"
         opacity="0.75"
         className="scene-cable"
       />
-      <path d="M60 812 Q800 502 1540 812" stroke="#4fe3d0" strokeWidth="4" fill="none" opacity="0.4" />
+      <path d="M60 812 Q800 502 1540 812" stroke="#f2ae3c" strokeWidth="4" fill="none" opacity="0.4" />
       {[...Array(11)].map((_, i) => {
         const t = i / 10;
         const x = 60 + t * 1480;
         const y = 780 - Math.sin(Math.PI * t) * 300;
         return (
           <g key={i} className="scene-float" style={{ animationDelay: `${i * 0.25}s` }}>
-            <line x1={x} y1={y} x2={x} y2={y + 90} stroke="#4fe3d0" strokeWidth="2" opacity="0.35" />
+            <line x1={x} y1={y} x2={x} y2={y + 90} stroke="#f2ae3c" strokeWidth="2" opacity="0.35" />
           </g>
         );
       })}
-      <ellipse cx="800" cy="520" rx="560" ry="240" fill="#4fe3d0" opacity="0.08" />
+      <ellipse cx="800" cy="520" rx="560" ry="240" fill="#f2ae3c" opacity="0.08" />
       <path d="M0 860 H1600 V900 H0 Z" fill="#040f1f" />
     </svg>
   );

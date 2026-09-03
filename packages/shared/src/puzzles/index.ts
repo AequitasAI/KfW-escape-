@@ -37,9 +37,9 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     title: 'Das Archiv der alten Bestände',
     task: 'Ordnet die fünf Runen in die richtige Reihenfolge.',
     atmosphere:
-      'Schwebende Register, uralte Bestände, und irgendwo darin die Ordnung, die alles zusammenhält.',
-    hint: 'Beginnt am rechten Ende: Der Fluss steht fest. Danach bleibt für Hammer und Mond nur eine Möglichkeit.',
-    successLine: 'Das erste Siegel ist geborgen. Das Archiv gewährt euch den Weg.',
+      'Schwebende Register, uralte Bestände – und irgendwo darin die Ordnung, die alles zusammenhält.',
+    hint: 'Fangt beim sichersten Posten an: Der Fluss steht ganz rechts fest. Danach bleibt für Hammer und Mond nur eine Möglichkeit.',
+    successLine: 'Der Bestand ist geordnet. Das erste Siegel ist geborgen.',
   },
   {
     index: 1,
@@ -48,7 +48,7 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     title: 'Die verlorene Verbindung',
     task: 'Verschiebt die Kacheln, bis die Energie von links nach rechts fließt.',
     atmosphere:
-      'Zwei Welten, getrennt durch tote Leitungen. Die Energie wartet auf der anderen Seite.',
+      'Zwei Welten, getrennt durch tote Leitungen. Eine Schnittstelle ist auch nur eine Brücke mit Kabeln.',
     hint: 'Die Leitung muss in Reihe 2 beginnen und in Reihe 3 rechts austreten. Räumt zuerst den rechten Rand frei.',
     successLine: 'Die Verbindung steht. Energie fließt wieder durch die alten Leitungen.',
   },
@@ -58,9 +58,9 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     station: 'Station 3/5',
     title: 'Die Halle der Prüfmeister',
     task: 'Findet die vier Unterschiede zwischen den beiden Bauplänen.',
-    atmosphere: 'Hier wird nichts durchgewunken. Hier wird geprüft.',
+    atmosphere: 'Hier wird nichts durchgewunken. Hier wird geprüft – zweimal, und dann noch einmal.',
     hint: 'Achtet auf die Rune oben links, die Pfeilrichtung in der Mitte, die Speichen des unteren Zahnrads und die Beschriftung des Behälters.',
-    successLine: 'Kein Fehler bleibt verborgen. Das dritte Siegel ist euer.',
+    successLine: 'Kein Fehler bleibt verborgen. Die Prüfmeister stempeln – das dritte Siegel ist euer.',
   },
   {
     index: 3,
@@ -68,9 +68,9 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     station: 'Station 4/5',
     title: 'Die Minen des Betriebs',
     task: 'Dreht die vier beweglichen Zahnräder, bis alle Kontakte greifen.',
-    atmosphere: 'Serverglut, Zahnräder – und ein Zwerg, der schon alles gesehen hat.',
+    atmosphere: 'Serverglut, Zahnräder – und ein Zwerg, der jeden Release seit dem Wiederaufbau gesehen hat.',
     hint: 'Arbeitet euch vom Antriebsrad nach rechts vor. Ein Kontakt leuchtet erst, wenn beide Zahnprofile zusammenpassen.',
-    successLine: 'Die Maschine läuft. Das vierte Siegel gehört euch.',
+    successLine: 'Die Maschine läuft. Der Betrieb nickt knapp. Das vierte Siegel gehört euch.',
   },
   {
     index: 4,
@@ -79,9 +79,9 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     title: 'Das Schwarze Tor',
     task: 'Ermittelt den dreistelligen Code aus den fünf Aussagen des Wächters.',
     atmosphere:
-      'Der letzte Wächter. Er ist nicht euer Feind – aber ohne Siegel passiert hier niemand.',
+      'Der letzte Wächter. Er ist nicht euer Feind – aber ohne vollständige Unterlagen passiert hier niemand.',
     hint: 'Die Zeile 738 schließt drei Ziffern vollständig aus. Und der Code darf mit einer Null beginnen.',
-    successLine: 'Eure Unterlagen sind vollständig.',
+    successLine: 'Eure Unterlagen sind vollständig. Das Tor gibt den Weg frei.',
   },
 ]);
 

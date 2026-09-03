@@ -11,7 +11,7 @@
 
 .dwarf-art__lamp-glow {
   animation: dwarf-lamp 3.6s ease-in-out infinite;
-  transform-origin: 70px 36px;
+  transform-origin: 80px 26px;
 }
 
 @keyframes dwarf-lamp {
@@ -47,6 +47,10 @@
   }
 }
 
+.dwarf-art__eyes {
+  transform-origin: center 56px;
+}
+
 /* mood: neutral -------------------------------------------------- */
 
 .dwarf-art__mouth {
@@ -69,8 +73,8 @@
 /* mood: skeptical ------------------------------------------------- */
 
 .dwarf-art--skeptical .dwarf-art__brow--r {
-  transform: translateY(-5px) rotate(-9deg);
-  transform-origin: 81px 48px;
+  transform: translateY(-6px) rotate(-10deg);
+  transform-origin: 94px 44px;
 }
 
 .dwarf-art--skeptical .dwarf-art__brow--l {
@@ -79,7 +83,7 @@
 
 .dwarf-art--skeptical .dwarf-art__eye {
   transform: scaleY(0.72);
-  transform-origin: center 58px;
+  transform-origin: center 56px;
 }
 
 /* mood: happy ----------------------------------------------------- */
@@ -100,7 +104,7 @@
 
 .dwarf-art--happy .dwarf-art__hand-right {
   animation: dwarf-cheer 900ms var(--game-ease-out) 2;
-  transform-origin: 104px 134px;
+  transform-origin: 120px 152px;
 }
 
 @keyframes dwarf-cheer {
@@ -124,30 +128,32 @@
   filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.65));
 }
 
-.guard-art__visor {
-  fill: var(--game-fx-energy);
-  filter: drop-shadow(0 0 8px var(--game-fx-energy-glow));
-  animation: guard-visor 4.2s ease-in-out infinite;
+/*
+ * Warm torchlight behind the eye slot, not an emitting visor. A cold bar of
+ * light across a helmet is the single cue that turns a knight into a robot.
+ */
+.guard-art__eye {
+  fill: #ffb257;
+  filter: drop-shadow(0 0 5px rgba(255, 178, 87, 0.8));
+  animation: guard-eyes 5.2s ease-in-out infinite;
 }
 
-@keyframes guard-visor {
+@keyframes guard-eyes {
   0%,
   100% {
-    opacity: 0.72;
+    opacity: 0.78;
   }
-  50% {
+  46% {
     opacity: 1;
   }
-}
-
-.guard-art__pommel {
-  fill: var(--game-fx-energy);
-  filter: drop-shadow(0 0 6px var(--game-fx-energy-glow));
+  62% {
+    opacity: 0.62;
+  }
 }
 
 /* the sword lowers once the code is accepted */
 .guard-art__sword {
-  transform-origin: 121px 140px;
+  transform-origin: 127px 150px;
   transition: transform var(--game-dur-slow) var(--game-ease-out);
 }
 
@@ -155,8 +161,8 @@
   transform: rotate(74deg) translateY(6px);
 }
 
-.guard-art.is-open .guard-art__visor {
-  fill: var(--game-fx-seal);
+.guard-art.is-open .guard-art__eye {
+  fill: #ffd98a;
   animation: none;
   opacity: 1;
 }
@@ -203,7 +209,7 @@
   .dwarf-art__lamp-glow,
   .dwarf-art__eyes,
   .dwarf-art--happy .dwarf-art__hand-right,
-  .guard-art__visor {
+  .guard-art__eye {
     animation: none !important;
   }
 }

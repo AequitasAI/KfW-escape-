@@ -34,7 +34,7 @@
   font-size: var(--kfw-font-size-small);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--game-fx-energy);
+  color: var(--game-fx-rune);
 }
 
 .landing__title {
@@ -155,7 +155,7 @@
   font-size: var(--kfw-font-size-small);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--game-fx-energy);
+  color: var(--game-fx-rune);
 }
 
 .stage__title {
@@ -243,8 +243,8 @@
   gap: 0.4rem;
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid var(--game-ui-line);
-  background: color-mix(in srgb, var(--game-ui-surface-deep) 74%, transparent);
+  border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 60%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 78%, transparent);
   font-size: var(--kfw-font-size-small);
   animation: rise-in var(--game-dur) var(--game-ease-out) both;
 }
@@ -253,7 +253,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--game-fx-seal);
+  background: var(--game-fx-rune);
 }
 
 .roster__item.is-away {
@@ -287,8 +287,8 @@
 }
 
 .stage--end.is-win .end__headline {
-  color: var(--game-fx-energy);
-  text-shadow: 0 0 40px var(--game-fx-energy-glow);
+  color: var(--game-fx-rune);
+  text-shadow: 0 0 40px var(--game-fx-rune-glow);
 }
 
 .end__line {
@@ -424,8 +424,8 @@
 .display__roster-item {
   padding: 0.25rem 0.7rem;
   border-radius: 999px;
-  border: 1px solid var(--game-ui-line);
-  background: color-mix(in srgb, var(--game-ui-surface-deep) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 60%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 78%, transparent);
   font-size: var(--kfw-font-size-small);
   animation: rise-in var(--game-dur) var(--game-ease-out) both;
 }
@@ -477,8 +477,8 @@
   display: inline-block;
   padding: 0.2rem 0.8rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--game-fx-energy) 45%, transparent);
-  color: var(--game-fx-energy);
+  border: 1px solid color-mix(in srgb, var(--game-fx-rune) 50%, transparent);
+  color: var(--game-fx-rune);
   font-size: var(--kfw-font-size-small);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -494,8 +494,8 @@
   width: 100%;
   padding: clamp(0.75rem, 2vh, 1.8rem);
   border-radius: var(--game-radius-l);
-  border: 1px solid var(--game-ui-line);
-  background: color-mix(in srgb, var(--game-ui-surface-deep) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 65%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 62%, transparent);
   backdrop-filter: blur(6px);
   animation: rise-in var(--game-dur) var(--game-ease-out) both;
 }
@@ -560,8 +560,8 @@
 }
 
 .display__end.is-win .display__end-headline {
-  color: var(--game-fx-energy);
-  text-shadow: 0 0 60px var(--game-fx-energy-glow);
+  color: var(--game-fx-rune);
+  text-shadow: 0 0 60px var(--game-fx-rune-glow);
 }
 
 .display__end-line {
@@ -805,4 +805,89 @@
 .display__lobby,
 .display__room {
   background: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Story voice                                                         */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Room titles, story lines and the end screens speak in a warm book serif.
+ * Buttons, labels, the timer and every form control stay on the corporate sans
+ * - the UX spec rules out a display face for interface texts, and a serif on a
+ * button is exactly the "medieval fansite" look it warns against.
+ */
+/* story voice: a book serif for prose */
+.stage__atmosphere,
+.intro__line,
+.end__line,
+.display__atmosphere,
+.display__lead,
+.display__end-line,
+.landing__subtitle,
+.gate__speech-body,
+.clues__list,
+.diff__npc {
+  font-family: var(--game-font-story);
+}
+
+/* the epic voice: inscriptional caps for titles and endings */
+.stage__title,
+.end__headline,
+.display__title,
+.display__room-title,
+.display__headline,
+.display__end-headline,
+.landing__title,
+.join__title,
+.gate__speech-hail {
+  font-family: var(--game-font-display);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.stage__atmosphere,
+.display__atmosphere {
+  font-style: italic;
+}
+
+/* Cinzel runs large and airy, so the display headings need a little less size */
+.display__title {
+  font-size: clamp(1.15rem, 0.7rem + 1.4vw, 2.1rem);
+}
+
+.display__end-headline {
+  font-size: clamp(2.2rem, 1.2rem + 4.2vw, 5rem);
+  letter-spacing: 0.05em;
+}
+
+/* the name of the seal just earned, and the closing institutional wink */
+.stage__seal-name,
+.display__seal-name {
+  font-family: var(--game-font-display);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--game-fx-rune);
+}
+
+.display__seal-name {
+  font-size: clamp(0.9rem, 0.7rem + 0.6vw, 1.25rem);
+}
+
+.stage__seal-name {
+  font-size: var(--kfw-font-size-small);
+}
+
+.end__footnote,
+.display__end-footnote {
+  margin-top: var(--game-space-2);
+  max-width: 44rem;
+  font-family: var(--game-font-story);
+  font-style: italic;
+  color: var(--game-ui-text-muted);
+}
+
+.display__end-footnote {
+  font-size: clamp(1rem, 0.85rem + 0.5vw, 1.35rem);
 }

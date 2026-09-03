@@ -14,18 +14,21 @@ sie automatisch, ohne Codeänderung. Details: `docs/ARTWORK.md`.
 
 Diesen Absatz **an jeden** Szenenprompt anhängen, damit alle acht Bilder wie eine Serie wirken:
 
-> Style: cinematic digital matte painting, high-detail fantasy concept art, dramatic volumetric
-> lighting, cool slate-blue and deep navy base palette with warm amber accents and a distinct
-> teal-cyan magical energy colour, painterly but clean, no text, no letters, no logos, no watermark,
-> no people's faces in the foreground, muted and professional rather than cartoonish, 16:9
-> composition, the central third of the image is deliberately calm and uncluttered so that UI
-> panels can sit on top, richer detail towards the left and right edges, slight vignette.
+> Style: cinematic digital matte painting, high-detail painted fantasy concept art in the spirit of
+> a Tolkien film production, dramatic volumetric lighting, warm amber and gold firelight as the
+> dominant accent against deep slate-blue shadow, painterly brushwork, no text, no letters, no
+> logos, no watermark, no people's faces in the foreground, storybook fantasy rather than science
+> fiction — no neon, no cyan glow, no holograms, no technology panels. 16:9 composition, the central
+> third is deliberately calm and uncluttered so that UI panels can sit on top, richer detail towards
+> the left and right edges, slight vignette.
 
 **Wichtig für jedes Bild:**
 - kein Text, keine Buchstaben, keine Zahlen im Bild
 - keine Logos, keine Markenzeichen, keine KfW-Bezüge
 - keine erkennbaren realen Personen
 - die Mitte bleibt ruhig – dort liegt später das Rätsel
+- **kein Neon, kein Cyan-Leuchten, keine Hologramme.** Kaltes Türkis ist das stärkste
+  Science-Fiction-Signal überhaupt; das Licht in dieser Welt kommt von Feuer, Laternen und Gold.
 
 ---
 
@@ -96,32 +99,63 @@ Diesen Absatz **an jeden** Szenenprompt anhängen, damit alle acht Bilder wie ei
 
 ## Figuren
 
-Freigestellt vor transparentem Hintergrund erzeugen (bei DALL·E: „on a plain white background"
-und anschließend freistellen).
+Ziel ist **gemalte Filmfantasy**, kein Vektor-Cartoon: Gimli und Gandalf als Referenz für
+Materialität, Gewicht und Gesichtsausdruck. Freigestellt erzeugen, damit die Figur vor jeder
+Szene stehen kann.
 
-### `character_operations_dwarf.webp` — Der Betriebszwerg
+Ganz wichtig bei den drei Zwergen-Varianten: **identische Pose, identischer Ausschnitt,
+identische Grösse** – nur der Gesichtsausdruck ändert sich. Sonst springt die Figur beim
+Stimmungswechsel. Bei Bild 2 und 3 ausdrücklich dazusagen:
+> identical pose, framing, scale and lighting as the previous image, only the facial expression changes
 
-> A friendly, slightly grumpy fantasy dwarf engineer, full body, standing, facing the viewer at a
-> three-quarter angle. Stocky and broad-shouldered, a large braided ginger-orange beard, a brown
-> leather mining helmet with a brass lamp on the front, a dark teal-grey workshop jacket, a wide
-> leather tool belt with a brass buckle and a hammer, sturdy boots. Warm and likeable, world-weary
-> expression, clearly a competent old hand who has seen everything. Stylised painterly game-art
-> character, not photorealistic, not childish or cartoonish. Isolated on a plain white background,
-> even lighting, full figure with space around it, no text, no logo, not a real person.
+### `character_operations_dwarf_neutral` — Der Betriebszwerg
 
-Optional zusätzlich in drei Varianten erzeugen (neutral / skeptisch / begeistert) und als
-`..._neutral.webp`, `..._skeptical.webp`, `..._happy.webp` ablegen.
+> A stout fantasy dwarf works-engineer, full body, standing, facing the viewer at a three-quarter
+> angle, feet planted wide. Painted cinematic fantasy character art in the spirit of a Tolkien film
+> production design — think Gimli, but a mine foreman rather than a warrior. A heavy braided
+> red-brown beard reaching his belt with iron beard rings, a plaited moustache, bushy brows, a
+> weathered lived-in face with a large nose and deep-set warm eyes. A battered leather mining helmet
+> with a brass carbide lamp, a thick leather apron over a wool tunic, riveted iron shoulder plates,
+> a broad tool belt with a hammer and calipers, heavy boots. Warm forge lighting from the lower
+> left, cool blue rim light from behind. Rich fabric and leather texture, visible wear, painterly
+> brushwork, not photorealistic and absolutely not a flat vector cartoon.
+>
+> Expression: calm, faintly unimpressed, arms relaxed at his sides.
+>
+> Isolated on a plain white background, full figure with even margins, no text, no logo, no
+> weapons raised, not a real person.
 
-### `character_black_guard.webp` — Der Schwarze Wächter
+### `character_operations_dwarf_skeptical`
 
-> A towering armoured gatekeeper in dark blackened plate armour, full body, standing, facing the
-> viewer. A closed great helm with no visible face and a single narrow horizontal visor slit glowing
-> cold teal, a heavy dark cloak, a large two-handed sword held point-down in front of him. Noble,
-> solemn and monumental — a dutiful guardian, absolutely not a horror or demonic figure, no skulls,
-> no gore, no glowing red. Stylised painterly game-art character. Isolated on a plain white
-> background, even lighting, no text, no logo, not a real person.
+> identical pose, framing, scale and lighting as the previous image, only the facial expression
+> changes: one eyebrow raised high, eyes narrowed, mouth a flat sceptical line, head tilted a
+> few degrees. Same dwarf, same clothing, same background.
 
----
+### `character_operations_dwarf_happy`
+
+> identical pose, framing, scale and lighting as the previous image, only the facial expression
+> changes: a broad delighted grin showing through the beard, eyes crinkled, both eyebrows raised,
+> one hand giving a thumbs up. Same dwarf, same clothing, same background.
+
+### `character_black_guard` — Der Schwarze Wächter
+
+> A towering armoured gatekeeper, full body, standing squarely, facing the viewer. Painted
+> cinematic fantasy character art with the gravitas of a Tolkien film production. Blackened steel
+> plate armour with hand-hammered texture and worn brass edging, a closed great helm with a narrow
+> eye slot and a fluted breathing grille — no face visible, no glowing visor bar. A deep crimson
+> cloak and a faded gold tabard. Both gauntlets rest on the pommel of a huge two-handed sword whose
+> point is planted on the ground before him. Torchlight from the lower left catches the armour
+> edges, cold moonlight from behind. Solemn, dutiful, monumental — a guardian doing his job, never
+> a demon: no skulls, no gore, no red glow, nothing robotic.
+>
+> Isolated on a plain white background, full figure with even margins, no text, no logo, not a
+> real person.
+
+### `character_black_guard_open` — optional
+
+> identical pose, framing, scale and lighting as the previous image, but the sword is lowered to
+> his side and his head inclines a fraction in acknowledgement. Same knight, same armour, same
+> background.
 
 ## Nach dem Erzeugen
 

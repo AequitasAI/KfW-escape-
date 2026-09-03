@@ -165,6 +165,34 @@ svg {
   backdrop-filter: blur(10px);
 }
 
+/*
+ * Inside a scene the panels pick up the world's warmth: a hint of stone and a
+ * brass edge. The corporate token layer stays untouched, so the host console
+ * and every form keep the neutral look the branding spec asks for - the warmth
+ * lives purely in the --game-fx-* layer.
+ */
+.scene .panel,
+.scene__content .panel {
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 82%, transparent);
+  border-color: color-mix(in srgb, var(--game-fx-metal-dark) 70%, transparent);
+}
+
+.scene .chip,
+.scene .notice {
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 78%, transparent);
+  border-color: color-mix(in srgb, var(--game-fx-metal-dark) 65%, transparent);
+}
+
+.scene .chip--live {
+  color: var(--game-fx-rune);
+  border-color: color-mix(in srgb, var(--game-fx-rune) 45%, transparent);
+}
+
+.scene .field__input {
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 92%, #000);
+  border-color: color-mix(in srgb, var(--game-fx-metal-dark) 70%, transparent);
+}
+
 .panel__head {
   display: flex;
   align-items: center;

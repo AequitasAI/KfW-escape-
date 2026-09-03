@@ -28,6 +28,16 @@
 
   --game-font: var(--kfw-font-family-sans);
   --game-font-mono: var(--kfw-font-family-mono);
+  /*
+   * Story voice. The UX spec forbids a medieval display face for interface
+   * texts, so buttons, labels and the timer stay on the corporate sans; only
+   * room titles and story lines use this warm serif. A book serif reads as
+   * storybook, never as blackletter kitsch.
+   */
+  --game-font-story: 'EB Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino,
+    'Book Antiqua', Georgia, serif;
+  /* Inscriptional caps for the big epic moments: titles, room names, endings. */
+  --game-font-display: 'Cinzel', 'EB Garamond', 'Palatino Linotype', Palatino, Georgia, serif;
 
   --game-radius-s: var(--kfw-radius-small);
   --game-radius-m: var(--kfw-radius-medium);
@@ -42,26 +52,39 @@
   --game-space-5: var(--kfw-spacing-medium);
 
   /* --- fantasy layer ----------------------------------------------- */
-  /* Atmospheric colours for the game world. Independent by design, chosen to
-     harmonise with the corporate layer, never presented as brand values. */
-  --game-fx-energy: #4fe3d0;
-  --game-fx-energy-soft: rgba(79, 227, 208, 0.28);
-  --game-fx-energy-glow: rgba(79, 227, 208, 0.55);
-  --game-fx-rune: #ffd48a;
-  --game-fx-rune-glow: rgba(255, 212, 138, 0.45);
-  --game-fx-forge: #ff9a52;
-  --game-fx-seal: #7ee0a8;
-  --game-fx-stone: #2a3a4d;
-  --game-fx-stone-deep: #16222f;
-  --game-fx-void: #060f1c;
-  --game-fx-metal: #9aa9b8;
-  --game-fx-metal-dark: #55677a;
+  /*
+   * Atmospheric colours for the game world. Independent by design, chosen to
+   * harmonise with the corporate layer, never presented as brand values.
+   *
+   * Deliberately WARM. A cold cyan "energy" colour is the single strongest
+   * science-fiction signal in an interface: it turns glowing cables, gears and
+   * seals into a spaceship HUD no matter how the backgrounds look. Magic here
+   * is candlelight, gold and old amber, with violet reserved for the arcane -
+   * the palette of a painted point-and-click adventure, not a control room.
+   */
+  --game-fx-energy: #f2ae3c;
+  --game-fx-energy-soft: rgba(242, 174, 60, 0.3);
+  --game-fx-energy-glow: rgba(255, 190, 92, 0.6);
+  --game-fx-rune: #ffd27a;
+  --game-fx-rune-glow: rgba(255, 210, 122, 0.5);
+  --game-fx-forge: #ff8a3c;
+  --game-fx-arcane: #b07bd8;
+  --game-fx-arcane-glow: rgba(176, 123, 216, 0.5);
+  --game-fx-seal: #e8b23f;
+  --game-fx-seal-glow: rgba(232, 178, 63, 0.55);
+  --game-fx-stone: #3b3227;
+  --game-fx-stone-deep: #241d16;
+  --game-fx-void: #14100c;
+  --game-fx-parchment: #e8d5ab;
+  --game-fx-metal: #b9a276;
+  --game-fx-metal-dark: #6d5c40;
+  --game-fx-ink: #2a2018;
 
   --game-scene-vignette: radial-gradient(
     120% 90% at 50% 42%,
     rgba(0, 0, 0, 0) 40%,
-    rgba(3, 9, 18, 0.55) 78%,
-    rgba(3, 9, 18, 0.88) 100%
+    rgba(14, 10, 6, 0.55) 78%,
+    rgba(14, 10, 6, 0.9) 100%
   );
 
   /* --- motion ------------------------------------------------------- */

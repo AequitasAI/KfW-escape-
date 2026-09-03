@@ -13,7 +13,8 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Branding-Entscheidung dokumentiert und umgesetzt (`docs/BRANDING_INTEGRATION.md`)
 - [x] Fantasy-Ebene als SVG (Szenen, Betriebszwerg, Schwarzer Wächter)
 - [x] Acht gerenderte Szenen-Illustrationen eingebunden
-- [ ] Figuren-Illustrationen (Zwerg, Wächter) – Code fertig, Dateien fehlen noch
+- [ ] Gemalte Figuren-Illustrationen (Zwerg, Wächter) – Code fertig, Dateien fehlen noch
+- [x] Art Direction auf warme Märchenfantasy umgestellt (kein Cyan, Cinzel/EB Garamond, KfW-Flavour)
 
 ## Funktioniert
 

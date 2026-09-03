@@ -4,11 +4,14 @@ import {
   FINALE_LINE,
   GAME_TITLE,
   INTRO_LINES,
+  LOSE_FOOTNOTE,
   LOSE_GAG,
   LOSE_LINES,
   PUZZLES,
+  WIN_FOOTNOTE,
   WIN_LINES,
   companionsGathered,
+  sealEarned,
 } from '@kfw-escape/shared';
 import type { SocketAuth } from '@kfw-escape/shared';
 import {
@@ -158,6 +161,7 @@ export function GameView(): JSX.Element {
               <h2 className="stage__title">
                 {PUZZLES[Math.max(0, snapshot.currentPuzzleIndex)]?.successLine}
               </h2>
+              <p className="stage__seal-name">{sealEarned(snapshot.currentPuzzleIndex)}</p>
               <p className="stage__text">Die nächste Prüfung öffnet sich …</p>
             </section>
           ) : null}
@@ -377,6 +381,7 @@ function EndScreen({
         </dl>
       ) : null}
 
+      <p className="end__footnote">{won ? WIN_FOOTNOTE : LOSE_FOOTNOTE}</p>
       {!won ? <p className="end__gag">{LOSE_GAG}</p> : null}
     </section>
   );

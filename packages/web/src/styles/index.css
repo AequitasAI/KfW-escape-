@@ -6,6 +6,7 @@
  *   4. base.css                          - reset and shared primitives
  * See docs/BRANDING_INTEGRATION.md.
  */
+@import './fonts.css';
 @import './kfw-token-contract.css';
 @import './game-tokens.css';
 @import './base.css';

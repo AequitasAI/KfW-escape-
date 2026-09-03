@@ -13,6 +13,27 @@
   box-shadow: var(--game-shadow-panel);
 }
 
+/*
+ * Inside a scene the clock is part of the world: aged brass on stone. On the
+ * host console it keeps the neutral corporate look.
+ */
+.scene .timer {
+  border-color: color-mix(in srgb, var(--game-fx-metal) 55%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 88%, transparent);
+}
+
+.scene .timer__value {
+  color: var(--game-fx-rune);
+}
+
+.scene .timer--urgent .timer__value {
+  color: #ffb765;
+}
+
+.scene .timer--critical .timer__value {
+  color: #ff9a8a;
+}
+
 .timer__icon {
   color: var(--game-ui-text-muted);
   display: flex;
@@ -104,7 +125,7 @@
   width: 0.9rem;
   height: 2px;
   margin-right: 0.55rem;
-  background: var(--game-ui-line-strong);
+  background: var(--game-fx-metal-dark);
 }
 
 .trail__pip {
@@ -125,18 +146,25 @@
   height: 58px;
 }
 
-.trail__hex {
+.trail__medal {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 
-.trail__hex polygon {
-  fill: color-mix(in srgb, var(--game-ui-surface-deep) 80%, transparent);
-  stroke: var(--game-ui-line-strong);
-  stroke-width: 2;
+.trail__medal-face {
+  fill: color-mix(in srgb, var(--game-fx-stone-deep) 88%, transparent);
+  stroke: var(--game-fx-metal-dark);
+  stroke-width: 2.5;
   transition: fill var(--game-dur) var(--game-ease), stroke var(--game-dur) var(--game-ease);
+}
+
+.trail__medal-ring {
+  fill: none;
+  stroke: var(--game-fx-metal-dark);
+  stroke-width: 1;
+  opacity: 0.7;
 }
 
 .trail__mark {
@@ -150,17 +178,23 @@
   font-size: var(--kfw-font-size-large);
 }
 
-.trail__item--done .trail__hex polygon {
-  fill: color-mix(in srgb, var(--game-ui-success) 34%, transparent);
-  stroke: var(--game-ui-success);
+.trail__item--done .trail__medal-face {
+  fill: color-mix(in srgb, var(--game-fx-seal) 30%, var(--game-fx-stone-deep));
+  stroke: var(--game-fx-seal);
+}
+
+.trail__item--done .trail__medal-ring,
+.trail__item--active .trail__medal-ring {
+  stroke: var(--game-fx-rune);
+  opacity: 0.85;
 }
 
 .trail__item--done .trail__mark {
-  color: #d9f7e5;
+  color: #ffe9bd;
 }
 
-.trail__item--active .trail__hex polygon {
-  fill: color-mix(in srgb, var(--game-ui-primary) 32%, transparent);
+.trail__item--active .trail__medal-face {
+  fill: color-mix(in srgb, var(--game-fx-energy) 26%, var(--game-fx-stone-deep));
   stroke: var(--game-fx-energy);
 }
 
@@ -192,32 +226,46 @@
 }
 
 .seal svg {
-  width: 30px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
 }
 
-.seal polygon {
-  fill: none;
-  stroke: var(--game-ui-line-strong);
+.seal__wax {
+  fill: color-mix(in srgb, var(--game-fx-stone-deep) 80%, transparent);
+  stroke: var(--game-fx-metal-dark);
   stroke-width: 2;
 }
 
-.seal circle {
-  fill: var(--game-ui-line-strong);
+.seal__rim {
+  fill: none;
+  stroke: var(--game-fx-metal-dark);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+.seal__rune {
+  fill: var(--game-fx-metal-dark);
+  opacity: 0.5;
 }
 
 .seal--lit {
   animation: seal-appear var(--game-dur-slow) var(--game-ease-out) both;
 }
 
-.seal--lit polygon {
-  fill: color-mix(in srgb, var(--game-fx-seal) 20%, transparent);
+.seal--lit .seal__wax {
+  fill: #8c2f26;
   stroke: var(--game-fx-seal);
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--game-fx-seal) 55%, transparent));
+  filter: drop-shadow(0 0 8px var(--game-fx-seal-glow));
 }
 
-.seal--lit circle {
-  fill: var(--game-fx-seal);
+.seal--lit .seal__rim {
+  stroke: var(--game-fx-rune);
+  opacity: 0.9;
+}
+
+.seal--lit .seal__rune {
+  fill: var(--game-fx-rune);
+  opacity: 1;
 }
 
 @keyframes seal-appear {
@@ -251,6 +299,12 @@
   backdrop-filter: blur(10px);
 }
 
+/* inside a scene it is carved stone with a brass edge, not a corporate card */
+.scene .solver-banner {
+  border-color: color-mix(in srgb, var(--game-fx-metal) 50%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 90%, transparent);
+}
+
 .solver-banner__avatar {
   flex: none;
   display: grid;
@@ -258,8 +312,8 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: linear-gradient(160deg, var(--game-ui-primary), var(--game-fx-energy));
-  color: #04121c;
+  background: linear-gradient(160deg, #c9963c, var(--game-fx-rune));
+  color: #2b1a10;
   font-weight: var(--kfw-font-weight-bold);
   font-size: 1.15rem;
 }
@@ -332,6 +386,7 @@
 
 .reveal__name {
   margin-top: var(--game-space-1);
+  font-family: var(--game-font-display);
   font-size: var(--kfw-font-size-display);
   font-weight: var(--kfw-font-weight-bold);
   letter-spacing: 0.1em;

@@ -61,15 +61,16 @@ export function OperationsGears({
           aria-label="Fünf Zahnräder zwischen Motor und Tor"
         >
           <defs>
+            {/* dull iron until the drive reaches a gear, then hot forged brass */}
             <linearGradient id="gear-metal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#8c9bab" />
-              <stop offset="55%" stopColor="#5c6c7e" />
-              <stop offset="100%" stopColor="#3a4859" />
+              <stop offset="0%" stopColor="#8e8574" />
+              <stop offset="55%" stopColor="#5f5748" />
+              <stop offset="100%" stopColor="#3b352b" />
             </linearGradient>
             <linearGradient id="gear-live" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#89f0e2" />
-              <stop offset="60%" stopColor="#3fb9ab" />
-              <stop offset="100%" stopColor="#217c73" />
+              <stop offset="0%" stopColor="#ffd88a" />
+              <stop offset="55%" stopColor="#e0a337" />
+              <stop offset="100%" stopColor="#9a6a18" />
             </linearGradient>
           </defs>
 

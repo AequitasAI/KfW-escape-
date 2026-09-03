@@ -5,11 +5,14 @@ import {
   FINALE_LINE,
   GAME_TITLE,
   INTRO_LINES,
+  LOSE_FOOTNOTE,
   LOSE_GAG,
   LOSE_LINES,
   PUZZLES,
+  WIN_FOOTNOTE,
   WIN_LINES,
   companionsGathered,
+  sealEarned,
 } from '@kfw-escape/shared';
 import type { SocketAuth } from '@kfw-escape/shared';
 import { ProgressTrail, SealRow, SolverBanner, SolverReveal, Timer, Dwarf } from '../components/Chrome.js';
@@ -136,6 +139,7 @@ export function DisplayView(): JSX.Element {
             <div className="display__message">
               <SealRow count={snapshot.seals} />
               <h2 className="display__headline">{PUZZLES[snapshot.currentPuzzleIndex]?.successLine}</h2>
+              <p className="display__seal-name">{sealEarned(snapshot.currentPuzzleIndex)}</p>
               <p className="display__lead">Der Weg zur nächsten Prüfung öffnet sich …</p>
             </div>
           ) : null}
@@ -233,6 +237,7 @@ function DisplayEnd({
           </div>
         </dl>
       ) : null}
+      <p className="display__end-footnote">{won ? WIN_FOOTNOTE : LOSE_FOOTNOTE}</p>
       {!won ? <p className="display__end-gag">{LOSE_GAG}</p> : null}
     </div>
   );

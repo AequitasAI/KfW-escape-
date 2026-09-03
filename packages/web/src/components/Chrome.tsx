@@ -66,8 +66,11 @@ export function ProgressTrail({
         return (
           <li key={puzzle.index} className={`trail__item trail__item--${state}`}>
             <span className="trail__pip" aria-hidden="true">
-              <svg viewBox="0 0 40 44" className="trail__hex">
-                <polygon points="20,1 38,11 38,33 20,43 2,33 2,11" />
+              {/* a struck medallion, not a hexagon: the honeycomb grid is a
+                  science-fiction HUD cliche and fights the fantasy world */}
+              <svg viewBox="0 0 40 40" className="trail__medal">
+                <circle className="trail__medal-face" cx="20" cy="20" r="17" />
+                <circle className="trail__medal-ring" cx="20" cy="20" r="13.5" />
               </svg>
               <span className="trail__mark">
                 {done ? (puzzle.status === 'SKIPPED' ? '–' : '✓') : puzzle.index + 1}
@@ -100,9 +103,14 @@ export function SealRow({ count, total = 5 }: { count: number; total?: number })
     <div className="seals" aria-label={`${count} von ${total} Siegeln geborgen`}>
       {Array.from({ length: total }, (_, i) => (
         <span key={i} className={`seal${i < count ? ' seal--lit' : ''}`} aria-hidden="true">
-          <svg viewBox="0 0 32 36">
-            <polygon points="16,1 30,9 30,27 16,35 2,27 2,9" />
-            <circle cx="16" cy="18" r="5" />
+          {/* a pressed wax seal with a rune star */}
+          <svg viewBox="0 0 36 36">
+            <circle className="seal__wax" cx="18" cy="18" r="16" />
+            <circle className="seal__rim" cx="18" cy="18" r="12.5" />
+            <path
+              className="seal__rune"
+              d="M18 8 L20.6 15.4 L28 18 L20.6 20.6 L18 28 L15.4 20.6 L8 18 L15.4 15.4 Z"
+            />
           </svg>
         </span>
       ))}

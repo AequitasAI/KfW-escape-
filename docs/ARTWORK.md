@@ -74,6 +74,16 @@ Das bedeutet:
 - Keine Logos, keine Markenzeichen, keine erkennbaren realen Personen – siehe
   `07_branding/BRANDING_README.md`.
 
+## Warum die Figuren als Bild besser sind
+
+Die SVG-Figuren sind bewusst gezeichnet und nicht gemalt. Vektorformen mit klaren Konturen lesen
+sich immer als Grafik – für eine Figur im Stil von Gimli oder Gandalf braucht es eine gemalte
+Illustration. Der Austauschweg dafür ist vorbereitet (siehe oben), die Prompts stehen in
+`08_assets/IMAGE_PROMPTS.md` und sind auf gemalte Filmfantasy ausgelegt.
+
+Solange keine Bilder vorliegen, ist das SVG die bessere Lösung, weil es die drei Stimmungen des
+Zwergs ohne drei separate Dateien abbildet.
+
 ## Grenzen
 
 Die Figuren (Zwerg, Wächter) werden derzeit **nicht** automatisch durch Bilder ersetzt, weil eine
