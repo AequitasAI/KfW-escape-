@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { SCENE_ART, artIsKnownAvailable, probeArt } from './sceneArt.js';
+import { knownSceneArt, probeSceneArt } from './sceneArt.js';
 import './scene.css';
 
 export type SceneId =
@@ -39,26 +39,25 @@ export function Scene({
   children?: ReactNode;
   className?: string;
 }): JSX.Element {
-  const src = SCENE_ART[id];
-  const [hasArt, setHasArt] = useState(() => artIsKnownAvailable(src));
+  const [art, setArt] = useState<string | null>(() => knownSceneArt(id));
 
   // If final artwork has been dropped in, it takes over the background layer.
   // Until then the generated SVG carries the scene on its own.
   useEffect(() => {
     let active = true;
-    void probeArt(src).then((available) => {
-      if (active) setHasArt(available);
+    void probeSceneArt(id).then((src) => {
+      if (active) setArt(src);
     });
     return () => {
       active = false;
     };
-  }, [src]);
+  }, [id]);
 
   return (
     <div
-      className={`scene scene--${id}${hasArt ? ' scene--art' : ''}${className ? ` ${className}` : ''}`}
+      className={`scene scene--${id}${art ? ' scene--art' : ''}${className ? ` ${className}` : ''}`}
       data-scene={id}
-      style={hasArt ? ({ '--scene-image': `url("${src}")` } as React.CSSProperties) : undefined}
+      style={art ? ({ '--scene-image': `url("${art}")` } as React.CSSProperties) : undefined}
     >
       <div className="scene__bg" aria-hidden="true">
         <SceneArt id={id} />

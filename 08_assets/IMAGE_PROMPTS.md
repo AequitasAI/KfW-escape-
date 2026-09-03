@@ -125,16 +125,20 @@ Optional zusätzlich in drei Varianten erzeugen (neutral / skeptisch / begeister
 
 ## Nach dem Erzeugen
 
-```bash
-# Grösse und Format prüfen bzw. konvertieren
-cwebp -q 82 scene_archive.png -o scene_archive.webp
+**Nichts konvertieren nötig.** `.png`, `.webp`, `.jpg` und `.jpeg` werden alle erkannt – nur der
+Dateiname ohne Endung muss exakt stimmen. Also: herunterladen, umbenennen, ablegen.
 
-# ablegen
-cp scene_*.webp   packages/web/public/art/scenes/
-cp character_*.webp packages/web/public/art/characters/
+```bash
+cp scene_*.png     packages/web/public/art/scenes/
+cp character_*.png packages/web/public/art/characters/
 
 npm run dev   # die Szenen ziehen die Bilder automatisch
 ```
 
-Zielgrösse pro Szene: 2560×1440, unter ~400 KB. Alles darüber verlangsamt die Displayansicht auf
-schwacher Hardware spürbar.
+Optional, wenn die Dateien gross sind (spürbar auf schwacher Beamer-Hardware):
+
+```bash
+cwebp -q 82 scene_archive.png -o scene_archive.webp && rm scene_archive.png
+```
+
+Zielgrösse pro Szene: 2560×1440, idealerweise unter ~400 KB.

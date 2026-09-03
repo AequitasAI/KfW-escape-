@@ -39,19 +39,21 @@ Es ist **keine Codeänderung** nötig. Ablauf:
 2. Dateien unter den exakt vorgegebenen Namen ablegen:
 
    ```
-   packages/web/public/art/scenes/scene_archive.webp
-   packages/web/public/art/scenes/scene_operations_mine.webp
+   packages/web/public/art/scenes/scene_archive.png
+   packages/web/public/art/scenes/scene_operations_mine.png
    ...
-   packages/web/public/art/characters/character_operations_dwarf.webp
+   packages/web/public/art/characters/character_operations_dwarf.png
    ```
 
-   Die vollständige Namensliste steht in `packages/web/public/art/README.md`.
+   Die Endung ist egal – `.webp`, `.png`, `.jpg` und `.jpeg` werden in dieser Reihenfolge
+   probiert. Nur der Name ohne Endung muss stimmen. Die vollständige Liste steht in
+   `packages/web/public/art/README.md`.
 3. `npm run build` bzw. `npm run dev`. Fertig.
 
 ### Wie der Austausch technisch funktioniert
 
-`packages/web/src/scenes/sceneArt.ts` prüft beim ersten Rendern einer Szene einmalig, ob die
-zugehörige Datei tatsächlich lädt. Erst dann setzt `Scene.tsx` die Custom Property
+`packages/web/src/scenes/sceneArt.ts` prüft beim ersten Rendern einer Szene einmalig, ob eine
+zugehörige Datei tatsächlich lädt – der Reihe nach `.webp`, `.png`, `.jpg`, `.jpeg`. Erst dann setzt `Scene.tsx` die Custom Property
 `--scene-image`, und der Bild-Layer blendet sich über das generierte SVG.
 
 Das bedeutet:

@@ -7,26 +7,30 @@ die generierte SVG-Szene – es gibt nie ein kaputtes Bild.
 
 | Datei | Station |
 |---|---|
-| `scene_lobby.webp` | Lobby / Intro |
-| `scene_archive.webp` | 1 – Archiv der alten Bestände |
-| `scene_connection.webp` | 2 – Die verlorene Verbindung |
-| `scene_testmasters.webp` | 3 – Halle der Prüfmeister |
-| `scene_operations_mine.webp` | 4 – Minen des Betriebs |
-| `scene_black_gate.webp` | 5 – Das Schwarze Tor |
-| `scene_final_bridge.webp` | Finale / Sieg |
-| `scene_defeat.webp` | Niederlage |
+| `scene_lobby.*` | Lobby / Intro |
+| `scene_archive.*` | 1 – Archiv der alten Bestände |
+| `scene_connection.*` | 2 – Die verlorene Verbindung |
+| `scene_testmasters.*` | 3 – Halle der Prüfmeister |
+| `scene_operations_mine.*` | 4 – Minen des Betriebs |
+| `scene_black_gate.*` | 5 – Das Schwarze Tor |
+| `scene_final_bridge.*` | Finale / Sieg |
+| `scene_defeat.*` | Niederlage |
 
 ## Figuren → `characters/`
 
 | Datei | Figur |
 |---|---|
-| `character_operations_dwarf.webp` | Betriebszwerg (freigestellt, transparent) |
-| `character_black_guard.webp` | Schwarzer Wächter (freigestellt, transparent) |
+| `character_operations_dwarf.*` | Betriebszwerg (freigestellt, transparent) |
+| `character_black_guard.*` | Schwarzer Wächter (freigestellt, transparent) |
 
 ## Vorgaben
 
-- Szenen: 2560×1440 (16:9), `.webp`, Qualität ~82, Ziel < 400 KB pro Datei.
-- Figuren: freigestellt mit Transparenz, Höhe ~1200 px, `.webp` oder `.png`.
+- **Dateiendung egal:** `.webp`, `.png`, `.jpg` und `.jpeg` werden alle erkannt, in dieser
+  Reihenfolge. Ein Bild direkt aus ChatGPT kann also unverändert hier abgelegt werden.
+  Nur der Dateiname ohne Endung muss exakt stimmen.
+- Szenen: möglichst 16:9 (2560×1440). `.webp` mit Qualität ~82 hält die Datei unter ~400 KB;
+  ein PNG von ~2 MB funktioniert auch, lädt auf schwacher Hardware nur langsamer.
+- Figuren: freigestellt mit Transparenz, Höhe ~1200 px.
 - Die Bildmitte bleibt ruhig – dort liegt das Rätsel. Details gehören an die Ränder.
 - Keine KfW-Logos, keine Markenassets, keine realen Personen.
 
