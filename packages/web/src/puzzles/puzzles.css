@@ -680,6 +680,7 @@
   position: static;
   display: flex;
   justify-content: flex-end;
+  align-items: flex-end;
   margin-top: 0.25rem;
 }
 

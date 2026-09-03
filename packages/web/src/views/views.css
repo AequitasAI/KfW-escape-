@@ -132,6 +132,11 @@
   padding-top: var(--game-space-1);
 }
 
+/* the sticky companion panel must never cover the tail of the puzzle */
+.game:has(.game__foot) .game__main {
+  padding-bottom: var(--game-space-2);
+}
+
 .stage {
   width: min(100%, 68rem);
   display: flex;
