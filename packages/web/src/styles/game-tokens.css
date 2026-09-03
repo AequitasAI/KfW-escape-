@@ -1,0 +1,95 @@
+/*
+ * Game alias layer.
+ *
+ * Corporate semantics alias straight onto the functional --kfw-* tokens, so a
+ * real token build takes effect everywhere at once. Fantasy semantics that have
+ * no corporate equivalent (rune glow, energy flow, forge light) stay
+ * deliberately independent under --game-fx-*.
+ */
+
+:root {
+  /* --- corporate layer -------------------------------------------- */
+  --game-ui-surface: var(--kfw-color-fn-background-inverted-secondary);
+  --game-ui-surface-raised: var(--kfw-color-fn-background-inverted-tertiary);
+  --game-ui-surface-deep: var(--kfw-color-fn-background-inverted);
+  --game-ui-line: var(--kfw-color-fn-line-inverted);
+  --game-ui-line-strong: var(--kfw-color-fn-line-inverted-strong);
+  --game-ui-text: var(--kfw-color-fn-text-inverted);
+  --game-ui-text-muted: var(--kfw-color-fn-text-inverted-secondary);
+  --game-ui-primary: var(--kfw-color-fn-interaction-primary);
+  --game-ui-primary-hover: var(--kfw-color-fn-interaction-primary-hover);
+  --game-ui-primary-active: var(--kfw-color-fn-interaction-primary-active);
+  --game-ui-focus: var(--kfw-color-fn-interaction-focus);
+  --game-ui-disabled: var(--kfw-color-fn-interaction-disabled);
+  --game-ui-success: var(--kfw-color-fn-status-success);
+  --game-ui-warning: var(--kfw-color-fn-status-warning);
+  --game-ui-danger: var(--kfw-color-fn-status-error);
+  --game-ui-info: var(--kfw-color-fn-status-info);
+
+  --game-font: var(--kfw-font-family-sans);
+  --game-font-mono: var(--kfw-font-family-mono);
+
+  --game-radius-s: var(--kfw-radius-small);
+  --game-radius-m: var(--kfw-radius-medium);
+  --game-radius-l: var(--kfw-radius-large);
+  --game-shadow-panel: var(--kfw-elevation-medium);
+  --game-shadow-hero: var(--kfw-elevation-high);
+
+  --game-space-1: var(--kfw-spacing-tiny);
+  --game-space-2: var(--kfw-spacing-xsmall);
+  --game-space-3: var(--kfw-spacing-mid-small);
+  --game-space-4: var(--kfw-spacing-small);
+  --game-space-5: var(--kfw-spacing-medium);
+
+  /* --- fantasy layer ----------------------------------------------- */
+  /* Atmospheric colours for the game world. Independent by design, chosen to
+     harmonise with the corporate layer, never presented as brand values. */
+  --game-fx-energy: #4fe3d0;
+  --game-fx-energy-soft: rgba(79, 227, 208, 0.28);
+  --game-fx-energy-glow: rgba(79, 227, 208, 0.55);
+  --game-fx-rune: #ffd48a;
+  --game-fx-rune-glow: rgba(255, 212, 138, 0.45);
+  --game-fx-forge: #ff9a52;
+  --game-fx-seal: #7ee0a8;
+  --game-fx-stone: #2a3a4d;
+  --game-fx-stone-deep: #16222f;
+  --game-fx-void: #060f1c;
+  --game-fx-metal: #9aa9b8;
+  --game-fx-metal-dark: #55677a;
+
+  --game-scene-vignette: radial-gradient(
+    120% 90% at 50% 42%,
+    rgba(0, 0, 0, 0) 40%,
+    rgba(3, 9, 18, 0.55) 78%,
+    rgba(3, 9, 18, 0.88) 100%
+  );
+
+  /* --- motion ------------------------------------------------------- */
+  --game-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --game-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --game-dur-fast: 160ms;
+  --game-dur: 320ms;
+  --game-dur-slow: 720ms;
+}
+
+/*
+ * Every animation in the app is written against these variables. Under
+ * prefers-reduced-motion they collapse to (almost) zero, which removes movement
+ * without removing the state change itself.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --game-dur-fast: 1ms;
+    --game-dur: 1ms;
+    --game-dur-slow: 1ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

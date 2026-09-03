@@ -1,0 +1,11 @@
+/*
+ * Import order matters:
+ *   1. (optional) kfw-tokens.vendor.css  - the maintained openKfW token build
+ *   2. kfw-token-contract.css            - neutral placeholder fallbacks
+ *   3. game-tokens.css                   - thin --game-* alias layer
+ *   4. base.css                          - reset and shared primitives
+ * See docs/BRANDING_INTEGRATION.md.
+ */
+@import './kfw-token-contract.css';
+@import './game-tokens.css';
+@import './base.css';

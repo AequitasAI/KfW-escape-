@@ -1,0 +1,443 @@
+/* ------------------------------------------------------------------ */
+/* Timer                                                               */
+/* ------------------------------------------------------------------ */
+
+.timer {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--game-space-2);
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--game-ui-line-strong);
+  border-radius: var(--game-radius-m);
+  background: color-mix(in srgb, var(--game-ui-surface) 90%, transparent);
+  box-shadow: var(--game-shadow-panel);
+}
+
+.timer__icon {
+  color: var(--game-ui-text-muted);
+  display: flex;
+  flex: none;
+}
+
+.timer--large .timer__icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.timer__body {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.timer__value {
+  font-size: 1.6rem;
+  font-weight: var(--kfw-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.timer__label {
+  font-size: var(--kfw-font-size-xsmall);
+  color: var(--game-ui-text-muted);
+}
+
+.timer--large .timer__value {
+  font-size: clamp(2.2rem, 1.2rem + 2.6vw, 3.6rem);
+}
+
+.timer--large {
+  padding: 0.7rem 1.5rem;
+}
+
+/* Urgency is never colour only: the label and the pulse carry it too. */
+.timer--urgent {
+  border-color: color-mix(in srgb, var(--game-ui-warning) 65%, transparent);
+}
+
+.timer--urgent .timer__value {
+  color: #ffd08a;
+}
+
+.timer--critical {
+  border-color: color-mix(in srgb, var(--game-ui-danger) 70%, transparent);
+  animation: timer-pulse 1.6s var(--game-ease) infinite;
+}
+
+.timer--critical .timer__value {
+  color: #ffb4ae;
+}
+
+@keyframes timer-pulse {
+  0%,
+  100% {
+    box-shadow: var(--game-shadow-panel);
+  }
+  50% {
+    box-shadow:
+      var(--game-shadow-panel),
+      0 0 0 6px color-mix(in srgb, var(--game-ui-danger) 18%, transparent);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Progress trail                                                      */
+/* ------------------------------------------------------------------ */
+
+.trail {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trail__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.trail__item + .trail__item::before {
+  content: '';
+  width: 0.9rem;
+  height: 2px;
+  margin-right: 0.55rem;
+  background: var(--game-ui-line-strong);
+}
+
+.trail__pip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 38px;
+}
+
+.trail--small .trail__pip {
+  width: 26px;
+  height: 30px;
+}
+
+.trail--large .trail__pip {
+  width: 52px;
+  height: 58px;
+}
+
+.trail__hex {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.trail__hex polygon {
+  fill: color-mix(in srgb, var(--game-ui-surface-deep) 80%, transparent);
+  stroke: var(--game-ui-line-strong);
+  stroke-width: 2;
+  transition: fill var(--game-dur) var(--game-ease), stroke var(--game-dur) var(--game-ease);
+}
+
+.trail__mark {
+  position: relative;
+  font-size: var(--kfw-font-size-small);
+  font-weight: var(--kfw-font-weight-bold);
+  color: var(--game-ui-text-muted);
+}
+
+.trail--large .trail__mark {
+  font-size: var(--kfw-font-size-large);
+}
+
+.trail__item--done .trail__hex polygon {
+  fill: color-mix(in srgb, var(--game-ui-success) 34%, transparent);
+  stroke: var(--game-ui-success);
+}
+
+.trail__item--done .trail__mark {
+  color: #d9f7e5;
+}
+
+.trail__item--active .trail__hex polygon {
+  fill: color-mix(in srgb, var(--game-ui-primary) 32%, transparent);
+  stroke: var(--game-fx-energy);
+}
+
+.trail__item--active .trail__mark {
+  color: #fff;
+}
+
+.trail__item--active .trail__pip {
+  animation: trail-active 2.4s var(--game-ease) infinite;
+}
+
+@keyframes trail-active {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px var(--game-fx-energy-glow));
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Seals                                                               */
+/* ------------------------------------------------------------------ */
+
+.seals {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.seal svg {
+  width: 30px;
+  height: 34px;
+}
+
+.seal polygon {
+  fill: none;
+  stroke: var(--game-ui-line-strong);
+  stroke-width: 2;
+}
+
+.seal circle {
+  fill: var(--game-ui-line-strong);
+}
+
+.seal--lit {
+  animation: seal-appear var(--game-dur-slow) var(--game-ease-out) both;
+}
+
+.seal--lit polygon {
+  fill: color-mix(in srgb, var(--game-fx-seal) 20%, transparent);
+  stroke: var(--game-fx-seal);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--game-fx-seal) 55%, transparent));
+}
+
+.seal--lit circle {
+  fill: var(--game-fx-seal);
+}
+
+@keyframes seal-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-25deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Solver banner                                                       */
+/* ------------------------------------------------------------------ */
+
+.solver-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--game-space-2);
+  padding: var(--game-space-2);
+  border: 1px solid var(--game-ui-line);
+  border-radius: var(--game-radius-l);
+  background: color-mix(in srgb, var(--game-ui-surface) 92%, transparent);
+  box-shadow: var(--game-shadow-panel);
+  backdrop-filter: blur(10px);
+}
+
+.solver-banner__avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--game-ui-primary), var(--game-fx-energy));
+  color: #04121c;
+  font-weight: var(--kfw-font-weight-bold);
+  font-size: 1.15rem;
+}
+
+.solver-banner__text {
+  min-width: 0;
+  flex: 1;
+}
+
+.solver-banner__headline {
+  font-size: var(--kfw-font-size-large);
+}
+
+.solver-banner__sub {
+  font-size: var(--kfw-font-size-small);
+  color: var(--game-ui-text-muted);
+}
+
+.solver-banner__actions {
+  display: flex;
+  gap: var(--game-space-1);
+  flex-wrap: wrap;
+}
+
+.solver-banner--display {
+  padding: var(--game-space-3);
+}
+
+.solver-banner--display .solver-banner__avatar {
+  width: 68px;
+  height: 68px;
+  font-size: 1.7rem;
+}
+
+.solver-banner--display .solver-banner__headline {
+  font-size: clamp(1.3rem, 0.9rem + 1.2vw, 2rem);
+}
+
+.solver-banner--display .solver-banner__sub {
+  font-size: var(--kfw-font-size-medium);
+}
+
+/* ------------------------------------------------------------------ */
+/* Solver reveal                                                       */
+/* ------------------------------------------------------------------ */
+
+.reveal {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background: var(--kfw-color-fn-opaque-medium);
+  backdrop-filter: blur(2px);
+  animation: fade-in var(--game-dur) var(--game-ease) both;
+  /* never blocks input: it is purely informational and self-dismissing */
+  pointer-events: none;
+}
+
+.reveal__inner {
+  text-align: center;
+  padding: var(--game-space-3);
+}
+
+.reveal__lead {
+  color: var(--game-ui-text-muted);
+  letter-spacing: 0.06em;
+  animation: rise-in var(--game-dur) var(--game-ease-out) both;
+}
+
+.reveal__name {
+  margin-top: var(--game-space-1);
+  font-size: var(--kfw-font-size-display);
+  font-weight: var(--kfw-font-weight-bold);
+  letter-spacing: 0.1em;
+  color: #fff;
+  text-shadow: 0 0 28px var(--game-fx-energy-glow);
+  animation: reveal-name 620ms var(--game-ease-out) 180ms both;
+}
+
+@keyframes reveal-name {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+    letter-spacing: 0.4em;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    letter-spacing: 0.1em;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Dwarf                                                               */
+/* ------------------------------------------------------------------ */
+
+.dwarf {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin: 0;
+  pointer-events: none;
+}
+
+.dwarf__art {
+  width: clamp(74px, 9vw, 132px);
+  height: auto;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5));
+  animation: dwarf-idle 4.5s var(--game-ease) infinite alternate;
+}
+
+@keyframes dwarf-idle {
+  from {
+    transform: translateY(0) rotate(-1deg);
+  }
+  to {
+    transform: translateY(-5px) rotate(1.5deg);
+  }
+}
+
+.dwarf__bubble {
+  position: relative;
+  max-width: 15rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--game-ui-line-strong);
+  border-radius: var(--game-radius-m);
+  background: color-mix(in srgb, var(--game-ui-surface) 94%, transparent);
+  font-size: var(--kfw-font-size-small);
+  animation: rise-in var(--game-dur) var(--game-ease-out) both;
+}
+
+.dwarf__bubble::after {
+  content: '';
+  position: absolute;
+  right: -7px;
+  bottom: 14px;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  border-right: 1px solid var(--game-ui-line-strong);
+  border-bottom: 1px solid var(--game-ui-line-strong);
+  transform: rotate(-45deg);
+}
+
+.dwarf--happy .dwarf__art {
+  animation-duration: 1.1s;
+}
+
+/* ------------------------------------------------------------------ */
+/* Misc                                                                */
+/* ------------------------------------------------------------------ */
+
+.btn--icon {
+  min-width: 44px;
+  padding: 0.5rem;
+}
+
+.conn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: var(--kfw-font-size-small);
+  background: color-mix(in srgb, var(--game-ui-surface-deep) 86%, transparent);
+  border: 1px solid var(--game-ui-line-strong);
+}
+
+.conn__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--game-ui-warning);
+  animation: pulse-soft 1.4s ease-in-out infinite;
+}
+
+.conn--failed .conn__dot {
+  background: var(--game-ui-danger);
+  animation: none;
+}

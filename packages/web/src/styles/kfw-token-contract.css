@@ -1,0 +1,104 @@
+/*
+ * openKfW design token contract
+ * =============================
+ *
+ * The maintained openKfW token build is the binding UI basis for this app
+ * (07_branding/OPENKFW_DESIGN_TOKENS.md). It is NOT vendored here:
+ *
+ *   - the npm package @openkfw/design-tokens is marked EOL/deprecated and
+ *     ships an empty module, and the branding spec explicitly forbids
+ *     pinning a deprecated version;
+ *   - the repository and its demo page were not reachable from the build
+ *     environment.
+ *
+ * This file therefore declares the functional token names the UI consumes and
+ * fills them with BRAND NEUTRAL PLACEHOLDERS. These values are deliberately
+ * not presented as KfW brand values: nothing here is sampled from a screenshot,
+ * nothing imitates a KfW colour, no logo or font is reproduced.
+ *
+ * To switch to the real tokens, drop the maintained CSS build in as
+ * kfw-tokens.vendor.css and import it BEFORE this file - see
+ * docs/BRANDING_INTEGRATION.md. Every component reads only var(--kfw-*) or the
+ * --game-* aliases, so no component code changes.
+ */
+
+:root {
+  /* Reported in the host view so the active source is always visible. */
+  --kfw-token-source: 'placeholder';
+
+  /* --- functional: background ------------------------------------- */
+  --kfw-color-fn-background-primary: #f7f9fb;
+  --kfw-color-fn-background-secondary: #ffffff;
+  --kfw-color-fn-background-tertiary: #eef2f6;
+  --kfw-color-fn-background-inverted: #0b1a2b;
+  --kfw-color-fn-background-inverted-secondary: #12263c;
+  --kfw-color-fn-background-inverted-tertiary: #1b3450;
+
+  /* --- functional: text -------------------------------------------- */
+  --kfw-color-fn-text-primary: #10202f;
+  --kfw-color-fn-text-secondary: #4a5b6b;
+  --kfw-color-fn-text-inverted: #f2f7fb;
+  --kfw-color-fn-text-inverted-secondary: #a9c0d4;
+  --kfw-color-fn-text-disabled: #8a99a7;
+
+  /* --- functional: line -------------------------------------------- */
+  --kfw-color-fn-line-primary: #ccd7e0;
+  --kfw-color-fn-line-inverted: #27435f;
+  --kfw-color-fn-line-inverted-strong: #3d6188;
+
+  /* --- functional: interaction ------------------------------------- */
+  --kfw-color-fn-interaction-primary: #1f6feb;
+  --kfw-color-fn-interaction-primary-hover: #1a5fcc;
+  --kfw-color-fn-interaction-primary-active: #164fa8;
+  --kfw-color-fn-interaction-secondary: #33587d;
+  --kfw-color-fn-interaction-focus: #63b3ff;
+  --kfw-color-fn-interaction-disabled: #56697c;
+
+  /* --- functional: status ------------------------------------------ */
+  --kfw-color-fn-status-success: #2e9e5b;
+  --kfw-color-fn-status-warning: #d99400;
+  --kfw-color-fn-status-error: #d24a43;
+  --kfw-color-fn-status-info: #2f80c4;
+
+  /* --- functional: opaque overlays --------------------------------- */
+  --kfw-color-fn-opaque-strong: rgba(7, 20, 38, 0.86);
+  --kfw-color-fn-opaque-medium: rgba(7, 20, 38, 0.66);
+  --kfw-color-fn-opaque-soft: rgba(7, 20, 38, 0.38);
+
+  /* --- typography --------------------------------------------------- */
+  --kfw-font-family-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --kfw-font-family-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
+
+  --kfw-font-size-xsmall: 0.75rem;
+  --kfw-font-size-small: 0.875rem;
+  --kfw-font-size-medium: 1rem;
+  --kfw-font-size-large: 1.125rem;
+  --kfw-font-size-xlarge: clamp(1.35rem, 1.1rem + 0.9vw, 1.9rem);
+  --kfw-font-size-display: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem);
+  --kfw-font-size-hero: clamp(2.6rem, 1.4rem + 5vw, 6rem);
+
+  --kfw-font-weight-regular: 400;
+  --kfw-font-weight-medium: 500;
+  --kfw-font-weight-bold: 700;
+
+  --kfw-line-height-tight: 1.15;
+  --kfw-line-height-default: 1.5;
+
+  /* --- spacing (scale documented in the public openKfW demo) -------- */
+  --kfw-spacing-tiny: 0.5rem;
+  --kfw-spacing-xsmall: 1rem;
+  --kfw-spacing-mid-small: 1.5rem;
+  --kfw-spacing-small: 2rem;
+  --kfw-spacing-medium: 3rem;
+  --kfw-spacing-large: clamp(3rem, 2rem + 3vw, 4.5rem);
+  --kfw-spacing-xlarge: clamp(4rem, 2.5rem + 5vw, 7rem);
+
+  /* --- shape / elevation ------------------------------------------- */
+  --kfw-radius-small: 4px;
+  --kfw-radius-medium: 8px;
+  --kfw-radius-large: 16px;
+  --kfw-elevation-low: 0 1px 2px rgba(6, 17, 31, 0.16);
+  --kfw-elevation-medium: 0 6px 20px rgba(6, 17, 31, 0.28);
+  --kfw-elevation-high: 0 18px 48px rgba(6, 17, 31, 0.42);
+}

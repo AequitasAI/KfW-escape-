@@ -1,0 +1,943 @@
+.puzzle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--game-space-3);
+  width: 100%;
+}
+
+.puzzle__status {
+  font-size: var(--kfw-font-size-small);
+  color: var(--game-ui-text-muted);
+  text-align: center;
+}
+
+.puzzle--wide .puzzle__status {
+  font-size: var(--kfw-font-size-large);
+}
+
+/* ------------------------------------------------------------------ */
+/* P1 Archive runes                                                    */
+/* ------------------------------------------------------------------ */
+
+.runes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--game-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.runes__slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rune {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  width: clamp(74px, 15vw, 116px);
+  height: clamp(92px, 18vw, 142px);
+  padding: 0.5rem;
+  border: 1px solid var(--game-ui-line-strong);
+  border-radius: var(--game-radius-m);
+  background:
+    radial-gradient(80% 60% at 50% 30%, rgba(255, 212, 138, 0.14), transparent 70%),
+    color-mix(in srgb, var(--game-fx-stone) 78%, transparent);
+  color: var(--game-ui-text);
+  cursor: grab;
+  transition:
+    transform var(--game-dur) var(--game-ease-out),
+    border-color var(--game-dur-fast) var(--game-ease),
+    box-shadow var(--game-dur-fast) var(--game-ease);
+}
+
+.rune:disabled {
+  cursor: default;
+}
+
+.rune__glyph {
+  font-size: clamp(1.8rem, 4.6vw, 2.8rem);
+  line-height: 1;
+  color: var(--game-fx-rune);
+  text-shadow: 0 0 14px var(--game-fx-rune-glow);
+}
+
+.rune__label {
+  font-size: var(--kfw-font-size-xsmall);
+  color: var(--game-ui-text-muted);
+}
+
+.rune__socket {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-size: var(--kfw-font-size-xsmall);
+  color: var(--kfw-color-fn-text-disabled);
+}
+
+.rune--selected {
+  border-color: var(--game-fx-energy);
+  box-shadow: 0 0 0 2px var(--game-fx-energy-soft);
+  transform: translateY(-6px);
+}
+
+.rune--dragging {
+  opacity: 0.5;
+}
+
+.rune--locked {
+  border-color: var(--game-fx-seal);
+  animation: rune-lock 700ms var(--game-ease-out) both;
+}
+
+@keyframes rune-lock {
+  0% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  45% {
+    box-shadow: 0 0 26px 6px var(--game-fx-rune-glow);
+    transform: translateY(-10px);
+  }
+  100% {
+    box-shadow: 0 0 12px 0 var(--game-fx-rune-glow);
+    transform: none;
+  }
+}
+
+.runes__nudge {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.runes__nudge .btn {
+  min-height: 36px;
+  min-width: 40px;
+  padding: 0.2rem 0.4rem;
+}
+
+.clues {
+  max-width: 46rem;
+  padding: var(--game-space-2);
+  border-left: 3px solid var(--game-fx-rune);
+  background: color-mix(in srgb, var(--game-ui-surface-deep) 72%, transparent);
+  border-radius: 0 var(--game-radius-m) var(--game-radius-m) 0;
+}
+
+.clues__title {
+  font-size: var(--kfw-font-size-small);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--game-fx-rune);
+  margin-bottom: 0.35rem;
+}
+
+.clues__list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.puzzle--wide .clues__list {
+  font-size: var(--kfw-font-size-large);
+}
+
+/* ------------------------------------------------------------------ */
+/* P2 Cable labyrinth                                                  */
+/* ------------------------------------------------------------------ */
+
+.cable__frame {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.4rem, 1.5vw, 1.25rem);
+  width: 100%;
+  justify-content: center;
+}
+
+.cable__board {
+  width: min(100%, 460px);
+  height: auto;
+}
+
+/*
+ * On the big screen the board is bound by height, not width: a 16:9 beamer has
+ * far more horizontal room than vertical, and the board must never push the
+ * solver panel below the fold.
+ */
+.puzzle--wide .cable__board {
+  width: auto;
+  height: min(48vh, 460px);
+  max-width: 100%;
+}
+
+.puzzle--wide .cable__port-core {
+  height: clamp(56px, 9vh, 92px);
+}
+
+.cable__port {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+}
+
+.cable__port-core {
+  width: clamp(18px, 3vw, 26px);
+  height: clamp(46px, 8vw, 74px);
+  border-radius: 6px;
+  background: var(--game-fx-metal-dark);
+  border: 1px solid var(--game-ui-line-strong);
+  transition: background var(--game-dur) var(--game-ease);
+}
+
+.cable__port-core.is-live {
+  background: var(--game-fx-energy);
+  box-shadow: 0 0 18px var(--game-fx-energy-glow);
+}
+
+.cable__port-label {
+  font-size: var(--kfw-font-size-xsmall);
+  color: var(--game-ui-text-muted);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.cable-tile__body {
+  fill: color-mix(in srgb, var(--game-fx-stone) 88%, transparent);
+  stroke: var(--game-ui-line);
+  stroke-width: 1.5;
+  transition: fill var(--game-dur-fast) var(--game-ease), stroke var(--game-dur-fast) var(--game-ease);
+}
+
+.cable-tile__conduit {
+  stroke: var(--game-fx-metal-dark);
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+
+.cable-tile__core {
+  stroke: transparent;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke var(--game-dur) var(--game-ease);
+}
+
+.cable-tile__hub {
+  fill: var(--game-fx-metal-dark);
+  transition: fill var(--game-dur) var(--game-ease);
+}
+
+.cable-tile.is-live .cable-tile__core {
+  stroke: var(--game-fx-energy);
+  stroke-dasharray: 10 14;
+  animation: energy-dash 900ms linear infinite;
+  filter: drop-shadow(0 0 5px var(--game-fx-energy-glow));
+}
+
+.cable-tile.is-live .cable-tile__hub {
+  fill: var(--game-fx-energy);
+}
+
+.cable-tile.is-movable {
+  cursor: pointer;
+}
+
+.cable-tile.is-movable .cable-tile__body {
+  stroke: var(--game-fx-energy);
+  stroke-dasharray: 5 4;
+}
+
+.cable-tile.is-movable:hover .cable-tile__body {
+  fill: color-mix(in srgb, var(--game-fx-stone) 60%, #fff 8%);
+}
+
+.cable-tile:focus-visible {
+  outline: none;
+}
+
+.cable-tile:focus-visible .cable-tile__body {
+  stroke: var(--game-ui-focus);
+  stroke-width: 3.5;
+  stroke-dasharray: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* P3 Testmasters diff                                                 */
+/* ------------------------------------------------------------------ */
+
+.diff__npc {
+  font-style: italic;
+  color: var(--game-ui-text-muted);
+  text-align: center;
+}
+
+.diff__plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--game-space-2);
+  width: 100%;
+  max-width: 62rem;
+}
+
+.diff__plan {
+  margin: 0;
+}
+
+.diff__caption {
+  margin-bottom: 0.35rem;
+  font-size: var(--kfw-font-size-small);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--game-ui-text-muted);
+}
+
+.diff__canvas {
+  position: relative;
+}
+
+.diff__svg {
+  width: 100%;
+  height: auto;
+  border-radius: var(--game-radius-m);
+  display: block;
+}
+
+.diff__svg.is-interactive {
+  cursor: crosshair;
+}
+
+.plan__paper {
+  fill: #0f2033;
+  stroke: var(--game-ui-line-strong);
+}
+
+.plan__grid line {
+  stroke: #1b3550;
+  stroke-width: 1;
+}
+
+.plan__title {
+  fill: var(--game-ui-text-muted);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.plan__part {
+  fill: none;
+  stroke: #7fb2e0;
+  stroke-width: 2;
+}
+
+.plan__line {
+  stroke: #7fb2e0;
+  stroke-width: 2;
+}
+
+.plan__glyph {
+  fill: var(--game-fx-rune);
+  opacity: 0.9;
+}
+
+.plan__label {
+  fill: var(--game-fx-rune);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.diff-hotspot__hit {
+  fill: transparent;
+  stroke: transparent;
+  cursor: pointer;
+}
+
+.diff-hotspot[aria-disabled='true'] .diff-hotspot__hit {
+  cursor: default;
+}
+
+.diff-hotspot:hover .diff-hotspot__hit {
+  fill: rgba(127, 178, 224, 0.08);
+}
+
+.diff-hotspot:focus-visible {
+  outline: none;
+}
+
+.diff-hotspot:focus-visible .diff-hotspot__hit {
+  stroke: var(--game-ui-focus);
+  stroke-width: 3;
+}
+
+.diff-hotspot__ring {
+  fill: none;
+  stroke: var(--game-fx-seal);
+  stroke-width: 3;
+  animation: stamp-in 480ms var(--game-ease-out) both;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--game-fx-seal) 55%, transparent));
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.9) rotate(-8deg);
+    transform-origin: center;
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.diff__miss {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: var(--kfw-font-size-xsmall);
+  background: rgba(9, 22, 38, 0.9);
+  border: 1px solid var(--game-ui-line-strong);
+  color: var(--game-ui-text-muted);
+  pointer-events: none;
+  animation: miss-fade 900ms var(--game-ease-out) both;
+}
+
+@keyframes miss-fade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(0.8);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -80%) scale(1);
+  }
+}
+
+.diff__tally {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 62rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diff__tally-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--game-radius-s);
+  border: 1px solid var(--game-ui-line);
+  font-size: var(--kfw-font-size-small);
+  color: var(--game-ui-text-muted);
+}
+
+.diff__tally-item.is-found {
+  border-color: color-mix(in srgb, var(--game-fx-seal) 55%, transparent);
+  color: var(--game-ui-text);
+}
+
+.diff__tally-mark {
+  font-weight: var(--kfw-font-weight-bold);
+  color: var(--game-fx-seal);
+}
+
+/* ------------------------------------------------------------------ */
+/* P4 Operations gears                                                 */
+/* ------------------------------------------------------------------ */
+
+.gears__machine {
+  position: relative;
+  width: 100%;
+}
+
+.gears__svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.gears__motor rect {
+  fill: #26333f;
+  stroke: var(--game-ui-line-strong);
+}
+
+.gears__motor-core {
+  fill: #14202b;
+  stroke: var(--game-fx-metal-dark);
+  stroke-width: 3;
+}
+
+.gears__motor.is-live .gears__motor-core {
+  fill: color-mix(in srgb, var(--game-fx-energy) 40%, #0b1a24);
+  stroke: var(--game-fx-energy);
+  filter: drop-shadow(0 0 12px var(--game-fx-energy-glow));
+}
+
+.gears__shaft {
+  stroke: var(--game-fx-metal-dark);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke var(--game-dur) var(--game-ease);
+}
+
+.gears__shaft.is-powered {
+  stroke: var(--game-fx-energy);
+  stroke-dasharray: 8 10;
+  animation: energy-dash 700ms linear infinite;
+  filter: drop-shadow(0 0 6px var(--game-fx-energy-glow));
+}
+
+.gear__teeth {
+  fill: url(#gear-metal);
+  stroke: #22303e;
+  stroke-width: 2;
+  transition: fill var(--game-dur) var(--game-ease);
+}
+
+.gear.is-powered .gear__teeth {
+  fill: url(#gear-live);
+  filter: drop-shadow(0 0 10px var(--game-fx-energy-soft));
+}
+
+.gear__hub {
+  fill: #1b2733;
+  stroke: var(--game-fx-metal-dark);
+  stroke-width: 2;
+}
+
+.gear__bore {
+  fill: #0a1219;
+}
+
+.gear__marker {
+  stroke: var(--game-fx-rune);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.gear__spin {
+  transition: transform var(--game-dur) var(--game-ease-out);
+  transform-origin: center;
+}
+
+.gear.is-turnable {
+  cursor: pointer;
+}
+
+.gear.is-turnable:hover .gear__teeth {
+  stroke: var(--game-fx-energy);
+}
+
+.gear:focus-visible {
+  outline: none;
+}
+
+.gear:focus-visible .gear__hub {
+  stroke: var(--game-ui-focus);
+  stroke-width: 4;
+}
+
+.gear--fixed .gear__hub {
+  stroke: var(--game-fx-rune);
+}
+
+/* the machine start: all five turn together, alternating direction */
+.gear--running .gear__spin {
+  transition: none;
+}
+
+.gear--running.gear--cw .gear__spin {
+  animation: spin-cw 3.4s linear infinite;
+}
+
+.gear--running.gear--ccw .gear__spin {
+  animation: spin-ccw 3.4s linear infinite;
+}
+
+.gear__contact {
+  fill: #16222e;
+  stroke: var(--game-fx-metal-dark);
+  stroke-width: 2;
+  transition: fill var(--game-dur-fast) var(--game-ease);
+}
+
+.gear__contact.is-meshed {
+  fill: var(--game-fx-energy);
+  stroke: #d7fff8;
+  animation: contact-pop 420ms var(--game-ease-out) both;
+  filter: drop-shadow(0 0 8px var(--game-fx-energy-glow));
+}
+
+@keyframes contact-pop {
+  0% {
+    transform: scale(0.4);
+    transform-origin: center;
+  }
+  60% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.gear-btn circle {
+  fill: rgba(11, 24, 38, 0.9);
+  stroke: var(--game-ui-line-strong);
+  stroke-width: 1.5;
+}
+
+.gear-btn {
+  cursor: pointer;
+}
+
+.gear-btn text {
+  fill: var(--game-ui-text);
+  font-size: 20px;
+}
+
+.gear-btn:hover circle {
+  stroke: var(--game-fx-energy);
+}
+
+.gear-btn:focus-visible {
+  outline: none;
+}
+
+.gear-btn:focus-visible circle {
+  stroke: var(--game-ui-focus);
+  stroke-width: 3.5;
+}
+
+.gears__gate-frame {
+  fill: #101a26;
+  stroke: var(--game-ui-line-strong);
+  stroke-width: 2;
+}
+
+.gears__gate-door {
+  fill: #1c2a3a;
+  stroke: #0b131d;
+  transition: transform var(--game-dur-slow) var(--game-ease-out);
+}
+
+.gears__gate.is-open .gears__gate-door--l {
+  transform: translateX(-38px);
+}
+
+.gears__gate.is-open .gears__gate-door--r {
+  transform: translateX(38px);
+}
+
+.gears__dwarf {
+  position: absolute;
+  right: 1.5%;
+  bottom: -0.25rem;
+  /* decorative character: it must never sit between a finger and a gear */
+  pointer-events: none;
+}
+
+/*
+ * On a phone the five gear machine cannot shrink further without becoming
+ * unusable, so it scrolls inside its own container (allowed by the UX spec)
+ * and the dwarf moves below the machine instead of over it.
+ */
+.puzzle--compact .gears__machine {
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  padding-bottom: 0.35rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.puzzle--compact .gears__svg {
+  min-width: 620px;
+}
+
+.puzzle--compact .gears__dwarf {
+  position: static;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
+.gears__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1rem;
+  font-size: var(--kfw-font-size-xsmall);
+  color: var(--game-ui-text-muted);
+}
+
+.gears__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.gears__legend-swatch {
+  display: inline-block;
+  width: 16px;
+  border-radius: 2px;
+  background: var(--game-fx-metal);
+}
+
+.gears__legend-swatch--1 {
+  height: 5px;
+}
+.gears__legend-swatch--2 {
+  height: 11px;
+}
+.gears__legend-swatch--3 {
+  height: 11px;
+  background: repeating-linear-gradient(90deg, var(--game-fx-metal) 0 3px, transparent 3px 6px);
+}
+
+.gears__legend-note {
+  width: 100%;
+  text-align: center;
+}
+
+/* the dwarf stands in front of the gate on the big screen, and gets room for it */
+.puzzle--wide .gears__dwarf .dwarf {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.puzzle--wide .dwarf__art {
+  width: clamp(96px, 9vw, 150px);
+}
+
+.puzzle--wide .dwarf__bubble {
+  font-size: var(--kfw-font-size-medium);
+}
+
+.puzzle--wide .dwarf__bubble::after {
+  right: 28px;
+  bottom: -7px;
+}
+
+.puzzle--wide .gears__svg {
+  max-height: 52vh;
+}
+
+/* ------------------------------------------------------------------ */
+/* P5 Black gate                                                       */
+/* ------------------------------------------------------------------ */
+
+.puzzle--gate {
+  gap: var(--game-space-2);
+}
+
+.gate__guard {
+  display: flex;
+  align-items: center;
+  gap: var(--game-space-2);
+  max-width: 46rem;
+}
+
+.gate__guard-art {
+  width: clamp(72px, 10vw, 118px);
+  flex: none;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6));
+}
+
+.gate__sword {
+  transform-origin: 100px 148px;
+  transition: transform var(--game-dur-slow) var(--game-ease-out);
+}
+
+.puzzle--gate.is-open .gate__sword {
+  transform: rotate(52deg);
+}
+
+.gate__speech-hail {
+  font-size: var(--kfw-font-size-xlarge);
+  font-weight: var(--kfw-font-weight-bold);
+  letter-spacing: 0.12em;
+}
+
+.gate__speech-body {
+  font-size: var(--kfw-font-size-small);
+  color: var(--game-ui-text-muted);
+}
+
+.gate__panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--game-space-3);
+  width: 100%;
+  max-width: 52rem;
+  align-items: start;
+}
+
+.gate__clues {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.gate__clue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--game-radius-s);
+  background: color-mix(in srgb, var(--game-ui-surface-deep) 72%, transparent);
+  border: 1px solid var(--game-ui-line);
+  font-size: var(--kfw-font-size-small);
+}
+
+.gate__clue-code {
+  font-size: var(--kfw-font-size-large);
+  font-weight: var(--kfw-font-weight-bold);
+  color: var(--game-fx-rune);
+}
+
+.gate__clue-text {
+  color: var(--game-ui-text-muted);
+}
+
+.gate__keypad-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--game-space-2);
+  align-items: center;
+}
+
+.gate__display {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.gate__display.is-rejected {
+  animation: gate-shake 420ms var(--game-ease);
+}
+
+@keyframes gate-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-9px);
+  }
+  45% {
+    transform: translateX(8px);
+  }
+  70% {
+    transform: translateX(-4px);
+  }
+}
+
+.gate__slot {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 74px;
+  border-radius: var(--game-radius-m);
+  border: 2px solid var(--game-ui-line-strong);
+  background: rgba(4, 10, 18, 0.85);
+  font-size: 2.1rem;
+  font-weight: var(--kfw-font-weight-bold);
+  font-family: var(--game-font-mono);
+}
+
+.gate__slot.is-filled {
+  border-color: var(--game-fx-rune);
+  color: var(--game-fx-rune);
+  text-shadow: 0 0 14px var(--game-fx-rune-glow);
+}
+
+.gate__reject {
+  font-size: var(--kfw-font-size-small);
+  color: #ffb4ae;
+}
+
+.gate__keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: min(100%, 280px);
+}
+
+.gate__key {
+  min-height: 56px;
+  border-radius: var(--game-radius-m);
+  border: 1px solid var(--game-ui-line-strong);
+  background: color-mix(in srgb, var(--game-fx-stone) 70%, transparent);
+  color: var(--game-ui-text);
+  font-size: 1.4rem;
+  font-weight: var(--kfw-font-weight-medium);
+  cursor: pointer;
+  transition: background var(--game-dur-fast) var(--game-ease);
+}
+
+.gate__key:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--game-fx-stone) 50%, #fff 10%);
+}
+
+.gate__key:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.gate__key--submit {
+  background: var(--game-ui-primary);
+  border-color: transparent;
+  color: #fff;
+}
+
+.gate__key--util {
+  color: var(--game-ui-text-muted);
+}
+
+.gate__attempts {
+  font-size: var(--kfw-font-size-xsmall);
+  color: var(--game-ui-text-muted);
+}
+
+/* ------------------------------------------------------------------ */
+/* Wide (display) tuning                                               */
+/* ------------------------------------------------------------------ */
+
+.puzzle--wide .gate__slot {
+  width: 78px;
+  height: 100px;
+  font-size: 3rem;
+}
+
+.puzzle--wide .gate__clue {
+  font-size: var(--kfw-font-size-medium);
+}
+
+.puzzle--wide .diff__tally-item {
+  font-size: var(--kfw-font-size-medium);
+}
