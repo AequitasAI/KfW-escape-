@@ -9,7 +9,13 @@ import { log } from './logger.js';
 import type { SessionManager } from './sessionManager.js';
 import { RateLimiter, sanitizeDisplayName } from './util.js';
 
-const JOIN_LIMIT = new RateLimiter(20, 60_000);
+/*
+ * A whole team joins from one office network, so the join limit is per source
+ * IP but sized for a full room arriving at once - 20/min would have locked out
+ * everyone after the twentieth person behind the same NAT. It is still low
+ * enough to stop a script from filling a session.
+ */
+const JOIN_LIMIT = new RateLimiter(Number(process.env['JOIN_RATE_LIMIT'] ?? 120), 60_000);
 const CREATE_LIMIT = new RateLimiter(10, 60_000);
 
 function cookieName(code: string): string {

@@ -1,48 +1,125 @@
 # HANDOFF STATUS
 
 ## Letzter stabiler Commit
-Phase 0 + Rätselkern (siehe `git log` auf `claude/mvp-build`)
+Siehe `git log -1` auf `claude/mvp-build`.
 
 ## Aktueller Stand
 - [x] Phase 0 Repo Setup
-- [ ] Phase 1 Multiplayer Foundation
-- [ ] Phase 2 Puzzle Engine
-- [ ] Phase 3 Game Flow
-- [ ] Phase 4 UI / Game Feel
-- [ ] Phase 5 Hardening
-- [x] Branding-Entscheidung dokumentiert (`docs/BRANDING_INTEGRATION.md`)
-- [ ] Finale Art Assets integriert (optional, Struktur vorbereitet)
+- [x] Phase 1 Multiplayer Foundation
+- [x] Phase 2 Puzzle Engine
+- [x] Phase 3 Game Flow
+- [x] Phase 4 UI / Game Feel
+- [x] Phase 5 Hardening
+- [x] Branding-Entscheidung dokumentiert und umgesetzt (`docs/BRANDING_INTEGRATION.md`)
+- [ ] Finale Fantasy-Art-Assets integriert (bewusst offen, Struktur vorbereitet)
 
 ## Funktioniert
-- Handoff-Paket vollständig im Repository, Branch `claude/mvp-build`.
-- npm-Workspaces: `packages/shared`, `packages/server`, `packages/web`.
-- TypeScript strict (`noUncheckedIndexedAccess`, `verbatimModuleSyntax`).
-- `packages/shared` vollständig: Typen, Story-Copy, Konstanten und alle fünf Rätsel-Reducer.
-- 24 Unit-Tests grün, darunter die drei geforderten Eindeutigkeitsbeweise:
-  - P1: 120 Permutationen → genau eine Lösung.
-  - P2: eingefrorener Startzustand aus 15 legalen Slides erzeugt, BFS beweist Lösbarkeit
-    (optimal 13 Züge, Zielkorridor 8–16).
-  - P4: alle 4096 Konfigurationen → genau eine Lösung `[0,3,3,6,7]`.
-  - P5: alle 1000 Codes → genau einer (`042`).
-- Dockerfile (multi-stage) + docker-compose inkl. Healthcheck und persistentem Volume.
 
-## Offen
-- Phase 1: Server (Express + Socket.IO + SQLite), Session-/Player-Manager, autoritativer Timer,
-  Solver-Auswahl, Views host/join/game/display.
-- Phase 3–5 wie in `CLAUDE_START_HERE.md`.
+**Multiplayer**
+- Session erstellen, QR-Code (SVG), Join-Link, Beitritt ohne Login (nur Anzeigename).
+- Identität über servergenerierte UUID + Token, HttpOnly-Cookie plus localStorage-Spiegel.
+- Reload/Reconnect stellt Spieler und Spielzustand wieder her.
+- Serverneustart: laufende Sessions werden aus SQLite geladen und pausiert, damit keine
+  Zeit verloren geht; ein Klick auf „Fortsetzen“ läuft weiter.
+- 30 gleichzeitige Clients getestet (`packages/server/test/load.test.ts`).
+
+**Autorisierung**
+- Jede `puzzle:action` durchläuft serverseitig die fünf Prüfungen aus WEBSOCKET_EVENTS.md.
+- Nicht-Solver werden serverseitig abgewiesen, auch wenn sie das Event direkt senden.
+- Host-Aktionen erfordern das Host-Secret aus der Socket-Auth.
+- Rate-Limits auf Join, Session-Anlage, Socket-Controls und Puzzle-Aktionen.
+
+**Timer**
+- Serverautoritär aus `startedAt` / `totalPausedMs` / `bonusMs`.
+- Reload, Tab-Wechsel und Backgrounding verändern die verbleibende Zeit nicht (E2E-geprüft).
+- Pause/Resume, +30 s als markierter Host-Eingriff, harter Verlust bei 00:00.
+
+**Rätsel** – alle fünf vollständig, alle Lösungen automatisiert bewiesen:
+| # | Beweis | Ergebnis |
+|---|---|---|
+| 1 | 120 Permutationen gegen die drei Hinweise | genau eine Lösung |
+| 2 | Startzustand aus 15 legalen Slides erzeugt, BFS-Solver | lösbar in 13 optimalen Zügen (Ziel 8–16) |
+| 3 | Hotspot-Registry | genau vier, jeder einmal zählbar |
+| 4 | alle 8⁴ = 4096 Konfigurationen enumeriert | genau eine Lösung `[0,3,3,6,7]` |
+| 5 | alle 1000 Codes gegen die fünf Aussagen | genau einer (`042`) |
+
+**Views**
+- `/`, `/host`, `/host/:code`, `/join/:code`, `/game/:code`, `/display/:code`.
+- Display-Ansicht ohne jede Adminsteuerung, ohne Debugdetails, ohne rohe Zustände (E2E-geprüft).
+- Host-Ansicht mit allen Failsafes plus technischem Status inkl. aktiver Token-Quelle.
+
+**Game Feel**
+- Alle Pflichtanimationen umgesetzt, sämtlich über Motion-Tokens, die
+  `prefers-reduced-motion` respektieren.
+- Soundarchitektur ohne Audio-Assets (kurze WebAudio-Cues), Mute jederzeit erreichbar,
+  kein Autoplay vor einer Nutzerinteraktion.
+- Mobile-first ab 320 px, keine horizontale Seiten-Scrollbar; das Zahnradpuzzle scrollt
+  auf schmalen Geräten in seinem eigenen Container.
+- Accessibility: Tastaturbedienung, sichtbare Fokuszustände, 44-px-Touchziele,
+  Tap-/Keyboard-Alternative zu jeder Drag-Interaktion, Status nie nur über Farbe.
+
+## Offen / bewusst nicht gemacht
+- **Finale Fantasy-Illustrationen.** Die Szenen sind derzeit prozedurales SVG. Die Layer-Struktur
+  (`bg` / `fx` / `content`) und der Custom-Property-Haken `--scene-image` liegen bereit; ein
+  fertiges Artwork ersetzt den bg-Layer ohne Codeänderung. Siehe `08_assets/ASSET_BRIEF.md`.
+- **Echte openKfW-Tokens.** Das npm-Paket ist EOL und leer, Repository und Demo-Seite waren aus
+  der Build-Umgebung nicht erreichbar. Statt eines von der Spec verbotenen Pins auf eine
+  deprecated Version liegt ein austauschbarer Token-Contract vor. Einspielen: ein Import,
+  siehe `docs/BRANDING_INTEGRATION.md`.
+- **Docker-Image nicht gebaut.** In dieser Umgebung läuft kein Docker-Daemon
+  (`/var/run/docker.sock` fehlt). Dockerfile und Compose-Datei sind vollständig, der
+  Produktionsmodus wurde stattdessen direkt verifiziert: ein Node-Prozess liefert SPA,
+  Deep-Links, Assets und API auf einem Port aus. Der Image-Build ist auf dem Zielhost
+  einmal auszuführen (`docker compose up --build -d`).
+- Safari iOS ist nicht getestet, in dieser Umgebung steht nur Chromium zur Verfügung.
 
 ## Bekannte Bugs
-- keine
+- keine offenen
+
+Beim Durchspielen im echten Browser gefunden und behoben:
+1. Der Solver-Reveal verschwand nie – die Elternkomponente rendert im Sekundentakt neu,
+   wodurch der Dismiss-Timer bei jedem Tick neu startete.
+2. Der Betriebszwerg lag über den Zahnradreglern und fing auf dem Handy die Klicks ab.
+3. Das Kabelbrett lief auf der Großbildansicht unter die Falz.
+4. Das Join-Rate-Limit (20/min pro IP) hätte ein echtes Event zerstört: 30 Personen hinter
+   einem Büro-NAT teilen sich eine IP, ab Person 21 wäre der Beitritt blockiert gewesen.
+   Jetzt 120/min, über `JOIN_RATE_LIMIT` konfigurierbar.
+5. `*.tsbuildinfo` lag neben `tsconfig.json` und war nicht ignoriert. Ein veralteter Stand im
+   Docker-Kontext hätte `tsc -b` das Emittieren überspringen lassen – das Image wäre ohne
+   Servercode ausgeliefert worden. Der Cache liegt jetzt in `dist/` und ist ignoriert.
 
 ## Tests
-- Command: `npm run verify` (`npm run typecheck && npm test`)
-- Ergebnis: 24/24 grün, Typecheck sauber.
+- `npm run verify` (Typecheck strict + Vitest): **52/52 grün**
+  - 24 Rätsel-Unit-Tests inkl. der vier Eindeutigkeits-/Lösbarkeitsbeweise
+  - 27 Server-Tests: Autorisierung, Solver-Regeln, Timer, kompletter Durchlauf, Failsafes,
+    Identität, Neustart-Wiederherstellung
+  - 1 Lasttest mit 30 gleichzeitigen Socket-Clients
+- `npm run test:e2e` (Playwright gegen den echten Produktions-Build): **12/12 grün**
+  - Beitritt, gleiche Namen, Reload-Wiederherstellung
+  - Solver-Autorisierung, Weitergabe, Host-Reroll
+  - Timer inkl. Reload und Pause/Resume
+  - kompletter Durchlauf über alle fünf Prüfungen bis zum Sieg, synchron auf Player,
+    Host und Display
+  - `042` inkl. führender Null, falsche Codes ohne Zeitstrafe
+  - Host-Failsafes, Barrierefreiheit der Runen ohne Drag
 
 ## Nächste Schritte
-1. `packages/server`: SQLite-Repository, SessionManager, Socket.IO-Autorisierung, Timer.
-2. `packages/web`: Routing, Socket-Client, Token-Layer, vier Views.
-3. Playwright-E2E über den gesamten Ablauf Lobby → Sieg.
+1. Auf dem Zielhost `docker compose up --build -d` ausführen und `PUBLIC_BASE_URL` setzen
+   (siehe `docs/DEPLOYMENT.md`) – das ist der einzige noch nicht in dieser Umgebung
+   ausführbare Schritt.
+2. Sobald der maintained openKfW-Token-Build vorliegt: als
+   `packages/web/src/styles/kfw-tokens.vendor.css` ablegen und in `styles/index.css`
+   vor dem Contract importieren.
+3. Optional finale Fantasy-Artworks nach `07_branding/approved_assets/` bzw. als
+   Szenen-Hintergründe ergänzen und `--scene-image` je Szene setzen.
 
 ## Resume
-Starte mit `packages/server/src/` und implementiere den SessionManager gemäß
-`05_technical/ARCHITECTURE.md`, `05_technical/DATA_MODEL.md` und `05_technical/WEBSOCKET_EVENTS.md`.
+Der MVP ist funktionsfähig, getestet, committet und gepusht. Für den nächsten Arbeitsschritt:
+
+```bash
+git checkout claude/mvp-build
+npm install
+npm run verify          # 52 Tests
+npm run test:e2e        # 12 E2E-Tests, baut und startet die App selbst
+npm run dev             # Host: http://localhost:5173/host
+```

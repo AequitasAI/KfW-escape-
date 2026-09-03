@@ -17,6 +17,8 @@ RUN npm ci
 
 COPY . .
 RUN npm run build
+# drop build-only dependencies before they reach the runtime layer
+RUN npm prune --omit=dev
 
 # ---------- runtime ----------
 FROM node:22-bookworm-slim AS runtime

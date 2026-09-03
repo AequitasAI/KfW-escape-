@@ -88,12 +88,15 @@ test.describe('Solver-Mechanik', () => {
 
     const first = await findOfferedPlayer(table.players);
     await first.page.getByRole('button', { name: 'An anderen Gefährten weitergeben' }).click();
+    // the offer has to be gone here, otherwise the next search races the update
+    await expect(first.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
 
     const second = await findOfferedPlayer(table.players);
     expect(second.name).not.toBe(first.name);
 
     // the player who declined is not offered again for this trial
     await second.page.getByRole('button', { name: 'An anderen Gefährten weitergeben' }).click();
+    await expect(second.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
     const third = await findOfferedPlayer(table.players);
     expect([first.name, second.name]).not.toContain(third.name);
 
@@ -121,7 +124,7 @@ test.describe('Solver-Mechanik', () => {
 test.describe('Timer', () => {
   test('A05: startet bei 10:00, läuft serverseitig und übersteht einen Reload', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await expect(table.host.getByText('10:00')).toBeVisible();
+    await expect(table.host.locator('.timer__value').first()).toHaveText('10:00');
 
     await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
     await table.players[0]!.page.waitForTimeout(3_000);
@@ -179,7 +182,7 @@ test.describe('Kompletter Durchlauf', () => {
     const displayContext = await browser.newContext({ viewport: { width: 1600, height: 900 } });
     const display = await displayContext.newPage();
     await display.goto(`/display/${table.code}`);
-    await expect(display.getByText(table.code)).toBeVisible();
+    await expect(display.locator('.display__code')).toHaveText(table.code);
     // the big screen carries no admin control at all
     await expect(display.getByRole('button', { name: /Pausieren|überspringen|neu ziehen|beginnen/ })).toHaveCount(0);
 
@@ -242,12 +245,12 @@ test.describe('Host-Failsafes', () => {
     await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
     await acceptOfferedSolver(table.players);
 
-    await table.host.getByRole('button', { name: 'Notfalleingriffe' }).click();
+    await table.host.locator('summary', { hasText: 'Notfalleingriffe' }).click();
     await table.host.getByRole('button', { name: 'Session zurücksetzen' }).click();
     await table.host.getByRole('button', { name: 'Wirklich zurücksetzen?' }).click();
 
-    await expect(table.host.getByText('Lobby')).toBeVisible();
-    await expect(table.host.getByText('10:00')).toBeVisible();
+    await expect(table.host.locator('.chip', { hasText: 'Lobby' })).toBeVisible();
+    await expect(table.host.locator('.timer__value').first()).toHaveText('10:00');
     await expect(table.players[0]!.page.getByText('Die Reisegruppe versammelt sich')).toBeVisible();
 
     await closeTable(table);
@@ -264,7 +267,7 @@ test.describe('Host-Failsafes', () => {
     };
     const before = await read();
 
-    await table.host.getByRole('button', { name: 'Notfalleingriffe' }).click();
+    await table.host.locator('summary', { hasText: 'Notfalleingriffe' }).click();
     await table.host.getByRole('button', { name: '+30 Sekunden' }).click();
     await table.host.waitForTimeout(600);
 
