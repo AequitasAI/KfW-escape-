@@ -102,6 +102,12 @@ es wird kein zweiter Webserver benötigt.
 
 ## 4. Cloudflare Tunnel (optional, empfohlen für Remote-Teilnahme)
 
+Zwei Wege, die sich **gegenseitig ausschliessen**. Wer den Tunnel im Dashboard angelegt hat, nimmt
+Variante B und legt *kein* `config.yml` an – Cloudflare verwaltet die Ingress-Regeln dann remote,
+eine lokale Datei würde nur zu widersprüchlichen Konfigurationen führen.
+
+### Variante A – alles über die Kommandozeile
+
 ```bash
 # cloudflared installieren (einmalig)
 curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg \
@@ -146,6 +152,41 @@ COOKIE_SECURE=1
 ```bash
 docker compose up -d
 ```
+
+### Variante B – Tunnel im Cloudflare-Dashboard angelegt
+
+1. **DNS ist bereits erledigt.** Mit der Route hat Cloudflare den Eintrag selbst erzeugt: ein
+   proxied CNAME vom gewählten Hostnamen auf `<TUNNEL-ID>.cfargotunnel.com`. Unter *DNS → Records*
+   ist er sichtbar. Von Hand nichts anlegen – eigene A-/CNAME-Einträge auf denselben Namen kollidieren
+   mit dem Tunnel.
+2. **Ziel der Route prüfen:** die Published application muss auf `HTTP` / `localhost:3001` zeigen.
+   Sonst verbindet der Tunnel korrekt und findet trotzdem nichts.
+3. **Connector auf dem Host starten.** Solange das fehlt, steht der Tunnel im Dashboard auf
+   `Inactive` mit 0 Replicas – das ist der Normalzustand vor diesem Schritt, kein Fehler.
+
+```bash
+# cloudflared installieren (wie in Variante A), dann mit dem Token aus dem
+# Dashboard verbinden - der fertige Befehl steht dort unter
+# "Install cloudflared connector"
+sudo cloudflared service install <TOKEN>
+sudo systemctl enable --now cloudflared
+sudo systemctl status cloudflared --no-pager | head -5
+```
+
+Im Dashboard wechselt der Status danach auf *Healthy*, Active replicas auf 1.
+
+Anschliessend in `.env` denselben Hostnamen eintragen wie in der Route:
+
+```bash
+PUBLIC_BASE_URL=https://<hostname-aus-der-route>
+COOKIE_SECURE=1
+```
+
+```bash
+docker compose up -d
+```
+
+### Für beide Varianten
 
 WebSockets funktionieren über Cloudflare Tunnel ohne Zusatzkonfiguration. Falls eine Zwischenstelle
 WebSockets blockiert, fällt Socket.IO automatisch auf HTTP-Long-Polling zurück; das Spiel bleibt
