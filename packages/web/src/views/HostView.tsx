@@ -135,7 +135,8 @@ export function HostView(): JSX.Element {
   if (hostStatus === null) {
     return (
       <main className="view view--centered host-shell">
-        <p className="field__hint">Einen Moment …</p>
+        {/* stable hook: the view does not yet know whether a login is configured */}
+        <p className="field__hint host-boot">Einen Moment …</p>
       </main>
     );
   }

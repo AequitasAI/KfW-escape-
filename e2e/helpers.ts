@@ -19,6 +19,14 @@ export const HOST_PASSWORD = 'e2e-spielleitung';
 
 /** Passes the game master login if this installation has one configured. */
 export async function hostLogin(page: Page): Promise<void> {
+  /*
+   * The host view shows a placeholder until it knows whether a login exists.
+   * Probing for the password field before that races: it is legitimately absent
+   * for a moment, the login gets skipped, and the failure only surfaces later
+   * as a missing control - in whichever test happened to lose the race.
+   */
+  await expect(page.locator('.host-boot')).toHaveCount(0);
+
   const field = page.getByLabel('Passwort');
   if (!(await field.isVisible().catch(() => false))) return;
   await field.fill(HOST_PASSWORD);
