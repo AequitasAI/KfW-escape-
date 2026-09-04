@@ -118,6 +118,34 @@ spielbar, nur die Latenz steigt.
 Empfehlung: 10 Minuten vor dem Termin einmal eine Testsession anlegen, mit dem eigenen Handy
 beitreten und wieder zurücksetzen.
 
+## 5b. Generalprobe (einmal, spätestens am Vortag)
+
+Die Reihenfolge ist so gewählt, dass jeder Schritt genau eine Fehlerquelle ausschliesst.
+
+```bash
+# 1. Läuft der Container und ist er gesund?
+docker compose ps                      # STATUS muss "healthy" sein
+curl -s localhost:3001/api/health      # {"ok":true,...}
+
+# 2. Kommt man von aussen durch den Tunnel?
+curl -sI https://<eure-domain>/api/health | head -1     # HTTP/2 200
+
+# 3. Zeigt der QR-Code nach draussen und nicht auf localhost?
+curl -s https://<eure-domain>/api/sessions -X POST | grep joinUrl
+```
+
+Der dritte Punkt ist der mit Abstand häufigste Fehler: steht `PUBLIC_BASE_URL` falsch, führt der
+QR-Code die Teilnehmenden auf ihr eigenes Gerät statt auf den Server. Das merkt man sonst erst,
+wenn dreissig Leute gleichzeitig scannen.
+
+Danach einmal mit dem Handy im Mobilfunknetz – nicht im WLAN – beitreten, damit auch der Weg
+von aussen wirklich geprüft ist. Anschliessend `Session zurücksetzen`.
+
+**Am Spieltag beachten:** Die Kennung der Spielleitung liegt nur im `localStorage` des Browsers,
+in dem die Session erstellt wurde. Wer die Session auf dem Laptop anlegt, muss sie auch von dort
+steuern – ein anderes Gerät kann die Grossbildansicht öffnen, aber nicht steuern. Das ist Absicht:
+so kann niemand die Session übernehmen, der nur den Code kennt.
+
 ## 6. Betrieb
 
 ```bash
