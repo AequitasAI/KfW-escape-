@@ -84,11 +84,38 @@ Illustration. Der Austauschweg dafür ist vorbereitet (siehe oben), die Prompts 
 Solange keine Bilder vorliegen, ist das SVG die bessere Lösung, weil es die drei Stimmungen des
 Zwergs ohne drei separate Dateien abbildet.
 
-## Grenzen
+## Figuren: Zustände und Bewegung
 
-Die Figuren (Zwerg, Wächter) werden derzeit **nicht** automatisch durch Bilder ersetzt, weil eine
-gute Figur mehr braucht als einen Hintergrundtausch: Ausdrucksvarianten, Ankerpunkte und
-Animationszustände. `CHARACTER_ART` in `sceneArt.ts` hält die Pfade bereits vor; der Austausch ist
-dann eine kleine, klar umrissene Änderung an `Characters.tsx` (Bild statt SVG rendern, gleiche
-Props). Solange keine finalen Figuren vorliegen, ist das SVG die bessere Lösung, weil es die drei
-Stimmungen des Zwergs ohne drei separate Dateien abbildet.
+Häufige Frage: Der Zwerg *tut* etwas – geht das mit SVG nicht besser als mit Bildern?
+
+Nein. Was er tut, sind drei Zustände (neutral, skeptisch, begeistert) plus Wippen und ein Jubeln.
+Zustandswechsel sind Sprite-Wechsel, kein Vektor-Rig – genau so haben die klassischen
+Point-and-Click-Adventures das gelöst. Deshalb liegt die Bewegung am Rahmen und nicht im Bild:
+
+- Die Leerlauf-Bewegung und der Jubel sind Transforms auf dem umschliessenden Element und
+  funktionieren mit Bild genauso wie mit SVG.
+- Alle vorhandenen Stimmungen werden gestapelt und per Opacity übergeblendet. Ein harter
+  `src`-Wechsel flackert ausgerechnet in dem Frame, in dem die Maschine anspringt.
+- Doppelte Pfade werden zusammengefasst: eine einzige gelieferte Datei kostet auch nur eine Ebene.
+- Die Ebenen sind unten zentriert ausgerichtet, damit jede Figur unabhängig vom Seitenverhältnis
+  der Datei auf derselben Standlinie steht.
+
+Was SVG könnte und Bilder nicht: Blinzeln und einzeln bewegliche Körperteile. Das braucht dieses
+Spiel nicht – gemalte Figuren sind hier der klare Gewinn.
+
+### Dateinamen der Figuren
+
+| Datei | Wirkung |
+|---|---|
+| `character_operations_dwarf_neutral` | Grundzustand |
+| `character_operations_dwarf_skeptical` | ab zwei greifenden Kontakten |
+| `character_operations_dwarf_happy` | wenn die Maschine läuft |
+| `character_operations_dwarf` | Sammelname, greift für jede fehlende Stimmung |
+| `character_black_guard` | Wächter, Schwert aufgestellt |
+| `character_black_guard_open` | optional, Schwert gesenkt |
+
+Fehlt eine Stimmung, wird eine **andere vorhandene Zwergendatei** benutzt und nicht das SVG.
+Sonst stünde eine gemalte Illustration neben einer Zeichnung in derselben Szene.
+
+Wichtig bei den drei Zwergen-Varianten: identische Pose, identischer Ausschnitt, identische Grösse.
+Nur der Gesichtsausdruck ändert sich, sonst springt die Figur beim Überblenden.
