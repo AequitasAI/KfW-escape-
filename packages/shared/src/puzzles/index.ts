@@ -67,9 +67,9 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     id: 'operations_gears',
     station: 'Station 4/5',
     title: 'Die Minen des Betriebs',
-    task: 'Dreht die vier beweglichen Zahnräder, bis alle Kontakte greifen.',
+    task: 'Dreht die vier beweglichen Räder, bis der Antrieb vom Motor bis zum Tor durchgreift.',
     atmosphere: 'Serverglut, Zahnräder – und ein Zwerg, der jeden Release seit dem Wiederaufbau gesehen hat.',
-    hint: 'Arbeitet euch vom Antriebsrad nach rechts vor. Ein Kontakt leuchtet erst, wenn beide Zahnprofile zusammenpassen.',
+    hint: 'Jedes treibende Rad hat genau einen Zapfen. Dreht ihn zum rechten Nachbarn – und sorgt dafür, dass dort ein Loch steht. Fangt links an.',
     successLine: 'Die Maschine läuft. Der Betrieb nickt knapp. Das vierte Siegel gehört euch.',
   },
   {

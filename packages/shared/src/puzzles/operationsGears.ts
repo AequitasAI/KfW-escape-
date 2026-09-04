@@ -5,18 +5,36 @@ export const GEAR_STEPS = 8;
 export const GEAR_COUNT = 5;
 
 /**
- * Eight discrete contact sectors per gear with tooth profile values 1/2/3.
- * Two touching sectors mesh when their profile values add up to 4.
+ * Acht Sektoren je Rad, und nur drei Sorten Rand:
+ *
+ *   PEG  (3) ein langer Zapfen
+ *   HOLE (1) ein Loch, das genau einen Zapfen aufnimmt
+ *   FLAT (2) glatter Rand, der zu nichts passt
+ *
+ * Der Antrieb läuft von links nach rechts: ein Rad treibt seinen Nachbarn,
+ * wenn es ihm einen Zapfen zuwendet und der Nachbar ein Loch anbietet.
+ *
+ * Warum genau ein Zapfen je treibendem Rad: Die Bedingung „Zapfen zeigt nach
+ * rechts" legt die Stellung des Rades damit eindeutig fest. Gäbe es zwei
+ * Zapfen, hätte das Rätsel mehrere Lösungen - was mit der alten Summenregel
+ * nachweislich der Fall war, sobald mehr als ein Loch je Rad vorkam. Das
+ * Torrad hat entsprechend genau ein Loch, denn nach ihm kommt nichts mehr.
+ * Zusätzliche Löcher sind harmlos und dienen dem Aussehen.
  */
+export const PEG = 3;
+export const HOLE = 1;
+export const FLAT = 2;
+
 export const GEAR_PROFILES: readonly (readonly number[])[] = Object.freeze([
-  Object.freeze([1, 1, 2, 2, 1, 1, 2, 1]), // gear 0 - motor, fixed
-  Object.freeze([1, 3, 2, 1, 1, 2, 1, 1]),
-  Object.freeze([3, 2, 1, 1, 3, 3, 3, 1]),
-  Object.freeze([3, 2, 2, 3, 2, 2, 1, 2]),
-  Object.freeze([3, 1, 1, 3, 1, 2, 3, 3]),
+  Object.freeze([3, 2, 1, 2, 2, 1, 2, 2]), // 0 Antriebsrad, fest - Zapfen auf 0
+  Object.freeze([2, 1, 2, 1, 2, 3, 2, 1]), // 1 - Zapfen auf 5, Loch gegenüber auf 1
+  Object.freeze([1, 2, 3, 2, 1, 2, 1, 2]), // 2 - Zapfen auf 2, Loch gegenüber auf 6
+  Object.freeze([2, 1, 1, 2, 2, 1, 3, 2]), // 3 - Zapfen auf 6, Loch gegenüber auf 2
+  Object.freeze([2, 3, 2, 2, 3, 2, 2, 1]), // 4 Torrad - einziges Loch auf 7
 ]);
 
-export const GEAR_SOLUTION: readonly number[] = Object.freeze([0, 3, 3, 6, 7]);
+/** Bewiesen eindeutig durch enumerateGearSolutions(); zehn Drehungen ab Start. */
+export const GEAR_SOLUTION: readonly number[] = Object.freeze([0, 3, 6, 2, 5]);
 
 /** Fixed, non random start. Gear 0 is the motor and never moves. */
 export const GEAR_START_ORIENTATIONS: readonly number[] = Object.freeze([0, 0, 0, 0, 0]);
@@ -33,25 +51,32 @@ function mod(value: number, m: number): number {
   return ((value % m) + m) % m;
 }
 
-/** Profile value that the gear presents to its right hand neighbour. */
+/** Sector value the gear presents to its right hand neighbour. */
 export function rightContactProfile(gear: number, orientation: number): number {
   const profile = GEAR_PROFILES[gear];
   if (!profile) throw new Error(`Unknown gear ${gear}`);
   return profile[mod(-orientation, GEAR_STEPS)] as number;
 }
 
-/** Profile value that the gear presents to its left hand neighbour. */
+/** Sector value the gear presents to its left hand neighbour. */
 export function leftContactProfile(gear: number, orientation: number): number {
   const profile = GEAR_PROFILES[gear];
   if (!profile) throw new Error(`Unknown gear ${gear}`);
   return profile[mod(4 - orientation, GEAR_STEPS)] as number;
 }
 
+/**
+ * Der Kontakt greift, wenn das linke Rad einen Zapfen anbietet und das rechte
+ * ein Loch. Glatter Rand passt zu nichts - genau so, wie es auf dem Schirm
+ * aussieht.
+ */
 export function isContactMeshed(orientations: readonly number[], contact: number): boolean {
   const left = orientations[contact];
   const right = orientations[contact + 1];
   if (left === undefined || right === undefined) return false;
-  return rightContactProfile(contact, left) + leftContactProfile(contact + 1, right) === 4;
+  return (
+    rightContactProfile(contact, left) === PEG && leftContactProfile(contact + 1, right) === HOLE
+  );
 }
 
 export function computeContacts(orientations: readonly number[]): boolean[] {

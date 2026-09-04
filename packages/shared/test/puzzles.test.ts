@@ -32,8 +32,12 @@ import {
   DIFF_ANTI_SPAM_COOLDOWN_MS,
 } from '../src/puzzles/testmastersDiff.js';
 import {
+  GEAR_COUNT,
+  GEAR_PROFILES,
   GEAR_SOLUTION,
   GEAR_START_ORIENTATIONS,
+  HOLE,
+  PEG,
   computeContacts,
   createOperationsGearsState,
   enumerateGearSolutions,
@@ -264,21 +268,41 @@ describe('P4 Minen des Betriebs', () => {
           for (let d = 0; d < 8; d += 1) {
             count += 1;
             const solved = isGearsSolved([0, a, b, c, d]);
-            expect(solved).toBe(a === 3 && b === 3 && c === 6 && d === 7);
+            const [, s1, s2, s3, s4] = GEAR_SOLUTION;
+            expect(solved).toBe(a === s1 && b === s2 && c === s3 && d === s4);
           }
     expect(count).toBe(4096);
   });
 
-  it('contact glow follows the profile sum rule', () => {
+  it('treibt nur über Zapfen in Loch, nie über glatten Rand', () => {
     const contacts = computeContacts(GEAR_SOLUTION);
     expect(contacts).toEqual([true, true, true, true]);
     expect(poweredUpTo(contacts)).toBe(4);
 
-    const partial = computeContacts([0, 3, 3, 0, 0]);
+    // die ersten beiden Räder richtig, der Rest nicht: die Kette endet dort
+    const [, s1, s2] = GEAR_SOLUTION;
+    const partial = computeContacts([0, s1 as number, s2 as number, 0, 0]);
     expect(partial[0]).toBe(true);
     expect(partial[1]).toBe(true);
     expect(partial[2]).toBe(false);
     expect(poweredUpTo(partial)).toBe(2);
+  });
+
+  it('gibt jedem treibenden Rad genau einen Zapfen - daher die Eindeutigkeit', () => {
+    /*
+     * Der Beweis hängt daran: "Zapfen zeigt nach rechts" legt die Stellung
+     * eines Rades eindeutig fest. Mit zwei Zapfen gäbe es mehrere Lösungen.
+     * Das Torrad treibt nichts mehr und braucht dafür genau ein Loch.
+     */
+    const pegs = (gear: number): number =>
+      (GEAR_PROFILES[gear] as readonly number[]).filter((v) => v === PEG).length;
+    const holes = (gear: number): number =>
+      (GEAR_PROFILES[gear] as readonly number[]).filter((v) => v === HOLE).length;
+
+    for (let gear = 0; gear < GEAR_COUNT - 1; gear += 1) expect(pegs(gear)).toBe(1);
+    expect(holes(GEAR_COUNT - 1)).toBe(1);
+    // und jedes Rad hat überhaupt Löcher, sonst könnte es nichts aufnehmen
+    for (let gear = 1; gear < GEAR_COUNT; gear += 1) expect(holes(gear)).toBeGreaterThan(0);
   });
 
   it('never moves the fixed motor gear and only solves on the full chain', () => {
@@ -288,7 +312,10 @@ describe('P4 Minen des Betriebs', () => {
     expect(reduceOperationsGears(state, { type: 'rotate', gear: 5, dir: 1 })).toBeNull();
 
     let current = state;
-    const plan: [number, number][] = [[1, 3], [2, 3], [3, 6], [4, 7]];
+    const plan: [number, number][] = GEAR_SOLUTION.slice(1).map((target, index) => [
+      index + 1,
+      target,
+    ]);
     for (const [gear, target] of plan) {
       for (let i = 0; i < target; i += 1) {
         const next = reduceOperationsGears(current, { type: 'rotate', gear, dir: 1 });

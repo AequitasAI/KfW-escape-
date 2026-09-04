@@ -1,5 +1,5 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
-import { companionsGathered } from '@kfw-escape/shared';
+import { companionsGathered, GEAR_LABELS, GEAR_SOLUTION } from '@kfw-escape/shared';
 
 export interface PlayerHandle {
   name: string;
@@ -143,13 +143,14 @@ export async function solveDiff(page: Page): Promise<void> {
   }
 }
 
-/** Solution [0,3,3,6,7]; gear 0 is the fixed motor. */
-export const GEAR_PLAN: [string, number][] = [
-  ['Zahnrad II', 3],
-  ['Zahnrad III', 3],
-  ['Zahnrad IV', 6],
-  ['Torrad', 7],
-];
+/**
+ * Aus der Lösung abgeleitet statt abgeschrieben - sonst geht der Plan beim
+ * nächsten Umbau des Rätsels still daneben. Rad 0 ist der feste Motor.
+ */
+export const GEAR_PLAN: [string, number][] = GEAR_SOLUTION.slice(1).map((orientation, index) => [
+  GEAR_LABELS[index + 1] as string,
+  orientation,
+]);
 
 export async function solveGears(page: Page): Promise<void> {
   for (const [label, turns] of GEAR_PLAN) {

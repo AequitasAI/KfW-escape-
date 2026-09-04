@@ -72,7 +72,7 @@ verbleibende Zeit nicht.
 | 1 | Archiv der alten Bestände | Runenreihenfolge | 120 Permutationen → genau eine Lösung |
 | 2 | Die verlorene Verbindung | 4×4 Sliding-Kabelpuzzle | BFS beweist Lösbarkeit des eingefrorenen Startzustands |
 | 3 | Halle der Prüfmeister | 4 Unterschiede in zwei SVG-Plänen | genau vier Hotspots, jeder einmal zählbar |
-| 4 | Minen des Betriebs | 5 asymmetrische Zahnräder | alle 8⁴ = 4096 Zustände → genau eine Lösung `[0,3,3,6,7]` |
+| 4 | Minen des Betriebs | 5 gleich grosse Räder mit Zapfen und Löchern | alle 8⁴ = 4096 Zustände → genau eine Lösung `[0,3,6,2,5]` |
 | 5 | Das Schwarze Tor | Deduktions-Code | alle 1000 Codes → genau einer (`042`) |
 
 ## Befehle

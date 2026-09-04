@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DWARF_LINES, GEAR_LABELS, GEAR_PROFILES, GEAR_STEPS } from '@kfw-escape/shared';
+import { DWARF_LINES, FLAT, GEAR_LABELS, GEAR_PROFILES, GEAR_STEPS } from '@kfw-escape/shared';
 import type { OperationsGearsState } from '@kfw-escape/shared';
 import type { PuzzleProps } from './types.js';
 import { Dwarf } from '../components/Chrome.js';
@@ -7,10 +7,14 @@ import { sound } from '../lib/sound.js';
 
 const GEAR_RADIUS = 84;
 /*
- * Der Abstand ist kein Layoutwert, sondern die Regel selbst: Zwei Kontaktflächen
- * greifen, wenn ihre Werte zusammen 4 ergeben - und genau dann berühren sich
- * ihre Zahnspitzen. Passt es nicht, klafft eine Lücke oder die Zähne überlappen
- * sichtbar. Deshalb muss GEAR_GAP zur Summe aus TIP_RADIUS passen.
+ * Der Abstand ist kein Layoutwert, sondern die Regel selbst: Ein Zapfen reicht
+ * genau bis in ein Loch des Nachbarn. Zapfen gegen glatten Rand überlappt
+ * sichtbar, glatter Rand gegen Loch lässt eine Lücke - man sieht also, dass es
+ * nicht passt, ohne dass irgendetwas leuchten müsste.
+ *
+ *   Zapfen (84) + Loch (32) = 116  ~ GEAR_GAP, sie berühren sich
+ *   Zapfen (84) + Rand (44) = 128  > GEAR_GAP, sie stossen ineinander
+ *   Rand   (44) + Loch (32) =  76  < GEAR_GAP, es klafft
  */
 const GEAR_GAP = 118;
 
@@ -206,15 +210,18 @@ export function OperationsGears({
 
       <div className="gears__legend" aria-hidden="true">
         <span className="gears__legend-item">
-          <i className="gears__legend-swatch gears__legend-swatch--1" /> Kerbe (1)
+          <i className="gears__legend-swatch gears__legend-swatch--3" /> Zapfen
         </span>
         <span className="gears__legend-item">
-          <i className="gears__legend-swatch gears__legend-swatch--2" /> mittlerer Zahn (2)
+          <i className="gears__legend-swatch gears__legend-swatch--1" /> Loch
         </span>
         <span className="gears__legend-item">
-          <i className="gears__legend-swatch gears__legend-swatch--3" /> langer Zahn (3)
+          <i className="gears__legend-swatch gears__legend-swatch--2" /> glatter Rand
         </span>
-        <span className="gears__legend-note">Zwei Kontaktflächen greifen, wenn sie zusammen 4 ergeben.</span>
+        <span className="gears__legend-note">
+          Ein Rad treibt seinen rechten Nachbarn, wenn es ihm einen Zapfen zuwendet und der Nachbar
+          dort ein Loch anbietet. Glatter Rand passt zu nichts.
+        </span>
       </div>
 
       <p className="puzzle__status" role="status" aria-live="polite">
@@ -267,25 +274,23 @@ function GearButton({
 }
 
 /**
- * Builds the tooth outline for one gear from its profile values, so the data the
- * puzzle is scored on is literally the shape on screen. Sector k is drawn at
- * angle k * 45 degrees and the whole gear is rotated by orientation * 45, which
- * is exactly the mapping the contact rule uses - the profile that decides a
- * contact is the one physically facing the neighbour.
+ * Zeichnet den Rand eines Rades aus seinen Sektorwerten - die Daten, nach denen
+ * gewertet wird, sind buchstäblich die Form auf dem Schirm. Sektor k liegt bei
+ * k * 45 Grad, das ganze Rad wird um orientation * 45 gedreht; das ist genau
+ * die Zuordnung, die auch die Kontaktregel benutzt.
  *
- *   1 -> notch cut into the rim, 2 -> medium tooth, 3 -> long tooth
+ * Alle Räder sind gleich gross. Unterschiedlich ist nur, wo Zapfen, Löcher und
+ * glatter Rand sitzen - deshalb sehen sie wie Maschinenteile aus und nicht wie
+ * zufällig zerkaute Scheiben.
  *
- * The order is what makes the rule visible instead of arithmetic: a long tooth
- * (3) reaches exactly into a notch (1), two medium teeth (2) meet exactly in
- * the middle - both sum to 4 and both touch. Every other pairing either leaves
- * an obvious gap or drives the teeth into each other. Nothing has to light up
- * for that to be readable, which is the whole point of this trial.
+ *   HOLE (1) Kerbe in den Rand, breit genug für einen Zapfen
+ *   FLAT (2) glatter Rand auf Grundradius
+ *   PEG  (3) langer, schmaler Zapfen
  */
 const ROOT_RADIUS = 44;
-/* Jedes gültige Paar summiert sich auf GEAR_GAP minus etwas Luft. */
-const TIP_RADIUS: Record<number, number> = { 1: 32, 2: 58, 3: 84 };
-/* Der lange Zahn muss schmal genug sein, um in die breite Kerbe zu fassen. */
-const TOOTH_WIDTH: Record<number, number> = { 1: 0.34, 2: 0.26, 3: 0.2 };
+const TIP_RADIUS: Record<number, number> = { 1: 30, 2: ROOT_RADIUS, 3: 84 };
+/* Der Zapfen muss schmal genug sein, um in das breitere Loch zu fassen. */
+const SECTOR_WIDTH: Record<number, number> = { 1: 0.38, 2: 0.5, 3: 0.24 };
 
 function gearPath(gearIndex: number): string {
   const profile = GEAR_PROFILES[gearIndex] ?? [];
@@ -297,20 +302,26 @@ function gearPath(gearIndex: number): string {
   const parts: string[] = [];
   for (let i = 0; i < GEAR_STEPS; i += 1) {
     const centre = i * sector;
-    const value = profile[i] ?? 2;
-    const tip = TIP_RADIUS[value] ?? TIP_RADIUS[2]!;
-    const halfTooth = sector * (TOOTH_WIDTH[value] ?? 0.32);
+    const value = profile[i] ?? FLAT;
     const rootStart = centre - sector / 2;
+    const rootEnd = centre + sector / 2;
 
     if (i === 0) parts.push(`M ${at(rootStart, ROOT_RADIUS)}`);
-    // root arc up to the flank of this tooth
-    parts.push(`A ${ROOT_RADIUS} ${ROOT_RADIUS} 0 0 1 ${at(centre - halfTooth, ROOT_RADIUS)}`);
-    // flank up, across the tip, flank down
-    parts.push(`L ${at(centre - halfTooth * 0.72, tip)}`);
-    parts.push(`L ${at(centre + halfTooth * 0.72, tip)}`);
-    parts.push(`L ${at(centre + halfTooth, ROOT_RADIUS)}`);
-    // root arc to the next sector boundary
-    parts.push(`A ${ROOT_RADIUS} ${ROOT_RADIUS} 0 0 1 ${at(centre + sector / 2, ROOT_RADIUS)}`);
+
+    if (value === FLAT) {
+      // glatter Rand: ein einziger Bogen, kein Merkmal
+      parts.push(`A ${ROOT_RADIUS} ${ROOT_RADIUS} 0 0 1 ${at(rootEnd, ROOT_RADIUS)}`);
+      continue;
+    }
+
+    const tip = TIP_RADIUS[value] ?? ROOT_RADIUS;
+    const half = sector * (SECTOR_WIDTH[value] ?? 0.3);
+    // Bogen bis zur Flanke, hinein oder hinaus, wieder zurück auf den Grundkreis
+    parts.push(`A ${ROOT_RADIUS} ${ROOT_RADIUS} 0 0 1 ${at(centre - half, ROOT_RADIUS)}`);
+    parts.push(`L ${at(centre - half * 0.78, tip)}`);
+    parts.push(`L ${at(centre + half * 0.78, tip)}`);
+    parts.push(`L ${at(centre + half, ROOT_RADIUS)}`);
+    parts.push(`A ${ROOT_RADIUS} ${ROOT_RADIUS} 0 0 1 ${at(rootEnd, ROOT_RADIUS)}`);
   }
   parts.push('Z');
   return parts.join(' ');

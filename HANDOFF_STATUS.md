@@ -61,7 +61,7 @@ Siehe `git log -1` auf `claude/mvp-build`.
 | 1 | 120 Permutationen gegen die drei Hinweise | genau eine Lösung |
 | 2 | Startzustand aus 15 legalen Slides erzeugt, BFS-Solver | lösbar in 13 optimalen Zügen (Ziel 8–16) |
 | 3 | Hotspot-Registry | genau vier, jeder einmal zählbar |
-| 4 | alle 8⁴ = 4096 Konfigurationen enumeriert | genau eine Lösung `[0,3,3,6,7]` |
+| 4 | alle 8⁴ = 4096 Konfigurationen enumeriert | genau eine Lösung `[0,3,6,2,5]`, 10 Drehungen |
 | 5 | alle 1000 Codes gegen die fünf Aussagen | genau einer (`042`) |
 
 **Views**
@@ -78,6 +78,26 @@ Siehe `git log -1` auf `claude/mvp-build`.
   auf schmalen Geräten in seinem eigenen Container.
 - Accessibility: Tastaturbedienung, sichtbare Fokuszustände, 44-px-Touchziele,
   Tap-/Keyboard-Alternative zu jeder Drag-Interaktion, Status nie nur über Farbe.
+
+## Bewusste Abweichung von der Spec: Rätsel 4
+
+`03_puzzles/PUZZLE_SPEC.md` gibt fünf Räder mit Profilwerten 1/2/3 und der Regel „Summe 4" vor,
+Lösung `[0,3,3,6,7]`. Diese Regel bildet sich **nicht zeichnen**: `2+2` ergibt laut Regel einen
+Treffer, gezeichnet stossen dort aber zwei gleich lange Zähne zusammen. Man konnte also optisch
+nichts erkennen und hat nur auf die Kontaktlampen geschaut – womit das Rätsel darauf hinauslief,
+jedes Rad einmal blind durchzudrehen.
+
+Auf ausdrückliche Ansage des Auftraggebers ist die Mechanik jetzt eine echte:
+
+- drei Sorten Rand statt Zahlenwerten – **Zapfen**, **Loch**, **glatter Rand**
+- ein Rad treibt seinen rechten Nachbarn, wenn es ihm einen Zapfen zuwendet und dort ein Loch steht
+- alle Räder sind gleich gross; unterschiedlich ist nur, wo die Merkmale sitzen
+
+Die Eindeutigkeit hängt an einer nachweisbaren Eigenschaft: Jedes treibende Rad hat **genau einen
+Zapfen**, wodurch „Zapfen zeigt nach rechts" seine Stellung festlegt; das Torrad hat genau ein Loch.
+Mit der alten Summenregel war Eindeutigkeit bei mehr als einem Loch je Rad nachweislich unmöglich –
+eine Zufallssuche über 400 000 Radsätze fand keinen einzigen passenden. Neue Lösung `[0,3,6,2,5]`,
+zehn Drehungen ab Start, weiterhin durch vollständige Aufzählung aller 4096 Zustände bewiesen.
 
 ## Offen / bewusst nicht gemacht
 - **Figuren-Illustrationen.** Die acht Szenen sind als gerenderte WebP eingebunden. Betriebszwerg
