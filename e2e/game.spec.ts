@@ -517,22 +517,26 @@ test.describe('Lösung für die Spielleitung', () => {
 
 test.describe('Minen des Betriebs: kein Signal pro Zahnradpaar', () => {
   test('verrät einzelne Paare nicht', async ({ browser }) => {
+    test.setTimeout(180_000);
     const table = await seatTable(browser, ['Mara', 'Jonas']);
     await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
-    const solver = await acceptOfferedSolver(table.players);
 
+    // der Gefährte wechselt nach jeder Prüfung - eine Seite festzuhalten geht schief
     for (let station = 0; station < 3; station += 1) {
+      const solver = await acceptOfferedSolver(table.players);
       await waitForStation(solver.page, station);
       await solveCurrentTrial(solver.page, station);
     }
-    await waitForStation(solver.page, 3);
+
+    const atGears = await acceptOfferedSolver(table.players);
+    await waitForStation(atGears.page, 3);
 
     // keine Kontaktlampen, kein Zähler - die Zahnformen tragen die Information
-    await expect(solver.page.locator('.gear__contact')).toHaveCount(0);
-    await expect(solver.page.locator('.puzzle--gears .puzzle__status')).not.toContainText(
+    await expect(atGears.page.locator('.gear__contact')).toHaveCount(0);
+    await expect(atGears.page.locator('.puzzle--gears .puzzle__status')).not.toContainText(
       /von \d+ Kontakten/,
     );
-    await expect(solver.page.locator('.gear__focus').first()).toBeVisible();
+    await expect(atGears.page.locator('.gear__focus').first()).toBeVisible();
 
     await closeTable(table);
   });
