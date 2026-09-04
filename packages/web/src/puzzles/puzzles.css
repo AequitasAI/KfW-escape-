@@ -537,8 +537,17 @@
   stroke-linecap: round;
 }
 
+/*
+ * transform-box is the whole story here. Its initial value for SVG elements is
+ * view-box, so "transform-origin: center" means the centre of the entire SVG -
+ * a rotated gear then swings around the middle of the machine and leaves the
+ * picture. fill-box makes the origin the element's own bounding box, and the
+ * invisible pin circle in the markup keeps that box symmetric around the gear
+ * centre for every tooth profile.
+ */
 .gear__spin {
   transition: transform var(--game-dur) var(--game-ease-out);
+  transform-box: fill-box;
   transform-origin: center;
 }
 

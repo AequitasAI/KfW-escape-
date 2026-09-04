@@ -239,6 +239,54 @@ test.describe('Kompletter Durchlauf', () => {
   });
 });
 
+test.describe('Minen des Betriebs', () => {
+  test('ein gedrehtes Zahnrad bleibt an seinem Platz', async ({ browser }) => {
+    test.setTimeout(150_000);
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+
+    // skip forward to the gear machine
+    for (let index = 0; index < 3; index += 1) {
+      await acceptOfferedSolver(table.players);
+      await table.host.getByRole('button', { name: 'Prüfung überspringen' }).click();
+      await table.host.waitForTimeout(1_200);
+    }
+    const solver = await acceptOfferedSolver(table.players);
+    await waitForStation(solver.page, 3);
+
+    const centres = async (): Promise<{ x: number; y: number }[]> =>
+      solver.page.locator('.gear__spin').evaluateAll((nodes) =>
+        nodes.map((n) => {
+          const r = n.getBoundingClientRect();
+          return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
+        }),
+      );
+
+    const before = await centres();
+    expect(before).toHaveLength(5);
+
+    for (let i = 0; i < 3; i += 1) {
+      await solver.page.locator('[aria-label="Zahnrad II im Uhrzeigersinn drehen"]').click();
+      await solver.page.waitForTimeout(200);
+    }
+    await solver.page.waitForTimeout(600);
+    const after = await centres();
+
+    /*
+     * A gear must spin on its own axle. With the SVG default transform-box the
+     * origin is the centre of the whole machine, so the first rotation threw the
+     * gear clean out of the picture - the signature puzzle was unplayable the
+     * moment anyone touched it.
+     */
+    for (let i = 0; i < before.length; i += 1) {
+      expect(Math.abs(after[i]!.x - before[i]!.x)).toBeLessThanOrEqual(4);
+      expect(Math.abs(after[i]!.y - before[i]!.y)).toBeLessThanOrEqual(4);
+    }
+
+    await closeTable(table);
+  });
+});
+
 test.describe('Host-Failsafes', () => {
   test('A12: Reset bringt die Session zurück in die Lobby', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas']);

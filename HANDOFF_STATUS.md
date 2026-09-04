@@ -13,7 +13,7 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Branding-Entscheidung dokumentiert und umgesetzt (`docs/BRANDING_INTEGRATION.md`)
 - [x] Fantasy-Ebene als SVG (Szenen, Betriebszwerg, Schwarzer Wächter)
 - [x] Acht gerenderte Szenen-Illustrationen eingebunden
-- [ ] Gemalte Figuren-Illustrationen (Zwerg, Wächter) – Code fertig, Dateien fehlen noch
+- [x] Gemalte Figuren-Illustrationen (Zwerg 3 Stimmungen, Wächter 2 Zustände)
 - [x] Art Direction auf warme Märchenfantasy umgestellt (kein Cyan, Cinzel/EB Garamond, KfW-Flavour)
 
 ## Funktioniert
@@ -108,7 +108,7 @@ Beim Durchspielen im echten Browser gefunden und behoben:
   - 27 Server-Tests: Autorisierung, Solver-Regeln, Timer, kompletter Durchlauf, Failsafes,
     Identität, Neustart-Wiederherstellung
   - 1 Lasttest mit 30 gleichzeitigen Socket-Clients
-- `npm run test:e2e` (Playwright gegen den echten Produktions-Build): **12/12 grün**
+- `npm run test:e2e` (Playwright gegen den echten Produktions-Build): **13/13 grün**
   - Beitritt, gleiche Namen, Reload-Wiederherstellung
   - Solver-Autorisierung, Weitergabe, Host-Reroll
   - Timer inkl. Reload und Pause/Resume

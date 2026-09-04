@@ -183,7 +183,7 @@
   display: block;
   width: 100%;
   /* the layers are stacked, so the box needs the aspect of the artwork */
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 711 / 1200;
 }
 
 .dwarf-art__layer,
@@ -209,7 +209,7 @@
 }
 
 .guard-art--image {
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 789 / 1200;
   filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.65));
   transition: transform var(--game-dur-slow) var(--game-ease-out);
 }

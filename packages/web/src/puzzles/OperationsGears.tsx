@@ -134,6 +134,13 @@ export function OperationsGears({
                   }}
                 >
                   <g className="gear__spin" style={{ transform: `rotate(${orientation * 45}deg)` }}>
+                    {/*
+                      Pins the bounding box symmetric around the gear centre.
+                      Tooth tips reach different radii per profile, so without
+                      this the fill-box centre drifts and the gear wobbles as it
+                      turns instead of spinning on its axle.
+                    */}
+                    <circle r={GEAR_RADIUS} fill="none" stroke="none" />
                     <path className="gear__teeth" d={gearPath(gearIndex)} />
                     <circle className="gear__hub" r="20" />
                     {/* orientation marker so the current step is never colour only */}

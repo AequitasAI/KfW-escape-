@@ -2,9 +2,23 @@
 
 ## Stand
 
-**Die acht Szenen sind eingebunden** (`packages/web/public/art/scenes/`, WebP, zusammen ~1,1 MB).
-Betriebszwerg und Schwarzer Wächter sind weiterhin SVG, bis freigestellte Figuren-Illustrationen
-vorliegen – der Code dafür ist fertig, es fehlen nur die Dateien.
+**Alles eingebunden.** Acht gemalte Szenen, der Betriebszwerg in drei Stimmungen und der Schwarze
+Wächter in zwei Zuständen liegen unter `packages/web/public/art/` als WebP, zusammen ~2,1 MB.
+Die SVG-Figuren in `Characters.tsx` bleiben als Rückfallebene bestehen, falls eine Datei fehlt.
+
+### Aufbereitung
+
+`tools/prepare_art.py` erledigt Grössenreduktion, Freistellen und Normalisierung:
+
+```bash
+python3 tools/prepare_art.py --scenes  rohbilder/scene_*.png
+python3 tools/prepare_art.py --figures rohbilder/character_operations_dwarf_*.png
+python3 tools/prepare_art.py --figures rohbilder/character_black_guard*.png
+```
+
+Alle Dateien **eines** `--figures`-Aufrufs gelten als Zustände derselben Figur und werden auf eine
+gemeinsame Leinwand gelegt. Das ist kein Pflichtschritt – die App frisst auch rohe PNGs – aber es
+spart etwa 90 % Dateigrösse und verhindert, dass die Figur beim Stimmungswechsel springt.
 
 Das Handoff-Paket v0.4 selbst enthielt **kein produktives Artwork**. In `08_assets/concept_refs/` liegen
 genau zwei PNGs, und die sind im Paket ausdrücklich als Mood-/Qualitätsreferenz deklariert, nicht
