@@ -5,8 +5,24 @@ import type { PuzzleProps } from './types.js';
 import { Dwarf } from '../components/Chrome.js';
 import { sound } from '../lib/sound.js';
 
-const GEAR_RADIUS = 66;
-const GEAR_GAP = 138;
+const GEAR_RADIUS = 84;
+/*
+ * Der Abstand ist kein Layoutwert, sondern die Regel selbst: Zwei Kontaktflächen
+ * greifen, wenn ihre Werte zusammen 4 ergeben - und genau dann berühren sich
+ * ihre Zahnspitzen. Passt es nicht, klafft eine Lücke oder die Zähne überlappen
+ * sichtbar. Deshalb muss GEAR_GAP zur Summe aus TIP_RADIUS passen.
+ */
+const GEAR_GAP = 118;
+
+/**
+ * Ab wie vielen zusammenhängenden Rädern die Maschine überhaupt etwas verrät.
+ *
+ * Absicht: Ein Signal pro Paar macht das Rätsel überflüssig - man dreht jedes
+ * Rad einmal durch, bis es aufleuchtet, und muss die Zahnformen nie ansehen.
+ * Erst eine durchgehende Kette ab drei Rädern zeigt sich, und die entsteht nur
+ * durch Hinsehen.
+ */
+const REVEAL_CHAIN_AT = 3;
 
 /**
  * The signature puzzle. Each gear carries eight discrete contact sectors with
@@ -39,15 +55,21 @@ export function OperationsGears({
     onAction({ type: 'rotate', gear, dir });
   };
 
-  const meshed = state.contacts.filter(Boolean).length;
+  /*
+   * Die Kette vom Motor aus ist die einzige Information, die nach aussen geht -
+   * und auch die erst ab REVEAL_CHAIN_AT. Wie viele Paare einzeln greifen,
+   * erfährt niemand.
+   */
+  const chain = state.poweredUpTo;
+  const revealed = chain >= REVEAL_CHAIN_AT;
   const dwarfLine = state.solved
     ? DWARF_LINES.success
-    : meshed >= 3
+    : chain >= 4
       ? DWARF_LINES.almost
-      : meshed >= 1
+      : revealed
         ? DWARF_LINES.progress
         : DWARF_LINES.start;
-  const dwarfMood = state.solved ? 'happy' : meshed >= 3 ? 'skeptical' : 'neutral';
+  const dwarfMood = state.solved ? 'happy' : revealed ? 'skeptical' : 'neutral';
 
   const width = 120 + GEAR_LABELS.length * GEAR_GAP + 120;
 
@@ -75,18 +97,17 @@ export function OperationsGears({
           </defs>
 
           {/* motor housing on the left */}
-          <g className={`gears__motor${state.poweredUpTo > 0 ? ' is-live' : ''}`}>
+          {/* auch der Motor verrät die erste Paarung nicht */}
+          <g className={`gears__motor${revealed ? ' is-live' : ''}`}>
             <rect x="10" y="82" width="86" height="96" rx="12" />
             <circle cx="53" cy="130" r="26" className="gears__motor-core" />
           </g>
 
           {/* drive shafts between gears */}
-          {state.contacts.map((live, index) => (
+          {state.contacts.map((_live, index) => (
             <line
               key={index}
-              className={`gears__shaft${live ? ' is-live' : ''}${
-                index < state.poweredUpTo ? ' is-powered' : ''
-              }`}
+              className={`gears__shaft${revealed && index < chain ? ' is-powered' : ''}`}
               x1={150 + index * GEAR_GAP + GEAR_RADIUS - 8}
               y1="130"
               x2={150 + (index + 1) * GEAR_GAP - GEAR_RADIUS + 8}
@@ -96,7 +117,7 @@ export function OperationsGears({
 
           {state.orientations.map((orientation, gearIndex) => {
             const cx = 150 + gearIndex * GEAR_GAP;
-            const powered = gearIndex <= state.poweredUpTo;
+            const powered = revealed && gearIndex <= chain;
             const fixed = gearIndex === 0;
             const canTurn = interactive && !fixed && !state.solved;
             const direction = gearIndex % 2 === 0 ? 'cw' : 'ccw';
@@ -157,12 +178,14 @@ export function OperationsGears({
                 ) : null}
 
                 {gearIndex < state.contacts.length ? (
-                  <circle
-                    className={`gear__contact${state.contacts[gearIndex] ? ' is-meshed' : ''}`}
-                    cx={GEAR_GAP / 2}
-                    cy="0"
-                    r="9"
-                  />
+                  /*
+                   * Zustandslos. Der Rahmen sagt nur, wo die beiden Zahnformen
+                   * aufeinandertreffen - ob sie passen, muss man selbst sehen.
+                   */
+                  <g className="gear__focus" aria-hidden="true">
+                    <path d={`M ${GEAR_GAP / 2 - 9} -22 h -5 v 44 h 5`} />
+                    <path d={`M ${GEAR_GAP / 2 + 9} -22 h 5 v 44 h -5`} />
+                  </g>
                 ) : null}
               </g>
             );
@@ -183,13 +206,13 @@ export function OperationsGears({
 
       <div className="gears__legend" aria-hidden="true">
         <span className="gears__legend-item">
-          <i className="gears__legend-swatch gears__legend-swatch--1" /> flacher Zahn (1)
+          <i className="gears__legend-swatch gears__legend-swatch--1" /> Kerbe (1)
         </span>
         <span className="gears__legend-item">
           <i className="gears__legend-swatch gears__legend-swatch--2" /> mittlerer Zahn (2)
         </span>
         <span className="gears__legend-item">
-          <i className="gears__legend-swatch gears__legend-swatch--3" /> tiefe Kerbe (3)
+          <i className="gears__legend-swatch gears__legend-swatch--3" /> langer Zahn (3)
         </span>
         <span className="gears__legend-note">Zwei Kontaktflächen greifen, wenn sie zusammen 4 ergeben.</span>
       </div>
@@ -197,7 +220,9 @@ export function OperationsGears({
       <p className="puzzle__status" role="status" aria-live="polite">
         {justSolved
           ? 'KLACK. Die Maschine läuft, das Tor öffnet sich.'
-          : `${meshed} von ${state.contacts.length} Kontakten greifen`}
+          : revealed
+            ? `Der Antrieb greift durch ${chain} Räder.`
+            : 'Die Maschine steht still. Vergleicht die Zahnformen dort, wo die Räder sich berühren.'}
       </p>
     </div>
   );
@@ -248,15 +273,23 @@ function GearButton({
  * is exactly the mapping the contact rule uses - the profile that decides a
  * contact is the one physically facing the neighbour.
  *
- *   1 -> shallow nub, 2 -> full tooth, 3 -> deep notch cut into the rim
+ *   1 -> notch cut into the rim, 2 -> medium tooth, 3 -> long tooth
+ *
+ * The order is what makes the rule visible instead of arithmetic: a long tooth
+ * (3) reaches exactly into a notch (1), two medium teeth (2) meet exactly in
+ * the middle - both sum to 4 and both touch. Every other pairing either leaves
+ * an obvious gap or drives the teeth into each other. Nothing has to light up
+ * for that to be readable, which is the whole point of this trial.
  */
 const ROOT_RADIUS = 44;
-const TIP_RADIUS: Record<number, number> = { 1: 54, 2: 66, 3: 30 };
+/* Jedes gültige Paar summiert sich auf GEAR_GAP minus etwas Luft. */
+const TIP_RADIUS: Record<number, number> = { 1: 32, 2: 58, 3: 84 };
+/* Der lange Zahn muss schmal genug sein, um in die breite Kerbe zu fassen. */
+const TOOTH_WIDTH: Record<number, number> = { 1: 0.34, 2: 0.26, 3: 0.2 };
 
 function gearPath(gearIndex: number): string {
   const profile = GEAR_PROFILES[gearIndex] ?? [];
   const sector = (Math.PI * 2) / GEAR_STEPS;
-  const halfTooth = sector * 0.32;
 
   const at = (angle: number, radius: number): string =>
     `${(Math.cos(angle) * radius).toFixed(2)},${(Math.sin(angle) * radius).toFixed(2)}`;
@@ -264,7 +297,9 @@ function gearPath(gearIndex: number): string {
   const parts: string[] = [];
   for (let i = 0; i < GEAR_STEPS; i += 1) {
     const centre = i * sector;
-    const tip = TIP_RADIUS[profile[i] ?? 2] ?? TIP_RADIUS[2]!;
+    const value = profile[i] ?? 2;
+    const tip = TIP_RADIUS[value] ?? TIP_RADIUS[2]!;
+    const halfTooth = sector * (TOOTH_WIDTH[value] ?? 0.32);
     const rootStart = centre - sector / 2;
 
     if (i === 0) parts.push(`M ${at(rootStart, ROOT_RADIUS)}`);

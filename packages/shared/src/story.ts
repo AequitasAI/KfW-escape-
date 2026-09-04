@@ -35,10 +35,16 @@ export function companionsGathered(count: number): string {
 }
 
 /** Betriebszwerg – a side character, never a depiction of a real person. */
+/**
+ * Der Zwerg ist die einzige Rückmeldung an der Maschine. Einzelne Paare
+ * verraten sich bewusst nicht - sonst dreht man jedes Rad blind durch, bis es
+ * aufleuchtet, und schaut die Zahnformen nie an. Er meldet sich erst, wenn der
+ * Antrieb wirklich durch mehrere Räder greift.
+ */
 export const DWARF_LINES = {
   start: 'Wer hat euch denn hier runtergelassen?',
-  progress: 'Hm.',
-  almost: 'Gar nicht völlig unfähig.',
+  progress: 'Hm. Drei Räder greifen ineinander. Weiter so.',
+  almost: 'Vier. Eins fehlt. Verkorkst es jetzt nicht.',
   success: 'ES LÄUFT! JETZT BLOSS NICHTS MEHR ANFASSEN!',
 } as const;
 

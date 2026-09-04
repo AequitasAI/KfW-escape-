@@ -466,3 +466,74 @@ test.describe('Anmeldung ohne speicherbares Cookie', () => {
     await context.close();
   });
 });
+
+test.describe('Allein in der Reisegruppe', () => {
+  test('bietet kein Weitergeben an, wenn es niemanden gibt', async ({ browser }) => {
+    /*
+     * Aus dem Betrieb: ein einzelner Spieler drückt "weitergeben", der Server
+     * bietet dieselbe Person wieder an, auf dem Schirm passiert nichts - die
+     * Prüfung wirkte eingefroren.
+     */
+    const table = await seatTable(browser, ['Markus']);
+    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+
+    const player = table.players[0]!.page;
+    await expect(player.getByRole('button', { name: /Prüfung annehmen/ })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(player.getByRole('button', { name: /weitergeben/ })).toHaveCount(0);
+    await expect(player.getByText(/allein unterwegs/)).toBeVisible();
+
+    // annehmen geht weiterhin, die Prüfung ist also nicht blockiert
+    await player.getByRole('button', { name: /Prüfung annehmen/ }).click();
+    await waitForStation(player, 0);
+
+    await closeTable(table);
+  });
+});
+
+test.describe('Lösung für die Spielleitung', () => {
+  test('zeigt die Lösung der laufenden Prüfung, eingeklappt', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    const solver = await acceptOfferedSolver(table.players);
+    await waitForStation(solver.page, 0);
+
+    // eingeklappt: der Inhalt steht nicht offen auf dem Schirm
+    await expect(table.host.getByText('Flamme', { exact: true })).toHaveCount(0);
+
+    await table.host.locator('summary', { hasText: 'Lösung dieser Prüfung' }).click();
+    const solution = table.host.locator('.host__solution-body');
+    await expect(solution).toContainText('Flamme');
+    await expect(solution).toContainText('Berg');
+    await expect(solution).toContainText('Fluss');
+
+    // und die Spielenden bekommen davon nichts zu sehen
+    await expect(solver.page.locator('.host__solution')).toHaveCount(0);
+
+    await closeTable(table);
+  });
+});
+
+test.describe('Minen des Betriebs: kein Signal pro Zahnradpaar', () => {
+  test('verrät einzelne Paare nicht', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    const solver = await acceptOfferedSolver(table.players);
+
+    for (let station = 0; station < 3; station += 1) {
+      await waitForStation(solver.page, station);
+      await solveCurrentTrial(solver.page, station);
+    }
+    await waitForStation(solver.page, 3);
+
+    // keine Kontaktlampen, kein Zähler - die Zahnformen tragen die Information
+    await expect(solver.page.locator('.gear__contact')).toHaveCount(0);
+    await expect(solver.page.locator('.puzzle--gears .puzzle__status')).not.toContainText(
+      /von \d+ Kontakten/,
+    );
+    await expect(solver.page.locator('.gear__focus').first()).toBeVisible();
+
+    await closeTable(table);
+  });
+});

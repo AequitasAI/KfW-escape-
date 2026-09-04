@@ -209,7 +209,7 @@ export function GameView(): JSX.Element {
                 </p>
               ) : null}
 
-              {channel.lastRejection && isSolver ? (
+              {channel.lastRejection && (isSolver || isCandidate) ? (
                 <p className="notice notice--error stage__reject" role="alert">
                   {channel.lastRejection.message}
                 </p>
@@ -244,16 +244,21 @@ export function GameView(): JSX.Element {
                   >
                     Prüfung annehmen
                   </button>
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => {
-                      sound.play('click');
-                      channel.emit('solver:decline');
-                    }}
-                  >
-                    An anderen Gefährten weitergeben
-                  </button>
+                  {snapshot.players.filter((p) => p.connected).length > 1 ? (
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => {
+                        sound.play('click');
+                        channel.emit('solver:decline');
+                      }}
+                    >
+                      An anderen Gefährten weitergeben
+                    </button>
+                  ) : (
+                    /* allein unterwegs: ein Knopf, der niemanden findet, wirkt kaputt */
+                    <span className="field__hint">Du bist gerade allein unterwegs.</span>
+                  )}
                 </>
               ) : null}
               {isSolver && snapshot.hintAvailable ? (

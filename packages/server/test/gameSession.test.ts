@@ -194,12 +194,12 @@ describe('Solver selection', () => {
     expect(first).toBeTruthy();
     expect(session.snapshot().players.filter((p) => p.isCandidate)).toHaveLength(1);
 
-    expect(session.declineSolver(first)).toBe(true);
+    expect(session.declineSolver(first)).toBe('PASSED');
     const second = session.snapshot().solver.candidateId as string;
     expect(second).not.toBe(first);
     expect(session.snapshot().players.find((p) => p.id === first)?.declinedCurrent).toBe(true);
 
-    expect(session.declineSolver(second)).toBe(true);
+    expect(session.declineSolver(second)).toBe('PASSED');
     const third = session.snapshot().solver.candidateId as string;
     expect([first, second]).not.toContain(third);
   });

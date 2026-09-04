@@ -190,7 +190,13 @@ export function createSocketServer(httpServer: HttpServer, manager: SessionManag
       if (!allowControl()) return;
       const playerId = socket.data.playerId;
       if (!playerId) return fail('Nur Spielende können weitergeben.', 'PLAYER_ONLY');
-      if (!session.declineSolver(playerId)) {
+      const outcome = session.declineSolver(playerId);
+      if (outcome === 'ALONE') {
+        fail(
+          'Du bist gerade allein unterwegs – es gibt niemanden, an den du weitergeben könntest. Die Spielleitung kann die Prüfung überspringen.',
+          'NO_ONE_ELSE',
+        );
+      } else if (outcome === 'REJECTED') {
         fail('Die Prüfung wurde dir gerade nicht angeboten.', 'NOT_CANDIDATE');
       }
     });

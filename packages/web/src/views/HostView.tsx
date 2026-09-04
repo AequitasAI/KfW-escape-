@@ -7,6 +7,7 @@ import { ConnectionPill, ProgressTrail, SealRow, Timer } from '../components/Chr
 import { api, RequestError } from '../lib/api.js';
 import type { HostSession, HostStatus } from '../lib/api.js';
 import { loadHostSecret, rememberHostedCode, saveHostSecret } from '../lib/identity.js';
+import { SolutionPanel } from './SolutionPanel.js';
 import { useSession } from '../lib/useSession.js';
 import { formatClock } from '../lib/useServerClock.js';
 import './views.css';
@@ -338,6 +339,8 @@ export function HostView(): JSX.Element {
               {snapshot ? (
                 <ProgressTrail puzzles={snapshot.puzzles} currentIndex={snapshot.currentPuzzleIndex} />
               ) : null}
+
+              {snapshot ? <SolutionPanel snapshot={snapshot} /> : null}
 
               <button
                 type="button"

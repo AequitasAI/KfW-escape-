@@ -230,3 +230,47 @@ describe('Login rate limit', () => {
     expect((await login(PASSWORD)).status).toBe(429);
   });
 });
+
+describe('Weitergeben ohne Gegenüber', () => {
+  it('verweigert die Weitergabe, statt dieselbe Person still erneut zu fragen', () => {
+    const repo = new Repository(openDatabase(':memory:'));
+    const game = new GameSession(repo, {
+      id: 'solo',
+      code: 'SOLO01',
+      hostSecret: 'x',
+      createdAt: Date.now(),
+    });
+    repo.insertSession(game.toRow());
+    const alone = game.addPlayer('Markus');
+    game.setConnected(alone.id, true);
+    game.start();
+    game.tick(Date.now() + 10_000);
+
+    expect(game.candidateId).toBe(alone.id);
+    // früher: 'PASSED', identischer Kandidat, auf dem Schirm passiert nichts
+    expect(game.declineSolver(alone.id)).toBe('ALONE');
+    expect(game.candidateId).toBe(alone.id);
+    expect(game.getPlayer(alone.id)?.declinedCurrentPuzzle).toBe(false);
+  });
+
+  it('gibt weiter, sobald jemand zweites verbunden ist', () => {
+    const repo = new Repository(openDatabase(':memory:'));
+    const game = new GameSession(repo, {
+      id: 'pair',
+      code: 'PAIR01',
+      hostSecret: 'x',
+      createdAt: Date.now(),
+    });
+    repo.insertSession(game.toRow());
+    const a = game.addPlayer('Mara');
+    const b = game.addPlayer('Jonas');
+    game.setConnected(a.id, true);
+    game.setConnected(b.id, true);
+    game.start();
+    game.tick(Date.now() + 10_000);
+
+    const first = game.candidateId as string;
+    expect(game.declineSolver(first)).toBe('PASSED');
+    expect(game.candidateId).not.toBe(first);
+  });
+});

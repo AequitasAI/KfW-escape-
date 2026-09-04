@@ -47,6 +47,13 @@ export type ActionRejection =
   | 'INVALID_ACTION'
   | 'REJECTED_BY_RULES';
 
+/**
+ * Handing a trial on has three outcomes, and they must stay distinguishable:
+ * re-offering the same lone player changes nothing on screen, so the button
+ * looks broken unless the client is told why.
+ */
+export type DeclineResult = 'PASSED' | 'ALONE' | 'REJECTED';
+
 export type ActionResult =
   | { ok: true; state: PuzzleStateUnion; solved: boolean }
   | { ok: false; reason: ActionRejection };
@@ -327,17 +334,24 @@ export class GameSession {
     return true;
   }
 
-  declineSolver(playerId: string): boolean {
-    if (this.status !== 'PUZZLE_ACTIVE') return false;
-    if (this.candidateId !== playerId) return false;
+  declineSolver(playerId: string): DeclineResult {
+    if (this.status !== 'PUZZLE_ACTIVE') return 'REJECTED';
+    if (this.candidateId !== playerId) return 'REJECTED';
     const player = this.players.get(playerId);
-    if (!player) return false;
+    if (!player) return 'REJECTED';
+
+    /*
+     * Nobody else is connected. Marking the decline and re-offering would land
+     * on the same person with an unchanged candidate id - nothing moves, and
+     * the trial looks stuck. Refuse and let the client explain instead.
+     */
+    if (this.connectedPlayers.every((p) => p.id === playerId)) return 'ALONE';
 
     player.declinedCurrentPuzzle = true;
     this.persistPlayer(player);
     this.repo.recordEvent(this.id, 'solver.declined', this.currentPuzzle.id, playerId, null);
     this.offerSolver(playerId);
-    return true;
+    return 'PASSED';
   }
 
   /** Host failsafe: draw a new companion even if one already accepted. */

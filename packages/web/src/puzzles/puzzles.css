@@ -585,31 +585,15 @@
   animation: spin-ccw 3.4s linear infinite;
 }
 
-.gear__contact {
-  fill: #241c14;
-  stroke: var(--game-fx-metal-dark);
+/*
+ * Zustandsloser Merker am Berührungspunkt. Er zeigt, wo hinzusehen ist, und
+ * verrät bewusst nicht, ob die beiden Zahnformen zusammenpassen.
+ */
+.gear__focus {
+  fill: none;
+  stroke: color-mix(in srgb, var(--game-fx-metal) 55%, transparent);
   stroke-width: 2;
-  transition: fill var(--game-dur-fast) var(--game-ease);
-}
-
-.gear__contact.is-meshed {
-  fill: var(--game-fx-energy);
-  stroke: #d7fff8;
-  animation: contact-pop 420ms var(--game-ease-out) both;
-  filter: drop-shadow(0 0 8px var(--game-fx-energy-glow));
-}
-
-@keyframes contact-pop {
-  0% {
-    transform: scale(0.4);
-    transform-origin: center;
-  }
-  60% {
-    transform: scale(1.35);
-  }
-  100% {
-    transform: none;
-  }
+  stroke-linecap: round;
 }
 
 .gear-btn circle {
