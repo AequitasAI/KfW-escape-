@@ -253,6 +253,8 @@ export interface ClientToServerEvents {
   'puzzle:action': (payload: PuzzleActionEnvelope) => void;
   'hint:request': () => void;
   'host:start': () => void;
+  /** Beendet Intro, Übergang oder Finale sofort, statt die Restzeit abzuwarten. */
+  'host:continue': () => void;
   'host:pause': () => void;
   'host:resume': () => void;
   'host:rerollSolver': () => void;

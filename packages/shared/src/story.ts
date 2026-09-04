@@ -15,15 +15,26 @@
 export const GAME_TITLE = 'Die Brücke zur Zwei-Programme-Welt';
 export const GAME_SUBTITLE = 'Ein Fantasy-Escape-Adventure für das KBS-BA-Team';
 
+/**
+ * Das Intro wird vorgelesen und von der Spielleitung weitergeklickt, nicht von
+ * einer Stoppuhr fortgeschoben. Es darf deshalb Luft haben - und die Zeile über
+ * die Uhr ist keine Verzierung, sondern eine echte Regel, die man kennen sollte.
+ */
 export const INTRO_LINES: readonly string[] = [
-  'Die große Umstellung steht bevor.',
-  'Doch die Brücke zur Zwei-Programme-Welt ist versiegelt.',
-  'Vor langer Zeit wurde sie bewilligt, geprüft und erbaut – dann vergaß man, sie zu pflegen.',
-  'Fünf Prüfungen liegen zwischen euch und dem großen Übergang.',
-  'Nur das KBS-BA-Team kann die verlorenen Siegel zurückholen.',
-  'Ihr habt zehn Minuten.',
+  'Vor langer Zeit beschloss man den Wiederaufbau.',
+  'Man prüfte. Man bewilligte. Man baute eine Brücke zur Zwei-Programme-Welt.',
+  'Dann legte man sie ordnungsgemäß ab – und vergaß, wo.',
+  'Seither ist sie versiegelt. Fünf Siegel, fünf Prüfungen, keine Ausnahmegenehmigung.',
+  'Im Archiv liegen die alten Bestände. In den Minen wartet ein Betriebszwerg,',
+  'der jeden Release seit dem Wiederaufbau gesehen hat und entsprechend gut gelaunt ist.',
+  'Ihr habt zehn Minuten. Die Uhr läuft erst, wenn die erste Prüfung beginnt –',
+  'so viel Kulanz muss sein.',
+  'Immer nur eine Person darf bedienen. Alle anderen dürfen reden. Laut.',
   'Wählt eure Gefährten. Öffnet die Tore. Vollendet den Release.',
 ];
+
+/** Steht unter dem Intro, solange die Spielleitung noch nicht weitergeklickt hat. */
+export const INTRO_WAIT_LINE = 'Die Spielleitung führt euch weiter, sobald alle so weit sind.';
 
 export const LOBBY_HEADLINE = 'Die Reisegruppe versammelt sich';
 export const LOBBY_SUBLINE = 'Tretet der Reisegruppe bei und wartet auf das Zeichen der Spielleitung.';
@@ -42,19 +53,47 @@ export function companionsGathered(count: number): string {
  * Antrieb wirklich durch mehrere Räder greift.
  */
 export const DWARF_LINES = {
-  start: 'Wer hat euch denn hier runtergelassen?',
-  progress: 'Hm. Drei Räder greifen ineinander. Weiter so.',
-  almost: 'Vier. Eins fehlt. Verkorkst es jetzt nicht.',
+  progress: 'Hm. Drei Räder greifen ineinander. Das war vermutlich Absicht.',
+  almost: 'Vier. Eins fehlt. Und jetzt bloß nicht kreativ werden.',
   success: 'ES LÄUFT! JETZT BLOSS NICHTS MEHR ANFASSEN!',
 } as const;
 
-export const TESTMASTER_LINE = 'Nur was geprüft wurde, darf diese Halle verlassen.';
+/**
+ * Was der Zwerg sagt, solange er nichts Nettes zu melden hat. Ausgewählt wird
+ * nach der Zahl der Züge - also serverseitig für alle gleich, und langsam genug,
+ * dass man den Spruch auch zu Ende lesen kann.
+ */
+export const DWARF_IDLE_LINES: readonly string[] = [
+  'Wer hat euch denn hier runtergelassen?',
+  'Vorsicht. Das Ding ist älter als die meisten Vorschriften.',
+  'Zapfen ins Loch. Nicht Loch auf Zapfen. Das ist schon der ganze Trick.',
+  'Ich hab das mal dokumentiert. Liegt im Archiv. Irgendwo.',
+  'Der Letzte, der hier war, wollte das agil machen.',
+  'Dreht ruhig weiter. Kaputter wird es nicht. Wahrscheinlich.',
+  'Früher gab es dafür ein Formular. Das war auch nicht besser.',
+  'Fünf Räder. Vier davon bewegen sich. Den Rest macht die Mathematik.',
+  'Ich sag ja nichts. Ich schau nur zu und denke mir meinen Teil.',
+  'Wenn ihr fertig seid, sagt Bescheid. Ich bin dann in der Pause.',
+  'Das Antriebsrad ist fest verbaut. Aus Gründen. Fragt nicht.',
+  'Sortiert das mal jemand von links nach rechts? Wie beim Aktenzeichen.',
+];
+
+/** Züge, die derselbe Spruch stehen bleibt. */
+export const DWARF_LINE_EVERY_MOVES = 3;
+
+export function dwarfIdleLine(moves: number): string {
+  const step = Math.floor(Math.max(0, moves) / DWARF_LINE_EVERY_MOVES);
+  return DWARF_IDLE_LINES[step % DWARF_IDLE_LINES.length] as string;
+}
+
+export const TESTMASTER_LINE =
+  'Nur was geprüft wurde, darf diese Halle verlassen. Vier Abweichungen. Wir zählen mit.';
 
 export const GUARD_LINES = {
   start: 'HALT.',
   continue:
-    'Ihr habt geprüft. Ihr habt die Maschinen erweckt. Doch ohne das letzte Siegel überschreitet niemand diese Brücke.',
-  success: 'Eure Unterlagen sind vollständig.',
+    'Ihr habt geprüft. Ihr habt die Maschinen erweckt. Doch ohne das letzte Siegel überschreitet niemand diese Brücke. Auch nicht mit Termindruck.',
+  success: 'Eure Unterlagen sind vollständig. Das kommt seltener vor, als ihr denkt.',
 } as const;
 
 export const SOLVER_REVEAL_PREFIX = 'Der nächste Gefährte wird bestimmt …';
@@ -69,11 +108,12 @@ export const WIN_LINES: readonly string[] = [
 export const LOSE_LINES: readonly string[] = [
   'ZU SPÄT.',
   'Die Brücke bleibt versiegelt.',
-  'Der große Übergang muss warten.',
+  'Der große Übergang wird auf das nächste Wartungsfenster verschoben.',
   'Morgen ist auch noch ein Release-Tag.',
 ];
 
-export const LOSE_GAG = 'Der Betriebszwerg behauptet, er habe es gleich gesagt.';
+export const LOSE_GAG =
+  'Der Betriebszwerg behauptet, er habe es gleich gesagt. Er hat es nicht gleich gesagt.';
 
 export const FINALE_LINE = 'Die Siegel erwachen. Die Brücke formt sich aus Runen und Energie.';
 
@@ -100,7 +140,7 @@ export function sealEarned(index: number): string {
 
 /** Shown on the victory screen, under the statistics. */
 export const WIN_FOOTNOTE =
-  'Ein Vorhaben, ordnungsgemäß geprüft, bewilligt und in Betrieb genommen. Der Wiederaufbau kann weitergehen.';
+  'Ein Vorhaben, ordnungsgemäß geprüft, bewilligt und in Betrieb genommen – und das ohne eine einzige Nachforderung. Der Wiederaufbau kann weitergehen.';
 
 export const LOSE_FOOTNOTE =
-  'Das Vorhaben wird zurückgestellt. Die Unterlagen bleiben erhalten – wie immer.';
+  'Das Vorhaben wird zurückgestellt. Die Unterlagen bleiben erhalten – wie immer. Aufbewahrungsfrist: auf unbestimmte Zeit.';

@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { DWARF_LINES, FLAT, GEAR_LABELS, GEAR_PROFILES, GEAR_STEPS } from '@kfw-escape/shared';
+import {
+  DWARF_LINES,
+  FLAT,
+  GEAR_LABELS,
+  GEAR_PROFILES,
+  GEAR_STEPS,
+  dwarfIdleLine,
+} from '@kfw-escape/shared';
 import type { OperationsGearsState } from '@kfw-escape/shared';
 import type { PuzzleProps } from './types.js';
 import { Dwarf } from '../components/Chrome.js';
@@ -75,7 +82,7 @@ export function OperationsGears({
       ? DWARF_LINES.almost
       : revealed
         ? DWARF_LINES.progress
-        : DWARF_LINES.start;
+        : dwarfIdleLine(state.moves);
   const dwarfMood = state.solved ? 'happy' : revealed ? 'skeptical' : 'neutral';
 
   const width = 120 + GEAR_LABELS.length * GEAR_GAP + 120;

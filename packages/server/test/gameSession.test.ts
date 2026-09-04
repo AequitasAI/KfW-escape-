@@ -294,6 +294,17 @@ describe('Timer', () => {
 
     session.start();
     expect(session.status).toBe('INTRO');
+    /*
+     * Der Vorspann wird vorgelesen und von der Spielleitung weitergeklickt.
+     * Solange darf die Uhr nicht laufen, sonst beginnt jede Runde mit einem
+     * Rückstand, den die Gruppe nicht beeinflussen kann.
+     */
+    expect(session.timerView().running).toBe(false);
+    vi.advanceTimersByTime(45_000);
+    expect(session.remainingMs()).toBe(GAME_DURATION_MS);
+
+    session.advancePhase();
+    expect(session.status).toBe('PUZZLE_ACTIVE');
     expect(session.timerView().running).toBe(true);
     expect(session.remainingMs()).toBe(GAME_DURATION_MS);
 
@@ -301,9 +312,19 @@ describe('Timer', () => {
     expect(session.remainingMs()).toBe(GAME_DURATION_MS - 60_000);
   });
 
+  it('lässt den Vorspann auch ohne Klick nicht ewig stehen', () => {
+    const { session } = withPlayers(2);
+    session.start();
+    expect(session.status).toBe('INTRO');
+    // Notausgang für eine vergessene Session
+    vi.advanceTimersByTime(INTRO_DURATION_MS + 1_000);
+    session.tick();
+    expect(session.status).toBe('PUZZLE_ACTIVE');
+  });
+
   it('is unaffected by client reloads because it derives from server time', () => {
     const { session, ids } = withPlayers(3);
-    session.start();
+    startToFirstPuzzle(session);
     vi.advanceTimersByTime(120_000);
     const before = session.remainingMs();
 
@@ -317,7 +338,7 @@ describe('Timer', () => {
 
   it('stops on pause and continues correctly on resume', () => {
     const { session } = withPlayers(3);
-    session.start();
+    startToFirstPuzzle(session);
     vi.advanceTimersByTime(60_000);
 
     session.pause();
@@ -329,7 +350,8 @@ describe('Timer', () => {
     expect(session.remainingMs()).toBe(paused);
 
     session.resume();
-    expect(session.status).toBe('INTRO');
+    // pausiert wird jetzt aus der laufenden Prüfung heraus, nicht mehr aus dem Vorspann
+    expect(session.status).toBe('PUZZLE_ACTIVE');
     expect(session.remainingMs()).toBe(paused);
 
     vi.advanceTimersByTime(10_000);
@@ -348,7 +370,7 @@ describe('Timer', () => {
 
   it('adds the host bonus time as an explicit intervention', () => {
     const { session } = withPlayers(3);
-    session.start();
+    startToFirstPuzzle(session);
     vi.advanceTimersByTime(60_000);
     const before = session.remainingMs();
     expect(session.addBonusTime()).toBe(true);

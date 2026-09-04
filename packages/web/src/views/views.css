@@ -987,3 +987,11 @@
   letter-spacing: 0.04em;
   word-break: break-word;
 }
+
+/* Der Vorspann wartet auf die Spielleitung, nicht auf eine Stoppuhr. */
+.intro__wait {
+  margin-top: var(--game-space-3);
+  color: var(--game-ui-text-muted);
+  font-size: var(--kfw-font-size-small);
+  animation: rise-in var(--game-dur-slow) var(--game-ease-out) both;
+}

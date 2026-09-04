@@ -65,6 +65,20 @@ export async function seatTable(browser: Browser, names: string[]): Promise<Tabl
   return { host, hostContext, code, players };
 }
 
+/**
+ * Startet die Runde und klickt den Vorspann weiter.
+ *
+ * Das Intro wartet bewusst auf die Spielleitung statt auf eine Stoppuhr - ohne
+ * diesen zweiten Klick beginnt keine Prüfung und die Spieluhr läuft nicht an.
+ */
+export async function startAdventure(host: Page): Promise<void> {
+  await host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+  const onward = host.getByRole('button', { name: 'Weiter zur ersten Prüfung' });
+  await expect(onward).toBeVisible({ timeout: 20_000 });
+  await onward.click();
+  await expect(onward).toHaveCount(0);
+}
+
 export async function closeTable(table: Table): Promise<void> {
   for (const player of table.players) await player.context.close();
   await table.hostContext.close();

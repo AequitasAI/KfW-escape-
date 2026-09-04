@@ -1,8 +1,15 @@
 /** Total run length of a session. Source: 01_product/GAME_SPEC.md */
 export const GAME_DURATION_MS = 10 * 60 * 1000;
 
-/** How long the intro is shown before the first trial opens. */
-export const INTRO_DURATION_MS = 7_000;
+/**
+ * Notausgang, kein Taktgeber: Normalerweise klickt die Spielleitung das Intro
+ * weiter, wenn sie es vorgelesen hat. Diese Dauer verhindert nur, dass eine
+ * vergessene Session ewig im Vorspann steht.
+ *
+ * Sie darf grosszügig sein, weil die Spieluhr erst mit der ersten Prüfung
+ * anläuft - das Intro kostet keine Spielzeit.
+ */
+export const INTRO_DURATION_MS = 3 * 60 * 1000;
 
 /** Seal reveal / room change between two trials. */
 export const TRANSITION_DURATION_MS = 4_000;

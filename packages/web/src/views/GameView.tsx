@@ -4,6 +4,7 @@ import {
   FINALE_LINE,
   GAME_TITLE,
   INTRO_LINES,
+  INTRO_WAIT_LINE,
   LOSE_FOOTNOTE,
   LOSE_GAG,
   LOSE_LINES,
@@ -365,6 +366,12 @@ function Intro(): JSX.Element {
           {line}
         </p>
       ))}
+      <p
+        className="intro__wait"
+        style={{ animationDelay: `${INTRO_LINES.length * 420 + 200}ms` }}
+      >
+        {INTRO_WAIT_LINE}
+      </p>
     </section>
   );
 }

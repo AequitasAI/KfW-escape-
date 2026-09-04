@@ -244,7 +244,7 @@ describe('Weitergeben ohne Gegenüber', () => {
     const alone = game.addPlayer('Markus');
     game.setConnected(alone.id, true);
     game.start();
-    game.tick(Date.now() + 10_000);
+    game.advancePhase();
 
     expect(game.candidateId).toBe(alone.id);
     // früher: 'PASSED', identischer Kandidat, auf dem Schirm passiert nichts
@@ -267,7 +267,7 @@ describe('Weitergeben ohne Gegenüber', () => {
     game.setConnected(a.id, true);
     game.setConnected(b.id, true);
     game.start();
-    game.tick(Date.now() + 10_000);
+    game.advancePhase();
 
     const first = game.candidateId as string;
     expect(game.declineSolver(first)).toBe('PASSED');

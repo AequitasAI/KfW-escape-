@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  DWARF_LINES,
+  dwarfIdleLine,
   FINALE_LINE,
   GAME_TITLE,
   INTRO_LINES,
+  INTRO_WAIT_LINE,
   LOSE_FOOTNOTE,
   LOSE_GAG,
   LOSE_LINES,
@@ -127,6 +128,12 @@ export function DisplayView(): JSX.Element {
                   {line}
                 </p>
               ))}
+              <p
+                className="intro__wait"
+                style={{ animationDelay: `${INTRO_LINES.length * 500 + 200}ms` }}
+              >
+                {INTRO_WAIT_LINE}
+              </p>
             </div>
           ) : null}
 
@@ -201,7 +208,7 @@ export function DisplayView(): JSX.Element {
               </div>
             ) : (
               <div className="display__aside">
-                <Dwarf line={DWARF_LINES.start} mood="neutral" />
+                <Dwarf line={dwarfIdleLine(0)} mood="neutral" />
               </div>
             )}
           </footer>

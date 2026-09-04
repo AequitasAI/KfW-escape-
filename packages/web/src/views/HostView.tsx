@@ -281,6 +281,11 @@ export function HostView(): JSX.Element {
   const paused = snapshot?.status === 'PAUSED';
   const finished = snapshot?.status === 'WON' || snapshot?.status === 'LOST';
   const inPuzzle = snapshot?.status === 'PUZZLE_ACTIVE';
+  // Phasen, die auf ein Weiter warten statt auf eine Eingabe der Gruppe
+  const waiting =
+    snapshot?.status === 'INTRO' ||
+    snapshot?.status === 'TRANSITION' ||
+    snapshot?.status === 'FINALE';
 
   return (
     <main className="view host-shell">
@@ -352,6 +357,23 @@ export function HostView(): JSX.Element {
               </button>
               {snapshot?.status === 'LOBBY' && snapshot.players.length === 0 ? (
                 <p className="field__hint">Es hat noch niemand die Reisegruppe betreten.</p>
+              ) : null}
+
+              {waiting ? (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn--primary btn--large btn--block"
+                    onClick={() => channel.emit('host:continue')}
+                  >
+                    {snapshot?.status === 'INTRO' ? 'Weiter zur ersten Prüfung' : 'Weiter'}
+                  </button>
+                  {snapshot?.status === 'INTRO' ? (
+                    <p className="field__hint">
+                      Lest den Vorspann in Ruhe vor – die Spieluhr läuft erst mit der ersten Prüfung.
+                    </p>
+                  ) : null}
+                </>
               ) : null}
 
               <div className="host__buttons">

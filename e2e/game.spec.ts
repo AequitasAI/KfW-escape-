@@ -7,6 +7,7 @@ import {
   findOfferedPlayer,
   hostLogin,
   HOST_PASSWORD,
+  startAdventure,
   joinPlayer,
   seatTable,
   solveCurrentTrial,
@@ -53,7 +54,7 @@ test.describe('Lobby und Beitritt', () => {
 test.describe('Solver-Mechanik', () => {
   test('A03: nur der angenommene Gefährte kann bedienen, alle anderen sehen dasselbe', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas', 'Alex', 'Sam']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
 
     const solver = await acceptOfferedSolver(table.players);
     const observer = table.players.find((p) => p !== solver)!;
@@ -86,7 +87,7 @@ test.describe('Solver-Mechanik', () => {
 
   test('A04: Weitergeben zieht einen Spieler, der noch nicht dran war', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas', 'Alex', 'Sam']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
 
     const first = await findOfferedPlayer(table.players);
     await first.page.getByRole('button', { name: 'An anderen Gefährten weitergeben' }).click();
@@ -107,7 +108,7 @@ test.describe('Solver-Mechanik', () => {
 
   test('A12: Host kann den Gefährten neu ziehen', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas', 'Alex', 'Sam']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
 
     const solver = await acceptOfferedSolver(table.players);
     await expect(table.host.getByText(solver.name).first()).toBeVisible();
@@ -128,7 +129,7 @@ test.describe('Timer', () => {
     const table = await seatTable(browser, ['Mara', 'Jonas']);
     await expect(table.host.locator('.timer__value').first()).toHaveText('10:00');
 
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
     await table.players[0]!.page.waitForTimeout(3_000);
 
     const readClock = async (page: import('@playwright/test').Page): Promise<number> => {
@@ -157,7 +158,7 @@ test.describe('Timer', () => {
 
   test('A12: Pause hält die Zeit an, Resume setzt sie fort', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
     await table.host.waitForTimeout(2_000);
 
     await table.host.getByRole('button', { name: 'Pausieren' }).click();
@@ -188,7 +189,7 @@ test.describe('Kompletter Durchlauf', () => {
     // the big screen carries no admin control at all
     await expect(display.getByRole('button', { name: /Pausieren|überspringen|neu ziehen|beginnen/ })).toHaveCount(0);
 
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
 
     for (let index = 0; index < 5; index += 1) {
       const solver = await acceptOfferedSolver(table.players);
@@ -218,7 +219,7 @@ test.describe('Kompletter Durchlauf', () => {
   test('A10: das Schwarze Tor akzeptiert nur 042, inklusive führender Null', async ({ browser }) => {
     test.setTimeout(150_000);
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
 
     // skip straight to the last trial via the host failsafe
     for (let index = 0; index < 4; index += 1) {
@@ -245,7 +246,7 @@ test.describe('Minen des Betriebs', () => {
   test('ein gedrehtes Zahnrad bleibt an seinem Platz', async ({ browser }) => {
     test.setTimeout(150_000);
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
 
     // skip forward to the gear machine
     for (let index = 0; index < 3; index += 1) {
@@ -256,11 +257,20 @@ test.describe('Minen des Betriebs', () => {
     const solver = await acceptOfferedSolver(table.players);
     await waitForStation(solver.page, 3);
 
+    /*
+     * Gemessen wird innerhalb der Maschine, nicht im Fenster: Die Seite scrollt
+     * beim Bedienen, und Fensterkoordinaten würden dann eine Verschiebung
+     * melden, die keine ist. Der Bezugspunkt ist deshalb die Zeichnung selbst.
+     */
     const centres = async (): Promise<{ x: number; y: number }[]> =>
-      solver.page.locator('.gear__spin').evaluateAll((nodes) =>
-        nodes.map((n) => {
+      solver.page.locator('.gears__svg').evaluate((svg) =>
+        [...svg.querySelectorAll('.gear__spin')].map((n) => {
           const r = n.getBoundingClientRect();
-          return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
+          const base = svg.getBoundingClientRect();
+          return {
+            x: Math.round(r.x + r.width / 2 - base.x),
+            y: Math.round(r.y + r.height / 2 - base.y),
+          };
         }),
       );
 
@@ -292,7 +302,7 @@ test.describe('Minen des Betriebs', () => {
 test.describe('Host-Failsafes', () => {
   test('A12: Reset bringt die Session zurück in die Lobby', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
     await acceptOfferedSolver(table.players);
 
     await table.host.locator('summary', { hasText: 'Notfalleingriffe' }).click();
@@ -308,7 +318,7 @@ test.describe('Host-Failsafes', () => {
 
   test('+30 Sekunden ist als Host-Eingriff verfügbar', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
     await table.host.waitForTimeout(2_500);
 
     const read = async (): Promise<number> => {
@@ -330,7 +340,7 @@ test.describe('Host-Failsafes', () => {
 test.describe('Barrierefreiheit', () => {
   test('A13: die Runen sind ohne Drag bedienbar und per Tastatur erreichbar', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
     const solver = await acceptOfferedSolver(table.players);
     await waitForStation(solver.page, 0);
 
@@ -371,7 +381,7 @@ test.describe('Spielleitung von einem anderen Gerät', () => {
     // the running session is offered for takeover and can be steered from here
     await page.getByRole('button', { name: new RegExp(table.code) }).click();
     await page.waitForURL(new RegExp(`/host/${table.code}`));
-    await page.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(page);
 
     // the players see the start, so this browser really holds control
     await expect(table.players[0]!.page.locator('.timer__value')).toBeVisible();
@@ -475,7 +485,7 @@ test.describe('Allein in der Reisegruppe', () => {
      * Prüfung wirkte eingefroren.
      */
     const table = await seatTable(browser, ['Markus']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
 
     const player = table.players[0]!.page;
     await expect(player.getByRole('button', { name: /Prüfung annehmen/ })).toBeVisible({
@@ -495,7 +505,7 @@ test.describe('Allein in der Reisegruppe', () => {
 test.describe('Lösung für die Spielleitung', () => {
   test('zeigt die Lösung der laufenden Prüfung, eingeklappt', async ({ browser }) => {
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
     const solver = await acceptOfferedSolver(table.players);
     await waitForStation(solver.page, 0);
 
@@ -519,7 +529,7 @@ test.describe('Minen des Betriebs: kein Signal pro Zahnradpaar', () => {
   test('verrät einzelne Paare nicht', async ({ browser }) => {
     test.setTimeout(180_000);
     const table = await seatTable(browser, ['Mara', 'Jonas']);
-    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+    await startAdventure(table.host);
 
     // der Gefährte wechselt nach jeder Prüfung - eine Seite festzuhalten geht schief
     for (let station = 0; station < 3; station += 1) {
@@ -537,6 +547,59 @@ test.describe('Minen des Betriebs: kein Signal pro Zahnradpaar', () => {
       /von \d+ Kontakten/,
     );
     await expect(atGears.page.locator('.gear__focus').first()).toBeVisible();
+
+    await closeTable(table);
+  });
+});
+
+test.describe('Vorspann', () => {
+  test('wartet auf die Spielleitung und kostet keine Spielzeit', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+
+    const player = table.players[0]!.page;
+    await expect(player.getByText('Vor langer Zeit beschloss man den Wiederaufbau.')).toBeVisible();
+    await expect(player.getByText(/Die Spielleitung führt euch weiter/)).toBeVisible();
+
+    // die Uhr steht: nach mehreren Sekunden immer noch die volle Zeit
+    await expect(player.locator('.timer__value')).toHaveText('10:00');
+    await player.waitForTimeout(4_000);
+    await expect(player.locator('.timer__value')).toHaveText('10:00');
+
+    // erst der Klick der Spielleitung öffnet die erste Prüfung und startet die Uhr
+    await table.host.getByRole('button', { name: 'Weiter zur ersten Prüfung' }).click();
+    await expect(player.getByText('Station 1/5')).toBeVisible({ timeout: 20_000 });
+    await expect
+      .poll(async () => player.locator('.timer__value').innerText(), { timeout: 20_000 })
+      .not.toBe('10:00');
+
+    await closeTable(table);
+  });
+});
+
+test.describe('Der Betriebszwerg', () => {
+  test('wechselt seine Sprüche, während gedreht wird', async ({ browser }) => {
+    test.setTimeout(180_000);
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await startAdventure(table.host);
+
+    for (let station = 0; station < 3; station += 1) {
+      const solver = await acceptOfferedSolver(table.players);
+      await waitForStation(solver.page, station);
+      await solveCurrentTrial(solver.page, station);
+    }
+
+    const atGears = await acceptOfferedSolver(table.players);
+    await waitForStation(atGears.page, 3);
+
+    const bubble = atGears.page.locator('.dwarf__bubble');
+    const first = await bubble.innerText();
+    // ein Spruch hält ein paar Züge, dann kommt der nächste
+    for (let i = 0; i < 4; i += 1) {
+      await atGears.page.locator('[aria-label="Torrad im Uhrzeigersinn drehen"]').click();
+      await atGears.page.waitForTimeout(200);
+    }
+    await expect.poll(async () => bubble.innerText(), { timeout: 10_000 }).not.toBe(first);
 
     await closeTable(table);
   });

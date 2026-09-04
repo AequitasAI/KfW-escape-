@@ -354,6 +354,27 @@ export class GameSession {
     return 'PASSED';
   }
 
+  /**
+   * Bringt eine wartende Phase sofort weiter: Intro, Übergang oder Finale.
+   * Das Intro wird dadurch von der Spielleitung getaktet statt von einer
+   * Stoppuhr - man liest es vor und klickt weiter, wenn alle so weit sind.
+   */
+  advancePhase(): boolean {
+    if (this.status === 'INTRO') {
+      this.enterPuzzle(0);
+      return true;
+    }
+    if (this.status === 'TRANSITION') {
+      this.enterPuzzle(this.currentPuzzleIndex + 1);
+      return true;
+    }
+    if (this.status === 'FINALE') {
+      this.finish(true);
+      return true;
+    }
+    return false;
+  }
+
   /** Host failsafe: draw a new companion even if one already accepted. */
   rerollSolver(): boolean {
     if (this.status !== 'PUZZLE_ACTIVE') return false;
@@ -438,7 +459,13 @@ export class GameSession {
     if (this.players.size === 0) return false;
     const now = Date.now();
     this.status = 'INTRO';
-    this.startedAt = now;
+    /*
+     * Die Uhr läuft bewusst noch nicht. Das Intro wird vorgelesen und von der
+     * Spielleitung weitergeklickt - das darf keine Spielzeit kosten, sonst
+     * beginnt jede Runde mit einem Nachteil, den niemand beeinflussen kann.
+     * Gesetzt wird startedAt beim Öffnen der ersten Prüfung.
+     */
+    this.startedAt = null;
     this.pausedAt = null;
     this.totalPausedMs = 0;
     this.phaseEndsAt = now + INTRO_DURATION_MS;
@@ -450,6 +477,8 @@ export class GameSession {
 
   private enterPuzzle(index: number): void {
     const now = Date.now();
+    // erst hier beginnt die Spielzeit
+    if (this.startedAt === null) this.startedAt = now;
     this.currentPuzzleIndex = index;
     this.status = 'PUZZLE_ACTIVE';
     this.phaseEndsAt = null;

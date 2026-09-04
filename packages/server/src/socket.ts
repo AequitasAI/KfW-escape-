@@ -249,6 +249,13 @@ export function createSocketServer(httpServer: HttpServer, manager: SessionManag
       if (!session.start()) fail('Das Abenteuer läuft bereits oder es fehlen Gefährten.', 'START_REJECTED');
     });
 
+    socket.on('host:continue', () => {
+      if (!allowControl() || !requireHost()) return;
+      if (!session.advancePhase()) {
+        fail('Gerade wartet keine Phase auf ein Weiter.', 'NOTHING_TO_ADVANCE');
+      }
+    });
+
     socket.on('host:pause', () => {
       if (!allowControl() || !requireHost()) return;
       if (!session.pause()) fail('Gerade lässt sich nichts pausieren.', 'PAUSE_REJECTED');
