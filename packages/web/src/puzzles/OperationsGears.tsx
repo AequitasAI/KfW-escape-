@@ -5,28 +5,31 @@ import type { PuzzleProps } from './types.js';
 import { Dwarf } from '../components/Chrome.js';
 import { sound } from '../lib/sound.js';
 
-const GEAR_RADIUS = 84;
+const GEAR_RADIUS = 90;
 /*
  * Der Abstand ist kein Layoutwert, sondern die Regel selbst: Ein Zapfen reicht
  * genau bis in ein Loch des Nachbarn. Zapfen gegen glatten Rand überlappt
  * sichtbar, glatter Rand gegen Loch lässt eine Lücke - man sieht also, dass es
  * nicht passt, ohne dass irgendetwas leuchten müsste.
  *
- *   Zapfen (84) + Loch (32) = 116  ~ GEAR_GAP, sie berühren sich
- *   Zapfen (84) + Rand (44) = 128  > GEAR_GAP, sie stossen ineinander
- *   Rand   (44) + Loch (32) =  76  < GEAR_GAP, es klafft
+ *   Zapfen (90) + Loch (26) = 116  ~ GEAR_GAP, sie berühren sich
+ *   Zapfen (90) + Rand (44) = 134  > GEAR_GAP, sie stossen ineinander
+ *   Rand   (44) + Loch (26) =  70  < GEAR_GAP, es klafft
  */
 const GEAR_GAP = 118;
 
 /**
- * Ab wie vielen zusammenhängenden Rädern die Maschine überhaupt etwas verrät.
+ * Ab wie vielen greifenden Kontakten die Maschine überhaupt etwas verrät.
  *
- * Absicht: Ein Signal pro Paar macht das Rätsel überflüssig - man dreht jedes
- * Rad einmal durch, bis es aufleuchtet, und muss die Zahnformen nie ansehen.
- * Erst eine durchgehende Kette ab drei Rädern zeigt sich, und die entsteht nur
- * durch Hinsehen.
+ * Gezählt werden Kontakte, angezeigt werden Räder - zwei Kontakte bedeuten drei
+ * laufende Räder. Diese Unterscheidung ist keine Wortklauberei: sie stand als
+ * Zählfehler in der Statuszeile und liess vier laufende Räder wie drei aussehen.
+ *
+ * Absicht der Schwelle: Ein Signal pro Paar macht das Rätsel überflüssig - man
+ * dreht jedes Rad blind durch, bis es aufleuchtet, und sieht die Formen nie an.
+ * Erst eine durchgehende Kette zeigt sich, und die entsteht nur durch Hinsehen.
  */
-const REVEAL_CHAIN_AT = 3;
+const REVEAL_CHAIN_AT = 2;
 
 /**
  * The signature puzzle. Each gear carries eight discrete contact sectors with
@@ -68,7 +71,7 @@ export function OperationsGears({
   const revealed = chain >= REVEAL_CHAIN_AT;
   const dwarfLine = state.solved
     ? DWARF_LINES.success
-    : chain >= 4
+    : chain >= 3
       ? DWARF_LINES.almost
       : revealed
         ? DWARF_LINES.progress
@@ -174,13 +177,6 @@ export function OperationsGears({
                   <circle className="gear__bore" r="7" />
                 </g>
 
-                {canTurn ? (
-                  <g className="gear__controls">
-                    <GearButton x={-34} label={`${GEAR_LABELS[gearIndex]} gegen den Uhrzeigersinn drehen`} glyph="↺" onClick={() => rotate(gearIndex, -1)} />
-                    <GearButton x={34} label={`${GEAR_LABELS[gearIndex]} im Uhrzeigersinn drehen`} glyph="↻" onClick={() => rotate(gearIndex, 1)} />
-                  </g>
-                ) : null}
-
                 {gearIndex < state.contacts.length ? (
                   /*
                    * Zustandslos. Der Rahmen sagt nur, wo die beiden Zahnformen
@@ -208,6 +204,42 @@ export function OperationsGears({
         </div>
       </div>
 
+      {interactive && !state.solved ? (
+        /*
+         * Die Regler liegen bewusst ausserhalb der Zeichnung. Im SVG schrumpfen
+         * sie mit ihr mit, und auf einem Telefon, auf dem fünf Räder
+         * nebeneinander passen müssen, bleiben davon keine bedienbaren
+         * Tippziele übrig.
+         */
+        <div className="gears__controls">
+          {GEAR_LABELS.map((label, gearIndex) =>
+            gearIndex === 0 ? null : (
+              <div className="gears__control" key={gearIndex}>
+                <span className="gears__control-label">{label}</span>
+                <div className="gears__control-row">
+                  <button
+                    type="button"
+                    className="gears__turn"
+                    aria-label={`${label} gegen den Uhrzeigersinn drehen`}
+                    onClick={() => rotate(gearIndex, -1)}
+                  >
+                    ↺
+                  </button>
+                  <button
+                    type="button"
+                    className="gears__turn"
+                    aria-label={`${label} im Uhrzeigersinn drehen`}
+                    onClick={() => rotate(gearIndex, 1)}
+                  >
+                    ↻
+                  </button>
+                </div>
+              </div>
+            ),
+          )}
+        </div>
+      ) : null}
+
       <div className="gears__legend" aria-hidden="true">
         <span className="gears__legend-item">
           <i className="gears__legend-swatch gears__legend-swatch--3" /> Zapfen
@@ -228,48 +260,10 @@ export function OperationsGears({
         {justSolved
           ? 'KLACK. Die Maschine läuft, das Tor öffnet sich.'
           : revealed
-            ? `Der Antrieb greift durch ${chain} Räder.`
-            : 'Die Maschine steht still. Vergleicht die Zahnformen dort, wo die Räder sich berühren.'}
+            ? `Der Antrieb greift bis zum ${chain + 1}. von ${GEAR_LABELS.length} Rädern.`
+            : 'Die Maschine steht still. Vergleicht Zapfen und Löcher dort, wo die Räder sich berühren.'}
       </p>
     </div>
-  );
-}
-
-function GearButton({
-  x,
-  glyph,
-  label,
-  onClick,
-}: {
-  x: number;
-  glyph: string;
-  label: string;
-  onClick: () => void;
-}): JSX.Element {
-  return (
-    <g
-      className="gear-btn"
-      role="button"
-      tabIndex={0}
-      aria-label={label}
-      transform={`translate(${x} 84)`}
-      onClick={(event) => {
-        event.stopPropagation();
-        onClick();
-      }}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          event.stopPropagation();
-          onClick();
-        }
-      }}
-    >
-      <circle r="22" />
-      <text textAnchor="middle" dy="7">
-        {glyph}
-      </text>
-    </g>
   );
 }
 
@@ -288,9 +282,14 @@ function GearButton({
  *   PEG  (3) langer, schmaler Zapfen
  */
 const ROOT_RADIUS = 44;
-const TIP_RADIUS: Record<number, number> = { 1: 30, 2: ROOT_RADIUS, 3: 84 };
+/*
+ * Bewusst kräftig: Auf einem Telefon stehen fünf Räder nebeneinander, die
+ * Zeichnung ist dort auf etwa die Hälfte skaliert. Eine flache Kerbe wäre dann
+ * ein paar Pixel tief und praktisch unsichtbar.
+ */
+const TIP_RADIUS: Record<number, number> = { 1: 26, 2: ROOT_RADIUS, 3: 90 };
 /* Der Zapfen muss schmal genug sein, um in das breitere Loch zu fassen. */
-const SECTOR_WIDTH: Record<number, number> = { 1: 0.38, 2: 0.5, 3: 0.24 };
+const SECTOR_WIDTH: Record<number, number> = { 1: 0.42, 2: 0.5, 3: 0.24 };
 
 function gearPath(gearIndex: number): string {
   const profile = GEAR_PROFILES[gearIndex] ?? [];

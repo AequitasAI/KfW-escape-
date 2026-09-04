@@ -585,6 +585,53 @@
   animation: spin-ccw 3.4s linear infinite;
 }
 
+/* Regler ausserhalb der Zeichnung: feste Tippziele, unabhängig davon, wie klein
+ * die Maschine auf einem schmalen Gerät skaliert. */
+.gears__controls {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.gears__control {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
+}
+
+.gears__control-label {
+  font-size: var(--kfw-font-size-xsmall);
+  color: var(--game-ui-text-muted);
+  text-align: center;
+  line-height: 1.15;
+}
+
+.gears__control-row {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.gears__turn {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--game-fx-metal) 60%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 88%, transparent);
+  color: var(--game-fx-rune);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background var(--game-dur-fast) var(--game-ease);
+}
+
+.gears__turn:hover {
+  background: color-mix(in srgb, var(--game-fx-metal) 30%, transparent);
+}
+
+.gears__turn:active {
+  transform: translateY(1px);
+}
+
 /*
  * Zustandsloser Merker am Berührungspunkt. Er zeigt, wo hinzusehen ist, und
  * verrät bewusst nicht, ob die beiden Zahnformen zusammenpassen.
@@ -594,34 +641,6 @@
   stroke: color-mix(in srgb, var(--game-fx-metal) 55%, transparent);
   stroke-width: 2;
   stroke-linecap: round;
-}
-
-.gear-btn circle {
-  fill: rgba(26, 20, 13, 0.92);
-  stroke: var(--game-fx-metal-dark);
-  stroke-width: 1.5;
-}
-
-.gear-btn {
-  cursor: pointer;
-}
-
-.gear-btn text {
-  fill: var(--game-ui-text);
-  font-size: 20px;
-}
-
-.gear-btn:hover circle {
-  stroke: var(--game-fx-energy);
-}
-
-.gear-btn:focus-visible {
-  outline: none;
-}
-
-.gear-btn:focus-visible circle {
-  stroke: var(--game-ui-focus);
-  stroke-width: 3.5;
 }
 
 .gears__gate-frame {
