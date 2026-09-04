@@ -4,7 +4,7 @@ Du bist Lead Full-Stack Engineer für dieses Projekt.
 
 ## Ziel-Repository
 
-https://github.com/AequitasAI/KfW-Escape.git
+https://github.com/AequitasAI/KfW-escape-
 
 Arbeite in diesem Repository und richte das Projekt vollständig ein.
 

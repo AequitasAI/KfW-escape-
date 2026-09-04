@@ -21,10 +21,15 @@ Getestet mit Debian 12 (bookworm), Docker Engine 24+ und Node 22 im Image.
 ## 2. Repository holen und konfigurieren
 
 ```bash
-git clone https://github.com/AequitasAI/KfW-Escape.git
-cd KfW-Escape
+# Achtung auf den Namen: kleines "escape", Bindestrich am Ende.
+# Das Repository liegt unter der Organisation AequitasAI, nicht unter einem
+# persönlichen Konto - unter "meine Repositories" taucht es deshalb nicht auf.
+git clone -b claude/mvp-build https://github.com/AequitasAI/KfW-escape-
+cd KfW-escape-
 cp .env.example .env
 ```
+
+Der Stand liegt auf dem Branch `claude/mvp-build`; `main` ist noch der Ausgangszustand.
 
 In `.env` mindestens setzen:
 

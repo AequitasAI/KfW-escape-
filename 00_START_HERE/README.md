@@ -62,7 +62,7 @@ Für Logo, Fonts, Icons, Bilder und weitere Brand Assets gelten gesonderte KfW-N
 Für Claude Code liegt zusätzlich `CLAUDE_START_HERE.md` im Root.
 Ziel-Repository:
 
-`https://github.com/AequitasAI/KfW-Escape.git`
+`https://github.com/AequitasAI/KfW-escape-`
 
 Empfohlener Arbeitsbranch:
 `claude/mvp-build`
