@@ -39,11 +39,13 @@ export function HostView(): JSX.Element {
   const [hostStatus, setHostStatus] = useState<HostStatus | null>(null);
   const [sessions, setSessions] = useState<HostSession[]>([]);
 
-  const refreshHostStatus = (): Promise<void> =>
-    api
+  const refreshHostStatus = async (): Promise<HostStatus> => {
+    const status = await api
       .hostStatus()
-      .then(setHostStatus)
-      .catch(() => setHostStatus({ loginEnabled: false, authenticated: false }));
+      .catch((): HostStatus => ({ loginEnabled: false, authenticated: false }));
+    setHostStatus(status);
+    return status;
+  };
 
   useEffect(() => {
     void refreshHostStatus();
@@ -81,7 +83,21 @@ export function HostView(): JSX.Element {
     setError(null);
     try {
       await api.hostLogin(password);
-      await refreshHostStatus();
+      /*
+       * The server accepted the password - but the session lives in a cookie,
+       * and a cookie can still be dropped on the way into the browser. The
+       * usual reason is an http:// page while COOKIE_SECURE is on: the login
+       * succeeds, nothing is stored, and the form silently comes back as if
+       * nothing had happened. Say what is going on instead.
+       */
+      const status = await refreshHostStatus();
+      if (!status.authenticated) {
+        setError(
+          window.location.protocol === 'http:'
+            ? 'Passwort korrekt, aber die Anmeldung konnte nicht gespeichert werden: Diese Seite ist über http:// geöffnet, und die Kennung wird nur über https:// gespeichert. Bitte die Adresse mit https:// aufrufen.'
+            : 'Passwort korrekt, aber die Anmeldung konnte nicht gespeichert werden. Vermutlich blockiert der Browser Cookies für diese Seite.',
+        );
+      }
     } catch (err) {
       setError(err instanceof RequestError ? err.message : 'Anmeldung fehlgeschlagen.');
     } finally {

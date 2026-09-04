@@ -436,3 +436,33 @@ test.describe('Zeichen der Gefährten', () => {
     await closeTable(table);
   });
 });
+
+test.describe('Anmeldung ohne speicherbares Cookie', () => {
+  test('sagt, warum die Anmeldung nicht haelt, statt stumm neu zu fragen', async ({ browser }) => {
+    /*
+     * Reproduziert den Fall aus dem Betrieb: das Passwort stimmt, aber die
+     * Kennung landet nie im Browser - ueber http:// bei gesetztem
+     * COOKIE_SECURE, oder weil Cookies blockiert sind. Frueher kam das
+     * Formular wortlos zurueck und man suchte den Fehler beim Passwort.
+     */
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // der Login gelingt, das Cookie erreicht den Browser aber nicht
+    await page.route('**/api/host/login', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true }),
+      });
+    });
+
+    await page.goto('/host');
+    await hostLogin(page).catch(() => undefined);
+
+    await expect(page.getByRole('alert')).toContainText(/nicht gespeichert werden/);
+    await expect(page.getByLabel('Passwort')).toBeVisible();
+
+    await context.close();
+  });
+});
