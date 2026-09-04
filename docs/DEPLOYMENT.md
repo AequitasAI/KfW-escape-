@@ -102,7 +102,26 @@ es wird kein zweiter Webserver benötigt.
 
 ## 4. Cloudflare Tunnel (optional, empfohlen für Remote-Teilnahme)
 
-Zwei Wege, die sich **gegenseitig ausschliessen**. Wer den Tunnel im Dashboard angelegt hat, nimmt
+**Voraussetzung: die DNS-Zone des Hostnamens muss bei Cloudflare liegen.** Ein Tunnel wird über
+einen CNAME auf `<TUNNEL-ID>.cfargotunnel.com` erreicht, und dieser Name existiert ausschliesslich
+innerhalb von Cloudflares DNS. Ein entsprechender Eintrag bei einem anderen Anbieter (Strato, IONOS,
+GoDaddy …) löst nirgends auf – das ist keine Konfigurationsfrage, sondern nicht vorgesehen.
+
+Liegt die Domain woanders, muss sie zuerst als Site in Cloudflare angelegt und die Nameserver beim
+Registrar umgestellt werden (Free-Plan genügt, die Domain bleibt beim Registrar). Zwei Punkte dabei:
+
+- Ab dem Umschalten beantwortet Cloudflare die **komplette Zone**. Läuft auf der Domain E-Mail,
+  müssen `MX` und die zugehörigen `TXT`-Einträge (SPF, DKIM, DMARC) vollständig übernommen sein.
+  Cloudflares Import erwischt meist alles, aber ein fehlender MX-Eintrag heisst: ab sofort keine
+  Mails mehr. Die importierte Liste vor dem Bestätigen gegen den Registrar prüfen.
+- Der Wechsel dauert typischerweise ein bis zwei Stunden, im Extremfall 24. Nicht am Morgen des
+  Termins beginnen.
+
+Für einen schnellen Test ohne eigene Domain genügt `cloudflared tunnel --url http://localhost:3001`;
+das liefert sofort eine zufällige `*.trycloudflare.com`-Adresse, die nur läuft, solange der Befehl
+läuft. Für den echten Termin ist sie nicht gedacht.
+
+Danach zwei Wege, die sich **gegenseitig ausschliessen**. Wer den Tunnel im Dashboard angelegt hat, nimmt
 Variante B und legt *kein* `config.yml` an – Cloudflare verwaltet die Ingress-Regeln dann remote,
 eine lokale Datei würde nur zu widersprüchlichen Konfigurationen führen.
 
