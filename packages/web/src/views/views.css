@@ -891,3 +891,53 @@
 .display__end-footnote {
   font-size: clamp(1rem, 0.85rem + 0.5vw, 1.35rem);
 }
+
+/* --- game master: list of running sessions after login ---------------- */
+
+.host__sessions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.host__session {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.host__session .mono {
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+
+/* --- companion sigils in the player lists ----------------------------- */
+
+/* the sigil replaces the connection dot, so the row keeps its height */
+.roster__item .avatar,
+.display__roster-item .avatar {
+  margin-left: -0.35rem;
+}
+
+.display__roster-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* away players fade, but the sigil stays identifiable */
+.roster__item.is-away .avatar,
+.host__player.is-away .avatar {
+  filter: grayscale(0.5);
+}
+
+.lobby__sigil {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: var(--game-space-2);
+  color: var(--game-ui-text-muted);
+}

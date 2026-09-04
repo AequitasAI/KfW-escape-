@@ -1,4 +1,5 @@
 import {
+  AVATARS,
   FINALE_DURATION_MS,
   GAME_DURATION_MS,
   HINT_AFTER_MS,
@@ -31,6 +32,7 @@ export interface Player {
   id: string;
   token: string;
   displayName: string;
+  avatar: number;
   connected: boolean;
   solverCount: number;
   declinedCurrentPuzzle: boolean;
@@ -188,12 +190,25 @@ export class GameSession {
   /* Players                                                           */
   /* ---------------------------------------------------------------- */
 
+  /**
+   * Free sigil for the next companion. Duplicates only start once more than
+   * AVATAR_COUNT people are in the room, and even then the reused one is drawn
+   * at random rather than always landing on the first sigil.
+   */
+  private nextAvatar(): number {
+    const taken = new Set([...this.players.values()].map((p) => p.avatar));
+    const free = AVATARS.filter((entry) => !taken.has(entry.id)).map((entry) => entry.id);
+    const pool = free.length > 0 ? free : AVATARS.map((entry) => entry.id);
+    return pickRandom(pool) ?? 0;
+  }
+
   addPlayer(displayName: string): Player {
     const now = Date.now();
     const player: Player = {
       id: uuid(),
       token: secret(),
       displayName,
+      avatar: this.nextAvatar(),
       connected: false,
       solverCount: 0,
       declinedCurrentPuzzle: false,
@@ -676,6 +691,7 @@ export class GameSession {
     return [...this.players.values()].map((p) => ({
       id: p.id,
       displayName: p.displayName,
+      avatar: p.avatar,
       connected: p.connected,
       solverCount: p.solverCount,
       isCandidate: this.candidateId === p.id,
@@ -767,6 +783,7 @@ export class GameSession {
       session_id: this.id,
       token: player.token,
       display_name: player.displayName,
+      avatar: player.avatar,
       connected: player.connected ? 1 : 0,
       solver_count: player.solverCount,
       declined_current_puzzle: player.declinedCurrentPuzzle ? 1 : 0,
@@ -805,6 +822,7 @@ export class GameSession {
         id: row.id,
         token: row.token,
         displayName: row.display_name,
+        avatar: row.avatar,
         // nobody holds a live socket right after a restart
         connected: false,
         solverCount: row.solver_count,

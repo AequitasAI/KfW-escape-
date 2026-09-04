@@ -5,6 +5,8 @@ import {
   createSession,
   enterCode,
   findOfferedPlayer,
+  hostLogin,
+  HOST_PASSWORD,
   joinPlayer,
   seatTable,
   solveCurrentTrial,
@@ -344,6 +346,93 @@ test.describe('Barrierefreiheit', () => {
     // every rune socket is a real button, so tab order reaches it
     await expect(solver.page.locator('button.rune')).toHaveCount(5);
 
+    await closeTable(table);
+  });
+});
+
+test.describe('Spielleitung von einem anderen Gerät', () => {
+  test('Login übernimmt eine laufende Session und startet sie', async ({ browser }) => {
+    // the laptop that creates the session
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+
+    // the locked-down office machine: a fresh context, no host secret anywhere
+    const office = await browser.newContext({ viewport: { width: 1440, height: 950 } });
+    const page = await office.newPage();
+    await page.goto('/host');
+
+    // a wrong password gets nowhere
+    await page.getByLabel('Passwort').fill('falsch');
+    await page.getByRole('button', { name: /^Anmelden$/ }).click();
+    await expect(page.getByRole('alert')).toContainText(/Passwort/);
+
+    await page.getByLabel('Passwort').fill(HOST_PASSWORD);
+    await page.getByRole('button', { name: /^Anmelden$/ }).click();
+
+    // the running session is offered for takeover and can be steered from here
+    await page.getByRole('button', { name: new RegExp(table.code) }).click();
+    await page.waitForURL(new RegExp(`/host/${table.code}`));
+    await page.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+
+    // the players see the start, so this browser really holds control
+    await expect(table.players[0]!.page.locator('.timer__value')).toBeVisible();
+    await expect(page.locator('.chip', { hasText: /Intro|Prüfung läuft/ })).toBeVisible();
+
+    await office.close();
+    await closeTable(table);
+  });
+
+  test('ohne Anmeldung ist die Steuerung nicht erreichbar', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+
+    const stranger = await browser.newContext();
+    const page = await stranger.newPage();
+    await page.goto(`/host/${table.code}`);
+
+    // the login stands in front of it, and no control is rendered
+    await expect(page.getByLabel('Passwort')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Abenteuer beginnen' })).toHaveCount(0);
+
+    await stranger.close();
+    await closeTable(table);
+  });
+
+  test('das Passwort gilt auch nach einem Reload', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto('/host');
+    await hostLogin(page);
+    await page.reload();
+    await expect(page.getByLabel('Passwort')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Neue Session erstellen/ })).toBeVisible();
+    await context.close();
+  });
+});
+
+test.describe('Zeichen der Gefährten', () => {
+  test('jeder Gefährte bekommt ein eigenes Zeichen, überall dasselbe', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas', 'Ayse']);
+
+    // the player sees their own sigil named, not just drawn
+    await expect(table.players[0]!.page.locator('.lobby__sigil')).toContainText(/Dein Zeichen:/);
+
+    // three players, three different sigils in the host list
+    const labels = await table.host.locator('.host__player .avatar').evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute('aria-label') ?? ''),
+    );
+    expect(labels).toHaveLength(3);
+    expect(new Set(labels).size).toBe(3);
+    for (const label of labels) expect(label).toMatch(/^Zeichen: /);
+
+    // the beamer shows the same sigils for the same people
+    const display = await table.hostContext.newPage();
+    await display.goto(`/display/${table.code}`);
+    await expect(display.locator('.display__roster-item .avatar')).toHaveCount(3);
+    const onDisplay = await display.locator('.display__roster-item .avatar').evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute('aria-label') ?? ''),
+    );
+    expect(onDisplay.sort()).toEqual([...labels].sort());
+
+    await display.close();
     await closeTable(table);
   });
 });

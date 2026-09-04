@@ -33,6 +33,8 @@ export type ClientRole = 'player' | 'host' | 'display';
 export interface PlayerView {
   id: string;
   displayName: string;
+  /** index into AVATARS; assigned by the server on join, never chosen */
+  avatar: number;
   connected: boolean;
   solverCount: number;
   /** true when this player is the currently offered solver candidate */

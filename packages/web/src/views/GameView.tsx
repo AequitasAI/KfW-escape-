@@ -11,6 +11,7 @@ import {
   WIN_FOOTNOTE,
   WIN_LINES,
   companionsGathered,
+  getAvatar,
   sealEarned,
 } from '@kfw-escape/shared';
 import type { SocketAuth } from '@kfw-escape/shared';
@@ -23,6 +24,7 @@ import {
   SolverReveal,
   Timer,
 } from '../components/Chrome.js';
+import { Avatar } from '../components/Avatar.js';
 import { PuzzleHost } from '../puzzles/PuzzleHost.js';
 import { SCENE_BY_PUZZLE, Scene, type SceneId } from '../scenes/Scene.js';
 import { loadIdentity } from '../lib/identity.js';
@@ -143,7 +145,12 @@ export function GameView(): JSX.Element {
 
         <main className="game__main" id="puzzle">
           {snapshot.status === 'LOBBY' ? (
-            <Lobby snapshot={snapshot} myName={me?.displayName ?? identity.displayName} channel={channel} />
+            <Lobby
+              snapshot={snapshot}
+              myName={me?.displayName ?? identity.displayName}
+              myAvatar={me?.avatar}
+              channel={channel}
+            />
           ) : null}
 
           {snapshot.status === 'INTRO' ? <Intro /> : null}
@@ -217,7 +224,14 @@ export function GameView(): JSX.Element {
 
         {snapshot.status === 'PUZZLE_ACTIVE' ? (
           <footer className="game__foot">
-            <SolverBanner solver={snapshot.solver}>
+            <SolverBanner
+              solver={snapshot.solver}
+              avatar={
+                snapshot.players.find(
+                  (p) => p.id === (snapshot.solver.solverId ?? snapshot.solver.candidateId),
+                )?.avatar
+              }
+            >
               {isCandidate ? (
                 <>
                   <button
@@ -252,7 +266,11 @@ export function GameView(): JSX.Element {
         ) : null}
       </div>
 
-      {revealShown ? <SolverReveal name={revealShown} onDone={() => setRevealShown(null)} /> : null}
+      {revealShown ? <SolverReveal
+          name={revealShown}
+          avatar={snapshot.players.find((p) => p.id === snapshot.solver.candidateId)?.avatar}
+          onDone={() => setRevealShown(null)}
+        /> : null}
     </Scene>
   );
 }
@@ -262,10 +280,13 @@ export function GameView(): JSX.Element {
 function Lobby({
   snapshot,
   myName,
+  myAvatar,
   channel,
 }: {
   snapshot: NonNullable<ReturnType<typeof useSession>['snapshot']>;
   myName: string;
+  /** undefined for the moment between joining and the first snapshot */
+  myAvatar?: number | undefined;
   channel: ReturnType<typeof useSession>;
 }): JSX.Element {
   const [name, setName] = useState(myName);
@@ -279,11 +300,20 @@ function Lobby({
         <p className="stage__station">{GAME_TITLE}</p>
         <h2 className="stage__title">Die Reisegruppe versammelt sich</h2>
         <p className="stage__task">{companionsGathered(snapshot.players.length)}</p>
+        {typeof myAvatar === 'number' ? (
+          <p className="lobby__sigil">
+            <Avatar id={myAvatar} size="md" title={false} />
+            <span>
+              Dein Zeichen: <strong>{getAvatar(myAvatar).name}</strong>
+            </span>
+          </p>
+        ) : null}
       </header>
 
       <ul className="roster" aria-label="Anwesende Gefährten">
         {snapshot.players.map((player) => (
           <li key={player.id} className={`roster__item${player.connected ? '' : ' is-away'}`}>
+            <Avatar id={player.avatar} />
             <span className="roster__dot" aria-hidden="true" />
             {player.displayName}
             {!player.connected ? <span className="roster__away"> (offline)</span> : null}

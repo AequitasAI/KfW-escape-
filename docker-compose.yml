@@ -15,6 +15,12 @@ services:
       # Public URL players reach, used for QR codes and join links.
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3001}
       COOKIE_SECURE: ${COOKIE_SECURE:-0}
+      # Game master login. Empty means no login (host secret bound to the
+      # browser that created the session).
+      HOST_PASSWORD: ${HOST_PASSWORD:-}
+      HOST_LOGIN_RATE_LIMIT: ${HOST_LOGIN_RATE_LIMIT:-10}
+      SESSION_RATE_LIMIT: ${SESSION_RATE_LIMIT:-10}
+      JOIN_RATE_LIMIT: ${JOIN_RATE_LIMIT:-120}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - escape-data:/app/data

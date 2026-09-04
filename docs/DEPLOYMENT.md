@@ -33,10 +33,50 @@ In `.env` mindestens setzen:
 | `PUBLIC_BASE_URL` | Die URL, unter der **die Spielenden** die App erreichen. Landet im QR-Code und im Join-Link. Bei Tunnel: die Tunnel-Hostname-URL, z. B. `https://escape.example.com`. |
 | `PORT` | Host-Port, auf den 3001 des Containers gemappt wird. Default 3001. |
 | `COOKIE_SECURE` | `1`, sobald über HTTPS ausgeliefert wird (mit Tunnel: immer `1`). |
+| `HOST_PASSWORD` | Passwort der Spielleitung. Siehe Abschnitt 2b – ohne diesen Wert lässt sich das Spiel **nur** von dem Browser aus steuern, der die Session erstellt hat. |
 | `LOG_LEVEL` | `info` im Normalbetrieb, `debug` nur zur Fehlersuche. |
 
 `PUBLIC_BASE_URL` ist der häufigste Fehler beim ersten Aufsetzen: steht dort `localhost`,
 zeigt der QR-Code auf das Gerät der Spielleitung statt auf den Server.
+
+## 2b. Login der Spielleitung
+
+Ohne `HOST_PASSWORD` liegt die Kennung der Spielleitung ausschliesslich im `localStorage` des
+Browsers, der die Session erstellt hat. Für ein Event, bei dem die Spielleitung von einem anderen
+Rechner aus startet – etwa vom Arbeitsplatz im Firmen-VPN – reicht das nicht.
+
+Mit gesetztem Passwort gilt:
+
+- `https://<host>/host` fragt zuerst nach dem Passwort.
+- Nach der Anmeldung erscheint eine Liste **aller laufenden Sessions**; ein Klick übernimmt die
+  Steuerung, unabhängig davon, auf welchem Gerät die Session angelegt wurde.
+- **Session anlegen setzt die Anmeldung ebenfalls voraus.** Wer nur die URL kennt, kann auf dem
+  Server keine Sessions mehr erzeugen.
+- Die Anmeldung gilt 12 Stunden und übersteht einen Container-Neustart: der Signaturschlüssel liegt
+  in der Datenbank, nicht im Arbeitsspeicher.
+
+**Für die Teilnehmenden ändert sich nichts.** Sie treten weiterhin nur mit einem Anzeigenamen bei –
+kein Konto, kein Passwort, keine Mailadresse.
+
+```bash
+# ein zufälliges Passwort erzeugen und in .env eintragen
+echo "HOST_PASSWORD=$(head -c 18 /dev/urandom | base64 | tr -d '/+=')" >> .env
+docker compose up -d
+```
+
+Prüfen, ob der Login aktiv ist:
+
+```bash
+curl -s https://<eure-domain>/api/health | grep -o '"hostLogin":[a-z]*'   # "hostLogin":true
+```
+
+Das Passwort steht im Klartext in `.env` und in der Prozessumgebung des Containers. Es schützt die
+Spielsteuerung eines Teamevents, nicht mehr – ein bereits andernorts benutztes Passwort gehört hier
+nicht hinein. Ein Ändern des Werts und `docker compose up -d` setzt es sofort neu.
+
+Zehn **Fehlversuche** pro fünf Minuten und Quell-IP sperren den Login (`HOST_LOGIN_RATE_LIMIT`).
+Erfolgreiche Anmeldungen zählen bewusst nicht mit: hinter dem Firmen-NAT teilen sich alle eine
+IP, und niemand soll sich selbst aussperren, weil er sich auf einem zweiten Gerät anmeldet.
 
 ## 3. Starten
 
@@ -108,8 +148,9 @@ spielbar, nur die Latenz steigt.
 
 ## 5. Ablauf am Spieltag
 
-1. Spielleitung öffnet `https://<host>/host` und erstellt eine Session.
-   Die Kennung der Spielleitung liegt **nur im Browser dieses Geräts** – dieses Gerät nicht wechseln.
+1. Spielleitung öffnet `https://<host>/host`, meldet sich an und erstellt eine Session.
+   Ohne eingerichteten Login (`HOST_PASSWORD` leer) liegt die Kennung **nur im Browser dieses
+   Geräts** – dann darf das Gerät nicht gewechselt werden.
 2. `https://<host>/display/<CODE>` auf dem Beamer bzw. im Teams-Screenshare öffnen (Vollbild, F11).
 3. Teilnehmende scannen den QR-Code oder tippen den Sessioncode auf `https://<host>/`.
 4. Wenn die Runde vollständig ist: **Abenteuer beginnen**.
@@ -141,10 +182,10 @@ wenn dreissig Leute gleichzeitig scannen.
 Danach einmal mit dem Handy im Mobilfunknetz – nicht im WLAN – beitreten, damit auch der Weg
 von aussen wirklich geprüft ist. Anschliessend `Session zurücksetzen`.
 
-**Am Spieltag beachten:** Die Kennung der Spielleitung liegt nur im `localStorage` des Browsers,
-in dem die Session erstellt wurde. Wer die Session auf dem Laptop anlegt, muss sie auch von dort
-steuern – ein anderes Gerät kann die Grossbildansicht öffnen, aber nicht steuern. Das ist Absicht:
-so kann niemand die Session übernehmen, der nur den Code kennt.
+**Am Spieltag beachten:** Mit gesetztem `HOST_PASSWORD` ist das Gerät egal – anmelden, Session aus
+der Liste wählen, weiterspielen. Ohne Passwort liegt die Kennung nur im `localStorage` des Browsers,
+in dem die Session erstellt wurde; ein anderes Gerät kann dann zwar die Grossbildansicht öffnen,
+aber nicht steuern.
 
 ## 6. Betrieb
 

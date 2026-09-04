@@ -158,3 +158,13 @@ export function useGuardArt(open: boolean): string | null {
 export function preloadDwarfMoods(moods: readonly string[]): void {
   for (const mood of moods) void resolveArt(`dwarf:${mood}`, 'characters', dwarfBasenames(mood));
 }
+
+/**
+ * Optional rendered portraits for the companion sigils. Files are numbered from
+ * 01 so they sort correctly: public/art/avatars/avatar_01.webp … avatar_30.webp.
+ * Missing files simply keep the drawn emblem, one sigil at a time.
+ */
+export function useAvatarArt(id: number): string | null {
+  const padded = String(id + 1).padStart(2, '0');
+  return useArt(`avatar:${padded}`, 'avatars', [`avatar_${padded}`]);
+}

@@ -3,6 +3,7 @@ import type { PuzzleMetaView, SolverView, TimerView } from '@kfw-escape/shared';
 import { describeClock, formatClock, useServerClock } from '../lib/useServerClock.js';
 import { sound } from '../lib/sound.js';
 import { DwarfArt, type DwarfMood } from '../scenes/Characters.js';
+import { Avatar } from './Avatar.js';
 import './chrome.css';
 
 /* ------------------------------------------------------------------ */
@@ -124,10 +125,13 @@ export function SealRow({ count, total = 5 }: { count: number; total?: number })
 
 export function SolverBanner({
   solver,
+  avatar,
   variant = 'player',
   children,
 }: {
   solver: SolverView;
+  /** sigil of the solver or candidate; falls back to the initial when unknown */
+  avatar?: number | undefined;
   variant?: 'player' | 'display';
   children?: React.ReactNode;
 }): JSX.Element {
@@ -136,9 +140,13 @@ export function SolverBanner({
 
   return (
     <div className={`solver-banner solver-banner--${variant}`}>
-      <span className="solver-banner__avatar" aria-hidden="true">
-        {(name ?? '?').slice(0, 1).toUpperCase()}
-      </span>
+      {typeof avatar === 'number' ? (
+        <Avatar id={avatar} size="md" title={false} className="solver-banner__sigil" />
+      ) : (
+        <span className="solver-banner__avatar" aria-hidden="true">
+          {(name ?? '?').slice(0, 1).toUpperCase()}
+        </span>
+      )}
       <div className="solver-banner__text">
         {name ? (
           <>
@@ -167,7 +175,16 @@ export function SolverBanner({
 /* Solver reveal overlay                                               */
 /* ------------------------------------------------------------------ */
 
-export function SolverReveal({ name, onDone }: { name: string; onDone: () => void }): JSX.Element {
+export function SolverReveal({
+  name,
+  avatar,
+  onDone,
+}: {
+  name: string;
+  /** sigil of the chosen companion; omitted while the player list is stale */
+  avatar?: number | undefined;
+  onDone: () => void;
+}): JSX.Element {
   // The parent re-renders on every timer tick, so the callback identity changes
   // constantly. Keep it in a ref, otherwise the dismissal timer is restarted
   // every second and the overlay never goes away.
@@ -184,6 +201,7 @@ export function SolverReveal({ name, onDone }: { name: string; onDone: () => voi
     <div className="reveal" role="status" aria-live="polite">
       <div className="reveal__inner">
         <p className="reveal__lead">Der nächste Gefährte wird bestimmt …</p>
+        {typeof avatar === 'number' ? <Avatar id={avatar} size="lg" title={false} /> : null}
         <p className="reveal__name">{name.toUpperCase()}</p>
       </div>
     </div>

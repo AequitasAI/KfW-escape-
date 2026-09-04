@@ -15,6 +15,7 @@ import {
   sealEarned,
 } from '@kfw-escape/shared';
 import type { SocketAuth } from '@kfw-escape/shared';
+import { Avatar } from '../components/Avatar.js';
 import { ProgressTrail, SealRow, SolverBanner, SolverReveal, Timer, Dwarf } from '../components/Chrome.js';
 import { PuzzleHost } from '../puzzles/PuzzleHost.js';
 import { SCENE_BY_PUZZLE, Scene, type SceneId } from '../scenes/Scene.js';
@@ -106,6 +107,7 @@ export function DisplayView(): JSX.Element {
                 <ul className="display__roster">
                   {snapshot.players.map((player) => (
                     <li key={player.id} className="display__roster-item">
+                      <Avatar id={player.avatar} />
                       {player.displayName}
                     </li>
                   ))}
@@ -184,7 +186,15 @@ export function DisplayView(): JSX.Element {
 
         {snapshot.status === 'PUZZLE_ACTIVE' ? (
           <footer className="display__foot">
-            <SolverBanner solver={snapshot.solver} variant="display" />
+            <SolverBanner
+              solver={snapshot.solver}
+              avatar={
+                snapshot.players.find(
+                  (p) => p.id === (snapshot.solver.solverId ?? snapshot.solver.candidateId),
+                )?.avatar
+              }
+              variant="display"
+            />
             {snapshot.currentPuzzleIndex !== 3 ? (
               <div className="display__aside">
                 <SealRow count={snapshot.seals} />
@@ -198,7 +208,11 @@ export function DisplayView(): JSX.Element {
         ) : null}
       </div>
 
-      {revealShown ? <SolverReveal name={revealShown} onDone={() => setRevealShown(null)} /> : null}
+      {revealShown ? <SolverReveal
+          name={revealShown}
+          avatar={snapshot.players.find((p) => p.id === snapshot.solver.candidateId)?.avatar}
+          onDone={() => setRevealShown(null)}
+        /> : null}
     </Scene>
   );
 }

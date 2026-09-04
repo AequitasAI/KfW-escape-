@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { GAME_TITLE, PUZZLES, companionsGathered } from '@kfw-escape/shared';
 import type { SocketAuth } from '@kfw-escape/shared';
+import { Avatar } from '../components/Avatar.js';
 import { ConnectionPill, ProgressTrail, SealRow, Timer } from '../components/Chrome.js';
 import { api, RequestError } from '../lib/api.js';
+import type { HostSession, HostStatus } from '../lib/api.js';
 import { loadHostSecret, rememberHostedCode, saveHostSecret } from '../lib/identity.js';
 import { useSession } from '../lib/useSession.js';
 import { formatClock } from '../lib/useServerClock.js';
@@ -32,6 +34,66 @@ export function HostView(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [joinUrl, setJoinUrl] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
+
+  // null while the first probe is in flight - the shell must not flash a login
+  const [hostStatus, setHostStatus] = useState<HostStatus | null>(null);
+  const [sessions, setSessions] = useState<HostSession[]>([]);
+
+  const refreshHostStatus = (): Promise<void> =>
+    api
+      .hostStatus()
+      .then(setHostStatus)
+      .catch(() => setHostStatus({ loginEnabled: false, authenticated: false }));
+
+  useEffect(() => {
+    void refreshHostStatus();
+  }, []);
+
+  useEffect(() => {
+    if (!hostStatus?.authenticated || normalized) return;
+    void api
+      .hostSessions()
+      .then((payload) => setSessions(payload.sessions))
+      .catch(() => setSessions([]));
+  }, [hostStatus?.authenticated, normalized]);
+
+  /*
+   * The whole point of the login: a session created on one device can be taken
+   * over on another. Fetch its host secret once and keep it locally from there,
+   * so a reload behaves exactly like the device-bound case.
+   */
+  useEffect(() => {
+    if (!normalized || secret || !hostStatus?.authenticated) return;
+    void api
+      .hostSession(normalized)
+      .then((session) => {
+        saveHostSecret(session.code, session.hostSecret);
+        rememberHostedCode(session.code);
+        setSecret(session.hostSecret);
+      })
+      .catch(() => {
+        /* not found or no longer authorised - the panels below explain it */
+      });
+  }, [normalized, secret, hostStatus?.authenticated]);
+
+  const login = async (password: string): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    try {
+      await api.hostLogin(password);
+      await refreshHostStatus();
+    } catch (err) {
+      setError(err instanceof RequestError ? err.message : 'Anmeldung fehlgeschlagen.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    await api.hostLogout().catch(() => undefined);
+    setSessions([]);
+    await refreshHostStatus();
+  };
 
   useEffect(() => {
     if (normalized) setSecret(loadHostSecret(normalized));
@@ -68,6 +130,28 @@ export function HostView(): JSX.Element {
     }
   };
 
+  /* ---------------- login gate ---------------- */
+
+  if (hostStatus === null) {
+    return (
+      <main className="view view--centered host-shell">
+        <p className="field__hint">Einen Moment …</p>
+      </main>
+    );
+  }
+
+  if (hostStatus.loginEnabled && !hostStatus.authenticated) {
+    return (
+      <HostLogin
+        busy={busy}
+        error={error}
+        code={normalized}
+        onSubmit={(password) => void login(password)}
+        onDisplay={normalized ? () => navigate(`/display/${normalized}`) : null}
+      />
+    );
+  }
+
   /* ---------------- no code yet ---------------- */
 
   if (!normalized) {
@@ -77,8 +161,9 @@ export function HostView(): JSX.Element {
           <div className="panel__body stack">
             <h1 className="host__title">Spielleitung</h1>
             <p className="field__hint">
-              Erstellt eine neue Session für {GAME_TITLE}. Die Kennung der Spielleitung bleibt nur in
-              diesem Browser.
+              {hostStatus.loginEnabled
+                ? `Angemeldet. Neue Session für ${GAME_TITLE} anlegen oder eine laufende übernehmen.`
+                : `Erstellt eine neue Session für ${GAME_TITLE}. Die Kennung der Spielleitung bleibt nur in diesem Browser.`}
             </p>
             <button
               type="button"
@@ -92,6 +177,41 @@ export function HostView(): JSX.Element {
               <p className="notice notice--error" role="alert">
                 {error}
               </p>
+            ) : null}
+
+            {hostStatus.authenticated && sessions.length > 0 ? (
+              <div className="stack">
+                <p className="field__label">Laufende Sessions</p>
+                <ul className="host__sessions">
+                  {sessions.map((session) => (
+                    <li key={session.code}>
+                      <button
+                        type="button"
+                        className="btn btn--block host__session"
+                        onClick={() => {
+                          saveHostSecret(session.code, session.hostSecret);
+                          rememberHostedCode(session.code);
+                          navigate(`/host/${session.code}`);
+                        }}
+                      >
+                        <span className="mono">{session.code}</span>
+                        <span className="chip">{STATUS_LABEL[session.status] ?? session.status}</span>
+                        <span className="field__hint">
+                          {session.playerCount === 1
+                            ? '1 Gefährte'
+                            : `${session.playerCount} Gefährten`}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {hostStatus.authenticated ? (
+              <button type="button" className="btn btn--block" onClick={() => void logout()}>
+                Abmelden
+              </button>
             ) : null}
           </div>
         </section>
@@ -108,10 +228,24 @@ export function HostView(): JSX.Element {
           <div className="panel__body stack">
             <h1 className="host__title">Keine Spielleitungs-Kennung</h1>
             <p className="field__hint">
-              Für die Session <strong className="mono">{normalized}</strong> liegt in diesem Browser keine
-              Kennung. Die Steuerung ist bewusst an das Gerät gebunden, auf dem die Session erstellt
-              wurde.
+              {hostStatus.loginEnabled ? (
+                <>
+                  Die Session <strong className="mono">{normalized}</strong> gibt es nicht mehr, oder sie
+                  wurde bereits beendet. Laufende Sessions stehen auf der Übersicht.
+                </>
+              ) : (
+                <>
+                  Für die Session <strong className="mono">{normalized}</strong> liegt in diesem Browser
+                  keine Kennung. Ohne eingerichteten Login ist die Steuerung an das Gerät gebunden, auf
+                  dem die Session erstellt wurde.
+                </>
+              )}
             </p>
+            {hostStatus.loginEnabled ? (
+              <button type="button" className="btn btn--block" onClick={() => navigate('/host')}>
+                Zur Übersicht
+              </button>
+            ) : null}
             <button type="button" className="btn btn--primary btn--block" onClick={() => void create()}>
               Stattdessen neue Session erstellen
             </button>
@@ -282,6 +416,7 @@ export function HostView(): JSX.Element {
                 {(snapshot?.players ?? []).map((player) => (
                   <li key={player.id} className={`host__player${player.connected ? '' : ' is-away'}`}>
                     <span className="host__player-dot" aria-hidden="true" />
+                    <Avatar id={player.avatar} />
                     <span className="host__player-name">{player.displayName}</span>
                     <span className="host__player-tags">
                       {player.isSolver ? <span className="chip chip--live">Gefährte</span> : null}
@@ -393,4 +528,84 @@ function TokenSource(): JSX.Element {
     setSource(value || 'unbekannt');
   }, []);
   return <span>{source === 'placeholder' ? 'Platzhalter (Contract)' : source}</span>;
+}
+
+/**
+ * The one login in the whole game. Players never see it - they still join with
+ * nothing but a display name. It exists so the game master can start and steer
+ * a session from a different machine than the one that created it.
+ */
+function HostLogin({
+  busy,
+  error,
+  code,
+  onSubmit,
+  onDisplay,
+}: {
+  busy: boolean;
+  error: string | null;
+  code: string;
+  onSubmit: (password: string) => void;
+  onDisplay: (() => void) | null;
+}): JSX.Element {
+  const [password, setPassword] = useState('');
+
+  return (
+    <main className="view view--centered host-shell">
+      <section className="panel host-create">
+        <form
+          className="panel__body stack"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (password.trim().length > 0) onSubmit(password);
+          }}
+        >
+          <h1 className="host__title">Anmeldung der Spielleitung</h1>
+          <p className="field__hint">
+            {code ? (
+              <>
+                Für die Steuerung von <strong className="mono">{code}</strong> ist eine Anmeldung nötig.
+              </>
+            ) : (
+              'Nur die Spielleitung meldet sich an. Alle anderen betreten die Reisegruppe allein mit ihrem Namen.'
+            )}
+          </p>
+
+          <label className="field">
+            <span className="field__label">Passwort</span>
+            <input
+              className="field__input"
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={busy}
+              autoFocus
+            />
+          </label>
+
+          <button
+            type="submit"
+            className="btn btn--primary btn--large btn--block"
+            disabled={busy || password.trim().length === 0}
+          >
+            {busy ? 'Wird geprüft …' : 'Anmelden'}
+          </button>
+
+          {error ? (
+            <p className="notice notice--error" role="alert">
+              {error}
+            </p>
+          ) : null}
+
+          {onDisplay ? (
+            <button type="button" className="btn btn--block" onClick={onDisplay}>
+              Nur die Großbildansicht öffnen
+            </button>
+          ) : null}
+        </form>
+      </section>
+    </main>
+  );
 }

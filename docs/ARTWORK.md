@@ -98,6 +98,23 @@ Illustration. Der Austauschweg dafür ist vorbereitet (siehe oben), die Prompts 
 Solange keine Bilder vorliegen, ist das SVG die bessere Lösung, weil es die drei Stimmungen des
 Zwergs ohne drei separate Dateien abbildet.
 
+## Sigel der Gefährten
+
+Jede beitretende Person bekommt vom Server eines von **dreissig Sigeln** zugeteilt – zufällig, aber
+ohne Dopplung, solange freie übrig sind. Das Sigel steht überall gleich: in der Lobby auf dem Handy,
+in der Spielleitungsliste, auf dem Beamer und in der Einblendung des gewählten Gefährten.
+
+Gezeichnet, nicht gemalt, und das mit Absicht:
+
+- Dreissig Portraits wären dreissig Dateien, die zusammenpassen müssen. Ein Emblem bleibt bei 32 px
+  neben einem Namen genauso lesbar wie bei 200 px auf der Projektion.
+- Ein zweiter Illustrationsstil neben den gemalten Hintergründen würde sich beissen; ein
+  Wachssiegel-Medaillon liegt als Objekt darauf, statt mit ihm zu konkurrieren.
+- Die Zuteilung überlebt einen Serverneustart, weil nur eine Zahl gespeichert wird.
+
+Wer trotzdem gemalte Wappen möchte: `packages/web/public/art/avatars/avatar_01.webp` … `avatar_30`
+ablegen, fertige Prompts stehen in `08_assets/IMAGE_PROMPTS.md`. Jede Datei wirkt einzeln.
+
 ## Figuren: Zustände und Bewegung
 
 Häufige Frage: Der Zwerg *tut* etwas – geht das mit SVG nicht besser als mit Bildern?

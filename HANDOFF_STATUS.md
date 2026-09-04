@@ -15,6 +15,8 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Acht gerenderte Szenen-Illustrationen eingebunden
 - [x] Gemalte Figuren-Illustrationen (Zwerg 3 Stimmungen, Wächter 2 Zustände)
 - [x] Art Direction auf warme Märchenfantasy umgestellt (kein Cyan, Cinzel/EB Garamond, KfW-Flavour)
+- [x] Login der Spielleitung (`HOST_PASSWORD`), Steuerung von jedem Gerät aus
+- [x] Dreissig Sigel der Gefährten, serverseitig und dopplungsfrei vergeben
 
 ## Funktioniert
 
@@ -25,6 +27,22 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - Serverneustart: laufende Sessions werden aus SQLite geladen und pausiert, damit keine
   Zeit verloren geht; ein Klick auf „Fortsetzen“ läuft weiter.
 - 30 gleichzeitige Clients getestet (`packages/server/test/load.test.ts`).
+
+**Spielleitung**
+- Optionaler Login über `HOST_PASSWORD`. Ist er gesetzt, kann die Spielleitung sich von jedem
+  Gerät anmelden, laufende Sessions auflisten und übernehmen – der Host-Schlüssel ist dann nicht
+  mehr an den erstellenden Browser gebunden. Ohne Passwort bleibt das alte Verhalten.
+- Mit Login setzt auch das Anlegen einer Session die Anmeldung voraus.
+- Signaturschlüssel liegt in SQLite, ein Neustart meldet die Spielleitung also nicht ab.
+- Zehn **Fehlversuche** pro fünf Minuten und Quell-IP sperren den Login; erfolgreiche Anmeldungen
+  zählen nicht mit, sonst sperrt sich ein Büro hinter einem NAT selbst aus. Passwortvergleich in
+  konstanter Zeit, Token HMAC-signiert und nach 12 Stunden abgelaufen.
+- Teilnehmende sind davon unberührt: weiterhin nur Anzeigename, kein Konto.
+
+**Sigel**
+- Dreissig Sigel, vom Server zufällig und ohne Dopplung vergeben, in Lobby, Hostliste,
+  Grossbildansicht und Gefährten-Einblendung identisch.
+- Als SVG gezeichnet; gemalte Wappen lassen sich einzeln darüberlegen.
 
 **Autorisierung**
 - Jede `puzzle:action` durchläuft serverseitig die fünf Prüfungen aus WEBSOCKET_EVENTS.md.
@@ -103,12 +121,14 @@ Beim Durchspielen im echten Browser gefunden und behoben:
    Servercode ausgeliefert worden. Der Cache liegt jetzt in `dist/` und ist ignoriert.
 
 ## Tests
-- `npm run verify` (Typecheck strict + Vitest): **52/52 grün**
+- `npm run verify` (Typecheck strict + Vitest): **67/67 grün**
   - 24 Rätsel-Unit-Tests inkl. der vier Eindeutigkeits-/Lösbarkeitsbeweise
   - 27 Server-Tests: Autorisierung, Solver-Regeln, Timer, kompletter Durchlauf, Failsafes,
     Identität, Neustart-Wiederherstellung
   - 1 Lasttest mit 30 gleichzeitigen Socket-Clients
-- `npm run test:e2e` (Playwright gegen den echten Produktions-Build): **13/13 grün**
+  - 15 Tests zu Spielleitungs-Login (Token, Ablauf, Neustart, Sperre) und Sigel-Vergabe
+- `npm run test:e2e` (Playwright gegen den echten Produktions-Build, mit gesetztem
+  `HOST_PASSWORD`): **17/17 grün**
   - Beitritt, gleiche Namen, Reload-Wiederherstellung
   - Solver-Autorisierung, Weitergabe, Host-Reroll
   - Timer inkl. Reload und Pause/Resume
@@ -116,6 +136,10 @@ Beim Durchspielen im echten Browser gefunden und behoben:
     Host und Display
   - `042` inkl. führender Null, falsche Codes ohne Zeitstrafe
   - Host-Failsafes, Barrierefreiheit der Runen ohne Drag
+  - Anmeldung der Spielleitung von einem fremden Browser, Übernahme einer laufenden Session,
+    Abweisung ohne Anmeldung, Anmeldung übersteht einen Reload
+  - dreissig Sigel: eigenes Zeichen benannt, drei Spieler drei verschiedene Zeichen,
+    identisch auf Host- und Grossbildansicht
 
 ## Nächste Schritte
 1. Auf dem Zielhost `docker compose up --build -d` ausführen und `PUBLIC_BASE_URL` setzen

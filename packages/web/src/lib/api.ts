@@ -22,6 +22,9 @@ const FALLBACK_MESSAGES: Record<string, string> = {
   RATE_LIMITED: 'Zu viele Versuche. Bitte einen Moment warten.',
   SESSION_FULL: 'Diese Reisegruppe ist bereits voll.',
   NOT_JOINED: 'Noch nicht beigetreten.',
+  HOST_LOGIN_REQUIRED: 'Bitte zuerst als Spielleitung anmelden.',
+  INVALID_PASSWORD: 'Passwort stimmt nicht.',
+  LOGIN_DISABLED: 'Für diese Installation ist kein Spielleitungs-Login eingerichtet.',
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -60,6 +63,17 @@ export interface PublicSession {
   joinUrl: string;
 }
 
+export interface HostStatus {
+  /** false when the installation runs without HOST_PASSWORD */
+  loginEnabled: boolean;
+  authenticated: boolean;
+}
+
+export interface HostSession extends PublicSession {
+  hostSecret: string;
+  createdAt: number;
+}
+
 export interface JoinResponse {
   playerId: string;
   playerToken: string;
@@ -80,5 +94,12 @@ export const api = {
     request<{ playerId: string; playerToken: string; displayName: string }>(
       `/api/sessions/${encodeURIComponent(code)}/me`,
     ),
+  hostStatus: () => request<HostStatus>('/api/host/me'),
+  hostLogin: (password: string) =>
+    request<{ ok: true }>('/api/host/login', { method: 'POST', body: JSON.stringify({ password }) }),
+  hostLogout: () => request<{ ok: true }>('/api/host/logout', { method: 'POST' }),
+  hostSessions: () => request<{ sessions: HostSession[] }>('/api/host/sessions'),
+  hostSession: (code: string) =>
+    request<HostSession>(`/api/host/sessions/${encodeURIComponent(code)}`),
   qrUrl: (code: string) => `/api/sessions/${encodeURIComponent(code)}/qr.svg`,
 };

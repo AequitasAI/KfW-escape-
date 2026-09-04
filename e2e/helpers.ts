@@ -1,4 +1,5 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import { companionsGathered } from '@kfw-escape/shared';
 
 export interface PlayerHandle {
   name: string;
@@ -13,10 +14,23 @@ export interface Table {
   players: PlayerHandle[];
 }
 
+/** Matches HOST_PASSWORD in playwright.config.ts. */
+export const HOST_PASSWORD = 'e2e-spielleitung';
+
+/** Passes the game master login if this installation has one configured. */
+export async function hostLogin(page: Page): Promise<void> {
+  const field = page.getByLabel('Passwort');
+  if (!(await field.isVisible().catch(() => false))) return;
+  await field.fill(HOST_PASSWORD);
+  await page.getByRole('button', { name: /^Anmelden$/ }).click();
+  await expect(field).toHaveCount(0);
+}
+
 export async function createSession(browser: Browser): Promise<{ host: Page; hostContext: BrowserContext; code: string }> {
   const hostContext = await browser.newContext({ viewport: { width: 1440, height: 950 } });
   const host = await hostContext.newPage();
   await host.goto('/host');
+  await hostLogin(host);
   await host.getByRole('button', { name: /Neue Session erstellen/ }).click();
   await host.waitForURL(/\/host\/[A-Z0-9]{6}/);
   const code = host.url().split('/').pop() as string;
@@ -38,7 +52,8 @@ export async function seatTable(browser: Browser, names: string[]): Promise<Tabl
   const { host, hostContext, code } = await createSession(browser);
   const players: PlayerHandle[] = [];
   for (const name of names) players.push(await joinPlayer(browser, code, name));
-  await expect(host.getByText(new RegExp(`${names.length} Gefährten`))).toBeVisible();
+  // the app says "1 Gefährte" in the singular, so use the same helper it does
+  await expect(host.getByText(companionsGathered(names.length))).toBeVisible();
   return { host, hostContext, code, players };
 }
 

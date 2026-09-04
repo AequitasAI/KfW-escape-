@@ -59,6 +59,13 @@ export class RateLimiter {
     private readonly windowMs: number,
   ) {}
 
+  /** Is this key currently exhausted? Does not consume anything. */
+  blocked(key: string, now = Date.now()): boolean {
+    const entry = this.hits.get(key);
+    if (!entry || now >= entry.resetAt) return false;
+    return entry.count >= this.limit;
+  }
+
   take(key: string, now = Date.now()): boolean {
     const entry = this.hits.get(key);
     if (!entry || now >= entry.resetAt) {

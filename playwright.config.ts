@@ -34,6 +34,11 @@ export default defineConfig({
       NODE_ENV: 'production',
       DATABASE_FILE: './data/e2e.sqlite',
       PUBLIC_BASE_URL: BASE_URL,
+      // the suite runs the login-protected configuration, because that is what
+      // an installation reachable from outside the building will actually run
+      HOST_PASSWORD: 'e2e-spielleitung',
+      // the suite opens one session per test, far faster than a human ever would
+      SESSION_RATE_LIMIT: '120',
       LOG_LEVEL: 'warn',
     },
   },

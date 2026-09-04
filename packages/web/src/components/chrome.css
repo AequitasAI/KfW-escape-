@@ -318,6 +318,11 @@
   font-size: 1.15rem;
 }
 
+.solver-banner__sigil {
+  width: 46px;
+  height: 46px;
+}
+
 .solver-banner__text {
   min-width: 0;
   flex: 1;
@@ -376,6 +381,12 @@
 .reveal__inner {
   text-align: center;
   padding: var(--game-space-3);
+}
+
+/* the sigil lands before the name so the room recognises the companion first */
+.reveal__inner .avatar {
+  margin: var(--game-space-2) auto;
+  animation: rise-in var(--game-dur) var(--game-ease-out) both;
 }
 
 .reveal__lead {

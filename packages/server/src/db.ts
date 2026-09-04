@@ -33,6 +33,7 @@ export interface PlayerRow {
   session_id: string;
   token: string;
   display_name: string;
+  avatar: number;
   connected: number;
   solver_count: number;
   declined_current_puzzle: number;
@@ -70,6 +71,7 @@ CREATE TABLE IF NOT EXISTS players (
   session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
   token TEXT NOT NULL,
   display_name TEXT NOT NULL,
+  avatar INTEGER NOT NULL DEFAULT 0,
   connected INTEGER NOT NULL DEFAULT 0,
   solver_count INTEGER NOT NULL DEFAULT 0,
   declined_current_puzzle INTEGER NOT NULL DEFAULT 0,
@@ -88,7 +90,30 @@ CREATE TABLE IF NOT EXISTS puzzle_events (
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_events_session ON puzzle_events(session_id);
+
+CREATE TABLE IF NOT EXISTS app_meta (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
 `;
+
+/**
+ * Additive column migrations for databases created by an earlier version.
+ * A live event must survive an update without losing its running session, so
+ * this runs on every boot and is a no-op once the column exists.
+ */
+const COLUMN_MIGRATIONS: { table: string; column: string; definition: string }[] = [
+  { table: 'players', column: 'avatar', definition: 'INTEGER NOT NULL DEFAULT 0' },
+];
+
+function migrateColumns(db: Db): void {
+  for (const migration of COLUMN_MIGRATIONS) {
+    const columns = db.prepare(`PRAGMA table_info(${migration.table})`).all() as { name: string }[];
+    if (columns.some((column) => column.name === migration.column)) continue;
+    db.exec(`ALTER TABLE ${migration.table} ADD COLUMN ${migration.column} ${migration.definition}`);
+    log.info('db.migrated', { table: migration.table, column: migration.column });
+  }
+}
 
 export type Db = Database.Database;
 
@@ -100,6 +125,7 @@ export function openDatabase(file: string = config.databaseFile): Db {
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
   db.exec(SCHEMA);
+  migrateColumns(db);
   log.info('db.ready', { file: file === ':memory:' ? ':memory:' : path.basename(file) });
   return db;
 }
@@ -148,11 +174,11 @@ export class Repository {
   upsertPlayer(row: PlayerRow): void {
     this.db
       .prepare(
-        `INSERT INTO players (id, session_id, token, display_name, connected, solver_count,
+        `INSERT INTO players (id, session_id, token, display_name, avatar, connected, solver_count,
            declined_current_puzzle, created_at, last_seen_at)
-         VALUES (@id, @session_id, @token, @display_name, @connected, @solver_count,
+         VALUES (@id, @session_id, @token, @display_name, @avatar, @connected, @solver_count,
            @declined_current_puzzle, @created_at, @last_seen_at)
-         ON CONFLICT(id) DO UPDATE SET display_name=@display_name, connected=@connected,
+         ON CONFLICT(id) DO UPDATE SET display_name=@display_name, avatar=@avatar, connected=@connected,
            solver_count=@solver_count, declined_current_puzzle=@declined_current_puzzle,
            last_seen_at=@last_seen_at`,
       )
@@ -182,6 +208,23 @@ export class Repository {
          VALUES (?, ?, ?, ?, ?, ?)`,
       )
       .run(sessionId, puzzleId, playerId, eventType, payload === undefined ? null : JSON.stringify(payload), Date.now());
+  }
+
+  /* --- application wide key/value, used for the host token secret --- */
+
+  readMeta(key: string): string | null {
+    const row = this.db.prepare('SELECT value FROM app_meta WHERE key = ?').get(key) as
+      | { value: string }
+      | undefined;
+    return row?.value ?? null;
+  }
+
+  writeMeta(key: string, value: string): void {
+    this.db
+      .prepare(
+        'INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
+      )
+      .run(key, value);
   }
 
   /** Housekeeping: drop sessions that finished or went stale long ago. */

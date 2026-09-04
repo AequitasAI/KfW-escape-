@@ -1,0 +1,38 @@
+.avatar {
+  display: block;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar--sm { width: 2rem; height: 2rem; }
+.avatar--md { width: 3rem; height: 3rem; }
+.avatar--lg { width: 5.5rem; height: 5.5rem; }
+
+/* the emblem itself: filled areas read as the ink, punched areas as the ground */
+.sigil__fill {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+/*
+ * Cut back into a filled shape. Drawn in the medallion ground rather than a
+ * flat black, so a notch reads as a gap in the emblem on every colourway
+ * instead of a smudge.
+ */
+.sigil__hole {
+  stroke: var(--sigil-ground, #14100c);
+  stroke-width: 2.5;
+}
+
+.avatar--image {
+  border: 2px solid transparent;
+  background: var(--game-fx-void, #14100c);
+}
+
+.avatar--image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

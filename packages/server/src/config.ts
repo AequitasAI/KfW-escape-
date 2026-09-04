@@ -17,6 +17,11 @@ export const config = {
   databaseFile: path.resolve(process.env['DATABASE_FILE'] ?? './data/kfw-escape.sqlite'),
   publicBaseUrl: (process.env['PUBLIC_BASE_URL'] ?? '').replace(/\/+$/, ''),
   cookieSecure: bool(process.env['COOKIE_SECURE'], false),
+  /**
+   * Password for the game master login. Empty means no login: the host secret
+   * then stays bound to the browser that created the session.
+   */
+  hostPassword: process.env['HOST_PASSWORD'] ?? '',
   corsOrigins: rawOrigins,
   logLevel: (process.env['LOG_LEVEL'] ?? 'info') as 'debug' | 'info' | 'warn' | 'error',
   /** absolute path of the built SPA, served in production */

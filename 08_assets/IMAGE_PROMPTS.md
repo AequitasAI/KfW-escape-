@@ -176,3 +176,62 @@ cwebp -q 82 scene_archive.png -o scene_archive.webp && rm scene_archive.png
 ```
 
 Zielgrösse pro Szene: 2560×1440, idealerweise unter ~400 KB.
+
+---
+
+## Sigel der Gefährten (optional)
+
+Die App zeichnet die dreissig Sigel selbst – als Wachssiegel-Medaillon mit Emblem. Das reicht
+vollkommen und ist der Normalfall. Wer gemalte Wappen möchte, erzeugt sie mit dem folgenden
+Block. **Alles oder nichts ist nicht nötig** – jede Datei wirkt einzeln, die restlichen Sigel
+bleiben gezeichnet.
+
+Stilblock an **jeden** Sigel-Prompt anhängen:
+
+> Style: a medieval wax seal medallion, circular, painted fantasy heraldry, aged brass rim,
+> deep warm shadow inside, a single bold emblem centred and clearly readable at thumbnail size,
+> hand-painted texture, warm amber and gold on dark ground, no text, no letters, no numbers,
+> no logos, no watermark, no faces. Square 1:1 composition, the emblem centred with generous
+> margin because the display crops to a circle.
+
+Dateiname jeweils `avatar_NN` (01–30), abgelegt unter `packages/web/public/art/avatars/`.
+
+| Datei | Sigel | Motiv für den Prompt |
+|---|---|---|
+| `avatar_01` | Hammer der Bauhütte | a blacksmith hammer |
+| `avatar_02` | Amboss der Esse | an anvil |
+| `avatar_03` | Rune des Anfangs | a carved standing rune stone |
+| `avatar_04` | Laterne der Nachtschicht | a hanging lantern |
+| `avatar_05` | Schlüssel des Archivs | an ornate iron key |
+| `avatar_06` | Zahnrad des Werks | a brass gear wheel |
+| `avatar_07` | Feder der Schreibstube | a writing quill |
+| `avatar_08` | Rolle der Zusagen | a rolled parchment scroll |
+| `avatar_09` | Axt der Waldhüter | a woodsman axe |
+| `avatar_10` | Schild der Bürgschaft | a heraldic shield |
+| `avatar_11` | Turm der Prüfung | a watchtower |
+| `avatar_12` | Brücke der zwei Welten | a stone arch bridge |
+| `avatar_13` | Flamme der Freigabe | a single flame |
+| `avatar_14` | Zirkel der Planer | a pair of drawing dividers |
+| `avatar_15` | Krone des Aufbaus | a crown |
+| `avatar_16` | Stern der Nordwacht | a many-pointed star |
+| `avatar_17` | Glocke des Ausrufs | a hanging bell |
+| `avatar_18` | Harfe der Chronisten | a small harp |
+| `avatar_19` | Gipfel der Förderer | a mountain peak |
+| `avatar_20` | Eiche des Wiederaufbaus | an oak tree |
+| `avatar_21` | Rabe der Botschaft | a raven |
+| `avatar_22` | Wolf der Grenzwacht | a wolf head |
+| `avatar_23` | Hirsch der Lichtung | a stag head |
+| `avatar_24` | Kahn der Fährleute | a small boat |
+| `avatar_25` | Rad der Mühle | a mill wheel |
+| `avatar_26` | Klinge der Testmeister | a sword |
+| `avatar_27` | Buch der Regeln | an open book |
+| `avatar_28` | Münze der Zusage | a stamped coin |
+| `avatar_29` | Riegel des Schwarzen Tors | a heavy padlock |
+| `avatar_30` | Tor der zwei Programme | a closed gate |
+
+Prompt-Muster:
+
+> A wax seal medallion showing **<Motiv aus der Tabelle>** as a bold heraldic emblem. <Stilblock>
+
+Die Reihenfolge muss stimmen: Die Nummer entscheidet, welches Wappen zu welchem Sigel gehört –
+sie ist in `packages/shared/src/avatars.ts` festgeschrieben.
