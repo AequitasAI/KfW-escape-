@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ARCHIVE_SOLUTION,
+  DIFF_HOTSPOT_IDS,
   GAME_DURATION_MS,
   GEAR_SOLUTION,
   HINT_AFTER_MS,
@@ -96,9 +97,8 @@ function solveCurrentPuzzle(session: GameSession, solverId: string): void {
     return;
   }
   if (id === 'testmasters_diff') {
-    for (const hotspot of ['rune_top_left', 'middle_arrow', 'bottom_gear_spokes', 'container_label']) {
-      act({ type: 'hit', hotspotId: hotspot });
-    }
+    // aus der Rätseldefinition, nicht abgeschrieben
+    for (const hotspotId of DIFF_HOTSPOT_IDS) act({ type: 'hit', hotspotId });
     return;
   }
   if (id === 'operations_gears') {

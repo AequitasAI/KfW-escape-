@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   ARCHIVE_SOLUTION,
+  DIFF_COUNT,
   DIFF_HOTSPOTS,
   GATE_SOLUTION,
   GEAR_LABELS,
@@ -99,15 +100,20 @@ function describe(state: PuzzleStateUnion, cableMoves: number[] | null): JSX.Ele
       return (
         <>
           <p className="field__label">
-            {open.length === 0 ? 'Alle gefunden' : `Noch offen: ${open.length} von 4`}
+            {open.length === 0 ? 'Alle gefunden' : `Noch offen: ${open.length} von ${DIFF_COUNT}`}
           </p>
           <ul className="host__solution-list">
             {open.map((spot) => (
               <li key={spot.id}>
-                <strong>{spot.label}</strong> – links {spot.left}, rechts {spot.right}
+                <strong>{spot.label}</strong> (Prüffeld {spot.field}) – Urfassung {spot.left},
+                Prüfexemplar {spot.right}
               </li>
             ))}
           </ul>
+          <p className="field__hint">
+            Getippt wird auf die Stelle selbst; die Felder sind grosszügig. Es zählt auf beiden
+            Plänen.
+          </p>
         </>
       );
     }

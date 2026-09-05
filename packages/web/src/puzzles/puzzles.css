@@ -355,21 +355,30 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* P3 Testmasters diff                                                 */
+/* P3 Halle der Prüfmeister - zwei Prüfpläne                           */
 /* ------------------------------------------------------------------ */
+
+/*
+ * Die Pläne sind helles Pergament in einer dunklen Halle. Das ist Absicht:
+ * Feine Abweichungen - eine fehlende Speiche, ein gedrehter Pfeil - findet man
+ * auf dunkler Tinte auf hellem Grund deutlich zuverlässiger als umgekehrt, und
+ * zwei beleuchtete Dokumente auf dem Tisch sind genau das Bild, das die Halle
+ * der Prüfmeister braucht.
+ */
 
 .diff__npc {
   font-style: italic;
   color: var(--game-ui-text-muted);
   text-align: center;
+  max-width: 44rem;
 }
 
 .diff__plans {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: var(--game-space-2);
   width: 100%;
-  max-width: 62rem;
+  max-width: 72rem;
 }
 
 .diff__plan {
@@ -377,9 +386,9 @@
 }
 
 .diff__caption {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
   font-size: var(--kfw-font-size-small);
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--game-ui-text-muted);
 }
@@ -391,93 +400,215 @@
 .diff__svg {
   width: 100%;
   height: auto;
-  border-radius: var(--game-radius-m);
   display: block;
+  border-radius: var(--game-radius-m);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 45%);
 }
 
 .diff__svg.is-interactive {
   cursor: crosshair;
 }
 
+/* --- Papier und Tinte ------------------------------------------------ */
+
 .plan__paper {
-  fill: #2b2418;
-  stroke: var(--game-fx-metal-dark);
+  stroke: #6d5b3a;
+  stroke-width: 1.5;
 }
 
 .plan__grid line {
-  stroke: #453a26;
-  stroke-width: 1;
+  stroke: #9c8757;
+  stroke-width: 0.6;
+  opacity: 0.45;
+}
+
+.plan__frame {
+  fill: none;
+  stroke: #6d5b3a;
+  stroke-width: 2;
+}
+
+.plan__frame--inner {
+  stroke-width: 0.8;
+  opacity: 0.7;
+}
+
+.plan__nail {
+  fill: #6d5b3a;
+  opacity: 0.7;
+}
+
+.plan__cartouche {
+  fill: rgb(255 255 255 / 22%);
+  stroke: #6d5b3a;
+  stroke-width: 1.2;
 }
 
 .plan__title {
-  fill: var(--game-ui-text-muted);
-  font-size: 11px;
-  letter-spacing: 2px;
+  fill: #3a2c18;
+  font-family: var(--kfw-font-display, serif);
+  font-size: 13px;
+  letter-spacing: 1.6px;
 }
 
-.plan__part {
-  fill: none;
-  stroke: #d8c08a;
-  stroke-width: 2;
-}
-
-.plan__line {
-  stroke: #d8c08a;
-  stroke-width: 2;
-}
-
-.plan__glyph {
-  fill: var(--game-fx-rune);
-  opacity: 0.9;
+.plan__subtitle,
+.plan__note {
+  fill: #6b5730;
+  font-size: 8px;
+  letter-spacing: 1.1px;
 }
 
 .plan__label {
-  fill: var(--game-fx-rune);
-  font-size: 22px;
+  fill: #3a2c18;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
-.diff-hotspot__hit {
+/* Bauteile sind Umrisse, Leitungen sind Striche - wie in einer Zeichnung. */
+.plan__part {
+  fill: none;
+  stroke: #3a2c18;
+  stroke-width: 2;
+}
+
+.plan__part--thin {
+  stroke-width: 1;
+  opacity: 0.75;
+}
+
+.plan__line {
+  fill: none;
+  stroke: #3a2c18;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.plan__line--thin {
+  stroke-width: 1.2;
+}
+
+/* Die Brücke über die Kreuzung ist offen gezeichnet, nicht gefüllt. */
+.plan__line--open {
+  fill: none;
+}
+
+.plan__hatch line {
+  stroke: #6d5b3a;
+  stroke-width: 0.8;
+  opacity: 0.5;
+}
+
+.plan__rivet {
+  fill: #3a2c18;
+}
+
+.plan__junction {
+  fill: #3a2c18;
+}
+
+.plan__rune-tile {
+  fill: rgb(255 255 255 / 25%);
+  stroke: #6d5b3a;
+  stroke-width: 1;
+}
+
+.plan__rune {
+  fill: #8a4f16;
+  stroke: #8a4f16;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.plan__scale-fill {
+  fill: #3a2c18;
+  opacity: 0.8;
+}
+
+.plan__stamp-field {
+  fill: none;
+  stroke: #6d5b3a;
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+}
+
+/*
+ * Auf dem Telefon ist derselbe Plan nur noch ein Drittel so breit; die Tinte
+ * wird dabei rechnerisch dünner als ein Haar. Sie darf dort kräftiger sein -
+ * die Zeichnung bleibt dieselbe, nur der Strich hält mit.
+ */
+@media (max-width: 40rem) {
+  .puzzle--compact .plan__line {
+    stroke-width: 3.2;
+  }
+
+  .puzzle--compact .plan__part {
+    stroke-width: 2.6;
+  }
+
+  .puzzle--compact .plan__line--thin,
+  .puzzle--compact .plan__part--thin {
+    stroke-width: 1.8;
+  }
+
+  .puzzle--compact .plan__subtitle,
+  .puzzle--compact .plan__note {
+    font-size: 9px;
+  }
+}
+
+/* --- Prüffelder ------------------------------------------------------ */
+
+/*
+ * Getroffen wird ein Feld, kein Pixel. Die Felder sind unsichtbar, bis man sie
+ * berührt - sonst stünde die Lösung als Raster auf dem Plan.
+ */
+.diff-field__hit {
   fill: transparent;
   stroke: transparent;
   cursor: pointer;
 }
 
-.diff-hotspot[aria-disabled='true'] .diff-hotspot__hit {
+.diff-field[aria-disabled='true'] .diff-field__hit {
   cursor: default;
 }
 
-.diff-hotspot:hover .diff-hotspot__hit {
-  fill: rgba(216, 192, 138, 0.1);
+.diff-field:hover .diff-field__hit {
+  fill: rgb(58 44 24 / 9%);
 }
 
-.diff-hotspot:focus-visible {
+.diff-field:focus-visible {
   outline: none;
 }
 
-.diff-hotspot:focus-visible .diff-hotspot__hit {
+.diff-field:focus-visible .diff-field__hit {
   stroke: var(--game-ui-focus);
   stroke-width: 3;
 }
 
-.diff-hotspot__ring {
-  fill: none;
-  stroke: var(--game-fx-seal);
-  stroke-width: 3;
+.diff-field__ring {
+  fill: rgb(150 30 24 / 8%);
+  stroke: #a01f18;
+  stroke-width: 2.5;
   animation: stamp-in 480ms var(--game-ease-out) both;
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--game-fx-seal) 55%, transparent));
+}
+
+.diff-field__mark {
+  fill: #a01f18;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 @keyframes stamp-in {
   0% {
     opacity: 0;
-    transform: scale(1.9) rotate(-8deg);
+    transform: scale(1.6) rotate(-7deg);
     transform-origin: center;
+    transform-box: fill-box;
   }
   70% {
     opacity: 1;
-    transform: scale(0.94);
+    transform: scale(0.96);
   }
   100% {
     opacity: 1;
@@ -485,13 +616,40 @@
   }
 }
 
-.diff__miss {
+/* --- Stempel der Prüfmeister ----------------------------------------- */
+
+.plan__approval {
+  animation: stamp-in 520ms var(--game-ease-out) both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.plan__approval-box {
+  fill: rgb(160 31 24 / 10%);
+  stroke: #a01f18;
+  stroke-width: 3;
+}
+
+.plan__approval-box--inner {
+  stroke-width: 1;
+}
+
+.plan__approval-text {
+  fill: #a01f18;
+  font-family: var(--kfw-font-display, serif);
+  font-size: 22px;
+  letter-spacing: 3px;
+}
+
+/* --- Quittung ohne Befund -------------------------------------------- */
+
+.diff__note {
   position: absolute;
   transform: translate(-50%, -50%);
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
   font-size: var(--kfw-font-size-xsmall);
-  background: rgba(24, 19, 12, 0.92);
+  background: rgb(24 19 12 / 92%);
   border: 1px solid var(--game-ui-line-strong);
   color: var(--game-ui-text-muted);
   pointer-events: none;
@@ -513,37 +671,59 @@
   }
 }
 
-.diff__tally {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+/* --- Prüfprotokoll ---------------------------------------------------- */
+
+/*
+ * Fünf Marken. Solange nichts gefunden ist, sind es fünf schmale Nummern -
+ * erst der Fund zieht die Marke auf und schreibt hinein, was nicht stimmte.
+ */
+.diff__protocol {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.4rem;
   width: 100%;
-  max-width: 62rem;
+  max-width: 72rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.diff__tally-item {
+.diff__protocol-item:not(.is-found) .diff__protocol-text {
+  /* „offen" steht schon in der Zeile darunter; die Nummer genügt */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.diff__protocol-item {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.5rem;
-  padding: 0.4rem 0.7rem;
+  padding: 0.35rem 0.7rem;
   border-radius: var(--game-radius-s);
   border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 55%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 70%, transparent);
   font-size: var(--kfw-font-size-small);
   color: var(--game-ui-text-muted);
 }
 
-.diff__tally-item.is-found {
+.diff__protocol-item.is-found {
   border-color: color-mix(in srgb, var(--game-fx-seal) 55%, transparent);
   color: var(--game-ui-text);
 }
 
-.diff__tally-mark {
+.diff__protocol-mark {
+  flex: none;
+  width: 1.2rem;
+  text-align: center;
   font-weight: var(--kfw-font-weight-bold);
   color: var(--game-fx-seal);
 }
+
 /* ------------------------------------------------------------------ */
 /* P4 Minen des Betriebs - Kettenmechanik                              */
 /* ------------------------------------------------------------------ */
@@ -761,193 +941,153 @@
   fill: #a8843a;
 }
 
-/* --- Regler --------------------------------------------------------- */
-
-.gears__controls {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.35rem;
-  margin-top: 0.6rem;
-}
+/* --- Greifflächen an den Rädern -------------------------------------- */
 
 /*
- * Fünf Regler nebeneinander brauchen mindestens 480 px - auf dem Telefon lief
- * die Reihe deshalb aus dem Bild. Dort brechen sie um, statt zu schrumpfen: Die
- * Knöpfe bleiben 44 px gross, sonst trifft sie niemand mit dem Daumen.
+ * Gedreht wird am Rad selbst: linke Hälfte zurück, rechte Hälfte weiter. Die
+ * Reglerreihe unter der Zeichnung ist damit weg - zehn kleine Knöpfe waren auf
+ * dem Telefon weder zu treffen noch zu verstehen, und sie haben die Maschine
+ * nach unten gedrückt, die eigentlich der Blickfang sein soll.
  */
-@media (max-width: 40rem) {
-  .gears__controls {
-    /* ohne feste Breite schrumpft das Raster auf eine Spalte, weil die Regler
-       als Flex-Element nur so breit werden wie ihr Inhalt */
-    width: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-    gap: 0.5rem 0.35rem;
-  }
-}
-
-.gears__control {
-  display: grid;
-  gap: 0.25rem;
-  justify-items: center;
-}
-
-.gears__control-label {
-  font-size: var(--kfw-font-size-xsmall);
-  color: var(--game-ui-text-muted);
-  text-align: center;
-}
-
-.gears__control-row {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.gears__turn {
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--game-fx-metal) 60%, transparent);
-  background: color-mix(in srgb, var(--game-fx-stone-deep) 88%, transparent);
-  color: var(--game-fx-rune);
-  font-size: 1.15rem;
+.gear-grip__hit {
+  fill: transparent;
   cursor: pointer;
-  transition: background var(--game-dur-fast) var(--game-ease);
 }
 
-.gears__turn:hover {
-  background: color-mix(in srgb, var(--game-fx-metal) 30%, transparent);
+.gear-grip__arrow,
+.gear-grip__arrow-head {
+  pointer-events: none;
+  opacity: 0.35;
+  transition: opacity var(--game-dur-fast) var(--game-ease);
 }
 
-.gears__turn:active {
-  transform: translateY(1px);
+.gear-grip__arrow {
+  fill: none;
+  stroke: #241d15;
+  stroke-width: 4;
+  stroke-linecap: round;
 }
 
-/* --- Zwerg und Kontaktliste ----------------------------------------- */
+.gear-grip__arrow-head {
+  fill: #241d15;
+}
 
-.gears__dwarf {
-  position: absolute;
-  right: 0;
-  bottom: -0.5rem;
-  width: min(34%, 260px);
+.gear-grip__half:hover .gear-grip__arrow,
+.gear-grip__half:hover .gear-grip__arrow-head {
+  opacity: 0.85;
+}
+
+.gear-grip__half:hover .gear-grip__hit {
+  fill: rgb(255 226 160 / 12%);
+}
+
+.gear-grip__half:focus-visible {
+  outline: none;
+}
+
+.gear-grip__half:focus-visible .gear-grip__hit {
+  fill: rgb(255 226 160 / 18%);
+  stroke: var(--game-ui-focus);
+  stroke-width: 3;
+}
+
+/* --- Energie und Kettenanzeige --------------------------------------- */
+
+/* Läuft die Maschine, steht die Energie über die ganze Kette an. */
+.gears__energy {
+  stroke: var(--game-fx-energy);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 14 16;
+  animation: energy-dash 620ms linear infinite;
+  filter: drop-shadow(0 0 10px var(--game-fx-energy-glow));
   pointer-events: none;
 }
 
-/* Sonst bricht die Sprechblase in eine Spalte aus einzelnen Wörtern um. */
-.gears__dwarf .dwarf__bubble {
-  min-width: 11rem;
-}
-
-.puzzle--wide .gears__dwarf {
-  width: min(30%, 330px);
-}
-
 /*
- * Auf dem Telefon ist der Zwerg samt Sprechblase breiter als der Bildschirm.
- * Absolut positioniert lief er deshalb rechts aus dem Kasten heraus und schob
- * die ganze Seite seitlich - die Radbeschriftungen standen halb ausserhalb.
- * Hier steht er im Fluss unter der Maschine und darf umbrechen.
+ * Sechs Marken für sechs Verbindungen. Wortlos, klein - und auf dem Telefon die
+ * einzige Stelle, an der man den Gesamtstand sieht, ohne die Kette zu scrollen.
  */
-@media (max-width: 40rem) {
-  .gears__dwarf {
-    position: static;
-    width: 100%;
-    margin-top: 0.4rem;
-  }
-
-  .gears__dwarf .dwarf {
-    justify-content: center;
-  }
-
-  .gears__dwarf .dwarf__bubble {
-    min-width: 0;
-  }
-}
-
-/*
- * Erklärtext und Kontaktliste lagen bisher blank auf dem Minen-Hintergrund -
- * Glut, Streben und Fackeln unter kleiner Schrift, das war kaum zu lesen. Sie
- * bekommen dieselbe Steintafel wie die Inschrift im Archiv und die Aussagen des
- * Wächters, damit die Ruhe an der Stelle entsteht, wo gelesen wird.
- */
-.gears__legend {
-  margin-top: 0.7rem;
-  display: grid;
-  gap: 0.4rem;
-  width: 100%;
-  max-width: 46rem;
-  padding: var(--game-space-2);
-  border-radius: var(--game-radius-m);
-  border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 60%, transparent);
-  /* Die Glut der Mine schlägt sonst durch die Tafel; deshalb fast deckend und
-     zusätzlich weichgezeichnet, was dahinter liegt. */
-  background: color-mix(in srgb, var(--game-fx-stone-deep) 93%, transparent);
-  backdrop-filter: blur(3px);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
-}
-
-.puzzle--wide .gears__legend {
-  max-width: 64rem;
-}
-
-.gears__legend-note {
-  font-size: var(--kfw-font-size-small);
-  color: var(--game-ui-text-muted);
-}
-
-/*
- * Die Kontaktliste in Worten. Sie ersetzt kein Hinsehen, sondern macht das
- * Rätsel ohne Farbsehen und mit Vorleseprogramm bedienbar - Status nie nur
- * über Farbe.
- */
-.gears__contact-list {
-  list-style: none;
+.gears__pips {
+  display: flex;
+  gap: 0.5rem;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 0.2rem;
+  list-style: none;
 }
 
-.gears__contact-item {
+.gears__pip {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--game-fx-metal-dark);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 80%, transparent);
+  transition: background var(--game-dur) var(--game-ease);
+}
+
+.gears__pip.is-live {
+  background: var(--game-fx-rune);
+  border-color: var(--game-fx-rune);
+}
+
+.gears__pip.is-powered {
+  box-shadow: 0 0 8px var(--game-fx-energy-glow);
+}
+
+/* --- Kettenlage ------------------------------------------------------ */
+
+/*
+ * Waagerecht, wo Platz ist; senkrecht auf dem Telefon. Senkrecht ist die Kette
+ * länger als jeder Bildschirm, deshalb scrollt hier die Maschine - lieber
+ * grosse Räder mit Wischen als fünf Räder, die niemand trifft.
+ */
+.gears--column .gears__viewport {
+  max-height: min(64vh, 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+}
+
+/* Nicht die volle Breite: Sonst füllt ein einziges Rad den Bildschirm und man
+   sieht von der Kette nichts mehr. So sind es rund zweieinhalb Knoten. */
+.gears--column .gears__svg {
+  width: min(100%, 300px);
+  margin: 0 auto;
+}
+
+.gears--row .gears__svg {
+  max-height: 46vh;
+}
+
+/* --- Zwerg ------------------------------------------------------------ */
+
+/*
+ * Der Zwerg steht unter der Maschine, nicht darüber: Die Zeichnung ist jetzt
+ * ein schmales Band ohne freie Ecke, und absolut positioniert hat er auf dem
+ * Telefon die Seite seitlich geschoben.
+ */
+.gears__dwarf {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: baseline;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--game-radius-s);
-  border: 1px solid transparent;
-  font-size: var(--kfw-font-size-xsmall);
-  color: var(--game-ui-text-muted);
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 0.2rem;
 }
 
-.gears__contact-item.is-live {
-  border-color: color-mix(in srgb, var(--game-fx-seal) 60%, transparent);
-  background: color-mix(in srgb, var(--game-fx-energy) 12%, transparent);
-  color: var(--game-ui-text);
+.gears--column .gears__dwarf {
+  justify-content: center;
 }
 
-.gears__contact-name {
-  min-width: 9rem;
-  font-weight: var(--kfw-font-weight-bold);
+.gears__dwarf .dwarf__bubble {
+  min-width: 0;
 }
 
-.gears__contact-item.is-live .gears__contact-name::after {
-  content: ' greift';
-  font-weight: var(--kfw-font-weight-regular);
-  color: var(--game-fx-rune);
-}
-
-/* Die Schlusszeile gehört zum selben Lesebereich und darf nicht als einzige
-   wieder auf der Glut liegen. */
+/* Nur noch eine Zeile Text - die bekommt eine ruhige Fläche. */
 .puzzle--gears .puzzle__status {
   padding: 0.35rem 0.9rem;
   border-radius: var(--game-radius-s);
   background: color-mix(in srgb, var(--game-fx-stone-deep) 93%, transparent);
   border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 45%, transparent);
   backdrop-filter: blur(3px);
-}
-
-.puzzle--wide .gears__svg {
-  max-height: 52vh;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1185,6 +1325,17 @@
   font-size: clamp(1.4rem, 1.8vw, 2.2rem);
 }
 
-.puzzle--wide .diff__tally-item {
+.puzzle--wide .diff__protocol-item {
   font-size: var(--kfw-font-size-medium);
 }
+
+/* Auf der Grossbildansicht sind die Pläne das Bild - sie bekommen die Fläche. */
+.puzzle--wide .diff__plans {
+  max-width: none;
+}
+
+.puzzle--wide .diff__npc {
+  font-size: var(--kfw-font-size-large);
+  max-width: 60rem;
+}
+

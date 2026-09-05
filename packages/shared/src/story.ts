@@ -88,7 +88,7 @@ export function dwarfIdleLine(moves: number): string {
 }
 
 export const TESTMASTER_LINE =
-  'Nur was geprüft wurde, darf diese Halle verlassen. Vier Abweichungen. Wir zählen mit.';
+  'Nur was geprüft wurde, darf diese Halle verlassen. Fünf Abweichungen. Wir zählen mit.';
 
 export const GUARD_LINES = {
   start: 'HALT.',
@@ -117,6 +117,7 @@ export const LOSE_GAG =
   'Der Betriebszwerg behauptet, er habe es gleich gesagt. Er hat es nicht gleich gesagt.';
 
 export const FINALE_LINE = 'Die Siegel erwachen. Die Brücke formt sich aus Runen und Energie.';
+
 
 /* ------------------------------------------------------------------ */
 /* House flavour                                                       */

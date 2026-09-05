@@ -49,16 +49,50 @@ test.describe('Übungsraum', () => {
     await page.goto('/demo/4');
     await expect(page.getByText('Station 4/5')).toBeVisible();
 
+    // schmal heisst senkrecht: fünf Räder nebeneinander wären auf dem Telefon
+    // nicht mehr zu bedienen
+    await expect(page.locator('.gears--column')).toHaveCount(1);
+
     const overflow = await page.evaluate(() => ({
       scroll: document.documentElement.scrollWidth,
       client: document.documentElement.clientWidth,
     }));
     expect(overflow.scroll).toBeLessThanOrEqual(overflow.client);
 
-    // die Regler brechen um, statt zu schrumpfen - 44 px bleiben 44 px
-    const turn = await page.locator('.gears__turn').first().boundingBox();
-    expect(turn?.height ?? 0).toBeGreaterThanOrEqual(44);
-    expect(turn?.width ?? 0).toBeGreaterThanOrEqual(44);
+    // gedreht wird am Rad selbst, und das ist daumengross
+    const grip = await page.locator('.gear-grip__hit').first().boundingBox();
+    expect(grip?.width ?? 0).toBeGreaterThanOrEqual(44);
+    expect(grip?.height ?? 0).toBeGreaterThanOrEqual(44);
+  });
+
+  test('am Rechner liegt dieselbe Kette waagerecht', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/demo/4');
+    await expect(page.locator('.gears--row')).toHaveCount(1);
+    // und ohne Erklärabsatz darunter: eine Zeile Text, sonst Maschine
+    await expect(page.locator('.gears__legend')).toHaveCount(0);
+  });
+
+  /*
+   * Die fünf Abweichungen stecken zwischen zwölf Prüffeldern. Ein Feld ohne
+   * Befund darf nichts weiterzählen - sonst wäre das Rätsel durch Abklicken
+   * gelöst statt durch Vergleichen.
+   */
+  test('die Halle der Prüfmeister zählt nur echte Abweichungen', async ({ page }) => {
+    await page.goto('/demo/3');
+    const plan = page.locator('.diff__plan').first();
+
+    for (const field of ['V', 'X']) {
+      await plan.locator(`[data-field="${field}"]`).click();
+      // die Sperre gegen Klickfluten läuft serverseitig 750 ms
+      await page.waitForTimeout(900);
+    }
+    await expect(page.getByText('0 von 5 Abweichungen gefunden')).toBeVisible();
+
+    await solveCurrentTrial(page, 2);
+    await expect(page.getByText(PUZZLES[2]!.successLine)).toBeVisible({ timeout: 15_000 });
+    // der Stempel der Prüfmeister liegt auf beiden Plänen
+    await expect(page.locator('.plan__approval')).toHaveCount(2);
   });
 
   test('ist ohne Anmeldung von der Startseite aus erreichbar', async ({ page }) => {

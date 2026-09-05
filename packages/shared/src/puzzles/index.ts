@@ -57,9 +57,9 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     id: 'testmasters_diff',
     station: 'Station 3/5',
     title: 'Die Halle der Prüfmeister',
-    task: 'Findet die vier Unterschiede zwischen den beiden Bauplänen.',
+    task: 'Findet die fünf Fehler im Prüfexemplar.',
     atmosphere: 'Hier wird nichts durchgewunken. Hier wird geprüft – zweimal, und dann noch einmal.',
-    hint: 'Achtet auf die Rune oben links, die Pfeilrichtung in der Mitte, die Speichen des unteren Zahnrads und die Beschriftung des Behälters.',
+    hint: 'Geht den Plan in Abschnitten durch statt kreuz und quer: Siegelband oben, Ventil und Kreuzung in der Mitte, das grosse Rad unten links, und ganz rechts die Steigleitung bis zum Behälter.',
     successLine: 'Kein Fehler bleibt verborgen. Die Prüfmeister stempeln – das dritte Siegel ist euer.',
   },
   {
@@ -67,9 +67,9 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     id: 'operations_gears',
     station: 'Station 4/5',
     title: 'Die Minen des Betriebs',
-    task: 'Dreht die vier beweglichen Räder, bis der Antrieb vom Motor bis zum Tor durchgreift.',
+    task: 'Dreht die Zahnräder, bis alle Verbindungen passen.',
     atmosphere: 'Serverglut, Zahnräder – und ein Zwerg, der jeden Release seit dem Wiederaufbau gesehen hat.',
-    hint: 'Jedes treibende Rad hat genau einen Zapfen. Dreht ihn zum rechten Nachbarn – und sorgt dafür, dass dort ein Loch steht. Fangt links an.',
+    hint: 'Ein Zapfen fasst nur in eine Kerbe derselben Form. Fangt beim Motor an – dort passen mehrere Stellungen, aber nur eine trägt bis zum Tor.',
     successLine: 'Die Maschine läuft. Der Betrieb nickt knapp. Das vierte Siegel gehört euch.',
   },
   {

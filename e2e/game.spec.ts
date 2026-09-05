@@ -568,7 +568,7 @@ test.describe('Minen des Betriebs: Kette statt Einzelkontakte', () => {
     }
 
     await expect(atGears.page.locator('.gears__contact')).toHaveCount(1);
-    await expect(atGears.page.locator('.gears__contact-item.is-live')).toHaveCount(1);
+    await expect(atGears.page.locator('.gears__pip.is-live')).toHaveCount(1);
     // die Maschine läuft deswegen noch lange nicht
     await expect(atGears.page.locator('.puzzle--gears.is-running')).toHaveCount(0);
 
@@ -613,8 +613,8 @@ test.describe('Minen des Betriebs: Kette statt Einzelkontakte', () => {
     await expect(atGears.page.locator('.puzzle--gears.is-running')).toHaveCount(1);
     await expect(atGears.page.locator('.gears__contact')).toHaveCount(6);
     await expect(atGears.page.locator('.gears__gate.is-open')).toHaveCount(1);
-    // gesperrt: die Regler verschwinden, sobald die Maschine läuft
-    await expect(atGears.page.locator('.gears__turn')).toHaveCount(0);
+    // gesperrt: die Greifflächen verschwinden, sobald die Maschine läuft
+    await expect(atGears.page.locator('.gear-grip__half')).toHaveCount(0);
 
     await closeTable(table);
   });

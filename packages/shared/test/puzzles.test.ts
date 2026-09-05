@@ -30,6 +30,12 @@ import {
   createTestmastersDiffState,
   reduceTestmastersDiff,
   DIFF_ANTI_SPAM_COOLDOWN_MS,
+  DIFF_COUNT,
+  DIFF_DECOYS,
+  DIFF_FIELDS,
+  DIFF_HOTSPOTS,
+  DIFF_PLAN_HEIGHT,
+  DIFF_PLAN_WIDTH,
 } from '../src/puzzles/testmastersDiff.js';
 import {
   CONTACT_COUNT,
@@ -209,27 +215,74 @@ describe('P2 Die verlorene Verbindung', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* A08 - Puzzle 3: exactly four differences                            */
+/* A08 - Puzzle 3: fünf subtile Abweichungen, fair getroffen           */
 /* ------------------------------------------------------------------ */
 
 describe('P3 Halle der Prüfmeister', () => {
-  it('defines exactly four hotspots', () => {
-    expect(DIFF_HOTSPOT_IDS).toHaveLength(4);
-    expect(new Set(DIFF_HOTSPOT_IDS).size).toBe(4);
+  it('defines exactly five differences with unique ids and fields', () => {
+    expect(DIFF_HOTSPOT_IDS).toHaveLength(5);
+    expect(DIFF_COUNT).toBe(5);
+    expect(new Set(DIFF_HOTSPOT_IDS).size).toBe(5);
+    expect(new Set(DIFF_HOTSPOTS.map((spot) => spot.field)).size).toBe(5);
+    for (const spot of DIFF_HOTSPOTS) {
+      expect(spot.label.length).toBeGreaterThan(0);
+      expect(spot.left).not.toBe(spot.right);
+    }
   });
 
-  it('counts each hotspot once and only solves on all four', () => {
+  /*
+   * Es müssen deutlich mehr Prüffelder sein als Abweichungen: Sonst führte die
+   * Tab-Reihenfolge - und jede Bedienhilfe - direkt zur Lösung.
+   */
+  it('hides the five findings among more inspection fields', () => {
+    expect(DIFF_DECOYS.length).toBeGreaterThanOrEqual(DIFF_COUNT);
+    expect(DIFF_FIELDS).toHaveLength(DIFF_HOTSPOTS.length + DIFF_DECOYS.length);
+    expect(DIFF_FIELDS.filter((entry) => entry.hotspotId !== null)).toHaveLength(DIFF_COUNT);
+    expect(new Set(DIFF_FIELDS.map((entry) => entry.field)).size).toBe(DIFF_FIELDS.length);
+  });
+
+  /*
+   * Zwei Felder dürfen sich nicht überlappen: Sonst entschiede die
+   * Zeichenreihenfolge darüber, was ein Klick trifft, und dieselbe Stelle
+   * verhielte sich auf beiden Plänen unterschiedlich.
+   */
+  it('keeps every inspection field on the plan and clear of its neighbours', () => {
+    for (const entry of DIFF_FIELDS) {
+      expect(entry.area.x).toBeGreaterThanOrEqual(0);
+      expect(entry.area.y).toBeGreaterThanOrEqual(0);
+      expect(entry.area.x + entry.area.w).toBeLessThanOrEqual(DIFF_PLAN_WIDTH);
+      expect(entry.area.y + entry.area.h).toBeLessThanOrEqual(DIFF_PLAN_HEIGHT);
+      // grosszügig genug, dass ein Daumen es trifft
+      expect(entry.area.w).toBeGreaterThanOrEqual(40);
+      expect(entry.area.h).toBeGreaterThanOrEqual(40);
+    }
+
+    for (let i = 0; i < DIFF_FIELDS.length; i += 1) {
+      for (let j = i + 1; j < DIFF_FIELDS.length; j += 1) {
+        const a = DIFF_FIELDS[i]!.area;
+        const b = DIFF_FIELDS[j]!.area;
+        const overlaps =
+          a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+        expect(
+          overlaps,
+          `Prüffeld ${DIFF_FIELDS[i]!.field} überlappt ${DIFF_FIELDS[j]!.field}`,
+        ).toBe(false);
+      }
+    }
+  });
+
+  it('counts each finding once and only solves on all five', () => {
     let state = createTestmastersDiffState();
     let now = 1_000;
     for (const id of DIFF_HOTSPOT_IDS) {
       const next = reduceTestmastersDiff(state, { type: 'hit', hotspotId: id }, now);
       expect(next).not.toBeNull();
       state = next!;
-      // a repeated click on the same hotspot changes nothing
+      // a repeated click on the same finding changes nothing
       expect(reduceTestmastersDiff(state, { type: 'hit', hotspotId: id }, now)).toBeNull();
       now += 1_000;
     }
-    expect(state.found).toHaveLength(4);
+    expect(state.found).toHaveLength(DIFF_COUNT);
     expect(state.solved).toBe(true);
   });
 
@@ -242,6 +295,7 @@ describe('P3 Halle der Prüfmeister', () => {
     expect(missed!.misses).toBe(1);
   });
 
+  /* Ein Fehlgriff kostet keine Zeit - nur eine kurze Sperre gegen Klickfluten. */
   it('enforces the anti spam cooldown after a miss', () => {
     const state = createTestmastersDiffState();
     const missed = reduceTestmastersDiff(state, { type: 'miss' }, 10_000)!;

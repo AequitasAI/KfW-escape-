@@ -1,5 +1,5 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
-import { companionsGathered, GEAR_LABELS, GEAR_SOLUTION } from '@kfw-escape/shared';
+import { companionsGathered, DIFF_HOTSPOTS, GEAR_LABELS, GEAR_SOLUTION } from '@kfw-escape/shared';
 
 export interface PlayerHandle {
   name: string;
@@ -159,16 +159,17 @@ export async function solveCableBoard(page: Page): Promise<void> {
   }
 }
 
-export const DIFF_LABELS = [
-  'Rune oben links',
-  'Pfeilrichtung der mittleren Verbindung',
-  'Speichen des unteren Zahnrads',
-  'Beschriftung des Behälters',
-];
+/**
+ * Die fünf Abweichungen sitzen in benannten Prüffeldern; getroffen wird das
+ * Feld, nicht das Pixel. Abgeleitet aus der Rätseldefinition statt abgeschrieben
+ * - wird eine Abweichung verschoben, zieht der Test mit.
+ */
+export const DIFF_FIELDS_WITH_FINDING = DIFF_HOTSPOTS.map((spot) => spot.field);
 
 export async function solveDiff(page: Page): Promise<void> {
-  for (const label of DIFF_LABELS) {
-    await page.locator(`[aria-label="Auffälligkeit prüfen: ${label}"]`).first().click();
+  const plan = page.locator('.diff__plan').first();
+  for (const field of DIFF_FIELDS_WITH_FINDING) {
+    await plan.locator(`[data-field="${field}"]`).click();
     await page.waitForTimeout(300);
   }
 }
