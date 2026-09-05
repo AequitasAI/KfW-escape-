@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { GAME_TITLE, PUZZLES, companionsGathered } from '@kfw-escape/shared';
 import type { SocketAuth } from '@kfw-escape/shared';
 import { Avatar } from '../components/Avatar.js';
-import { ConnectionPill, ProgressTrail, SealRow, Timer } from '../components/Chrome.js';
+import { ConnectionPill, HandoverPicker, ProgressTrail, SealRow, Timer } from '../components/Chrome.js';
 import { api, RequestError } from '../lib/api.js';
 import type { HostSession, HostStatus } from '../lib/api.js';
 import { loadHostSecret, rememberHostedCode, saveHostSecret } from '../lib/identity.js';
@@ -35,6 +35,7 @@ export function HostView(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [joinUrl, setJoinUrl] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
+  const [pickSolver, setPickSolver] = useState(false);
 
   // null while the first probe is in flight - the shell must not flash a login
   const [hostStatus, setHostStatus] = useState<HostStatus | null>(null);
@@ -397,11 +398,36 @@ export function HostView(): JSX.Element {
                   type="button"
                   className="btn"
                   disabled={!inPuzzle}
+                  onClick={() => setPickSolver((open) => !open)}
+                >
+                  Gefährten auswählen
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={!inPuzzle}
                   onClick={() => channel.emit('host:skipPuzzle')}
                 >
                   Prüfung überspringen
                 </button>
               </div>
+
+              {inPuzzle && pickSolver && snapshot ? (
+                <HandoverPicker
+                  title="Prüfung übergeben an:"
+                  players={snapshot.players}
+                  excludeId={snapshot.solver.solverId ?? snapshot.solver.candidateId}
+                  onPick={(playerId) => {
+                    channel.emit('host:setSolver', { playerId });
+                    setPickSolver(false);
+                  }}
+                  onRandom={() => {
+                    channel.emit('host:rerollSolver');
+                    setPickSolver(false);
+                  }}
+                  onCancel={() => setPickSolver(false)}
+                />
+              ) : null}
 
               <details className="host__danger">
                 <summary>Notfalleingriffe</summary>

@@ -8,7 +8,12 @@ import type {
   SocketAuth,
 } from '@kfw-escape/shared';
 import { config } from './config.js';
-import { REJECTION_MESSAGES, type GameSession, type SessionEvent } from './gameSession.js';
+import {
+  HANDOVER_MESSAGES,
+  REJECTION_MESSAGES,
+  type GameSession,
+  type SessionEvent,
+} from './gameSession.js';
 import { log } from './logger.js';
 import type { SessionManager } from './sessionManager.js';
 import { RateLimiter } from './util.js';
@@ -208,6 +213,14 @@ export function createSocketServer(httpServer: HttpServer, manager: SessionManag
       }
     });
 
+    socket.on('solver:handOver', (payload) => {
+      if (!allowControl()) return;
+      const playerId = socket.data.playerId;
+      if (!playerId) return fail('Nur Spielende können weitergeben.', 'PLAYER_ONLY');
+      const outcome = session.handOverTo(payload?.playerId, playerId);
+      if (outcome !== 'OFFERED') fail(HANDOVER_MESSAGES[outcome], outcome);
+    });
+
     socket.on('hint:request', () => {
       if (!allowControl()) return;
       if (!session.revealHint(socket.data.playerId)) {
@@ -271,6 +284,12 @@ export function createSocketServer(httpServer: HttpServer, manager: SessionManag
     socket.on('host:resume', () => {
       if (!allowControl() || !requireHost()) return;
       if (!session.resume()) fail('Die Session ist nicht pausiert.', 'RESUME_REJECTED');
+    });
+
+    socket.on('host:setSolver', (payload) => {
+      if (!allowControl() || !requireHost()) return;
+      const outcome = session.handOverTo(payload?.playerId, null);
+      if (outcome !== 'OFFERED') fail(HANDOVER_MESSAGES[outcome], outcome);
     });
 
     socket.on('host:rerollSolver', () => {

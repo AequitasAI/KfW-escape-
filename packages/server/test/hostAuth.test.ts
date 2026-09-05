@@ -274,3 +274,213 @@ describe('Weitergeben ohne Gegenüber', () => {
     expect(game.candidateId).not.toBe(first);
   });
 });
+
+/* ------------------------------------------------------------------ */
+/* Gefährtenwahl                                                       */
+/* ------------------------------------------------------------------ */
+
+function trialWith(names: string[]): { game: GameSession; ids: string[] } {
+  const repo = new Repository(openDatabase(':memory:'));
+  const game = new GameSession(repo, {
+    id: `s-${names.join('-')}`,
+    code: 'SOLVER',
+    hostSecret: 'x',
+    createdAt: Date.now(),
+  });
+  repo.insertSession(game.toRow());
+  const ids = names.map((name) => {
+    const player = game.addPlayer(name);
+    game.setConnected(player.id, true);
+    return player.id;
+  });
+  game.start();
+  game.advancePhase();
+  return { game, ids };
+}
+
+describe('Beim Start wird immer ein Gefährte gesetzt', () => {
+  it('auch wenn nur eine Person verbunden ist', () => {
+    const { game, ids } = trialWith(['Markus']);
+    expect(game.status).toBe('PUZZLE_ACTIVE');
+    expect(game.candidateId).toBe(ids[0]);
+    expect(game.snapshot().solver.candidateName).toBe('Markus');
+  });
+
+  it('bei mehreren Personen genau eine', () => {
+    const { game, ids } = trialWith(['Mara', 'Jonas', 'Alex']);
+    expect(ids).toContain(game.candidateId);
+    expect(game.snapshot().players.filter((p) => p.isCandidate)).toHaveLength(1);
+  });
+
+  it('holt ein verpasstes Angebot nach, statt ohne Gefährten stehen zu bleiben', () => {
+    /*
+     * Der eigentliche Fehler: Das Angebot wurde genau einmal beim Öffnen der
+     * Prüfung ausgesprochen. War in diesem Moment niemand verbunden - bei einer
+     * einzelnen Person genügt eine Bildschirmsperre -, blieb die Prüfung
+     * dauerhaft ohne Gefährten stehen, und nur "neu ziehen" kam da wieder raus.
+     */
+    const repo = new Repository(openDatabase(':memory:'));
+    const game = new GameSession(repo, {
+      id: 'gap',
+      code: 'GAP001',
+      hostSecret: 'x',
+      createdAt: Date.now(),
+    });
+    repo.insertSession(game.toRow());
+    const alone = game.addPlayer('Markus');
+    game.setConnected(alone.id, true);
+    game.start();
+
+    // genau im Übergang weg
+    game.setConnected(alone.id, false);
+    game.advancePhase();
+    expect(game.status).toBe('PUZZLE_ACTIVE');
+    expect(game.candidateId).toBeNull();
+
+    // zurück - und die Prüfung wird sofort angeboten
+    game.setConnected(alone.id, true);
+    expect(game.candidateId).toBe(alone.id);
+  });
+
+  it('fängt es auch ohne Wiederverbinden im Tick auf', () => {
+    const repo = new Repository(openDatabase(':memory:'));
+    const game = new GameSession(repo, {
+      id: 'tick',
+      code: 'TICK01',
+      hostSecret: 'x',
+      createdAt: Date.now(),
+    });
+    repo.insertSession(game.toRow());
+    const a = game.addPlayer('Mara');
+    const b = game.addPlayer('Jonas');
+    game.setConnected(a.id, true);
+    game.start();
+    game.setConnected(a.id, false);
+    game.advancePhase();
+    expect(game.candidateId).toBeNull();
+
+    // jemand anderes ist da: der nächste Tick zieht ihn
+    game.setConnected(b.id, true);
+    game.tick();
+    expect(game.candidateId).toBe(b.id);
+  });
+
+  it('bleibt ohne verbundene Person ruhig und erholt sich danach', () => {
+    const repo = new Repository(openDatabase(':memory:'));
+    const game = new GameSession(repo, {
+      id: 'empty',
+      code: 'EMPTY1',
+      hostSecret: 'x',
+      createdAt: Date.now(),
+    });
+    repo.insertSession(game.toRow());
+    const solo = game.addPlayer('Markus');
+    game.setConnected(solo.id, true);
+    game.start();
+    game.setConnected(solo.id, false);
+    game.advancePhase();
+
+    // kein Absturz, keine Endlosschleife, nur kein Angebot
+    game.tick();
+    game.tick();
+    expect(game.candidateId).toBeNull();
+    expect(game.status).toBe('PUZZLE_ACTIVE');
+
+    game.setConnected(solo.id, true);
+    expect(game.candidateId).toBe(solo.id);
+  });
+
+  it('lässt einen kurzen Verbindungsabbruch den Gefährten nicht verlieren', () => {
+    const { game } = trialWith(['Mara', 'Jonas']);
+    const solver = game.candidateId as string;
+    game.acceptSolver(solver);
+    expect(game.solverId).toBe(solver);
+
+    // Netzwechsel: weg und gleich wieder da
+    game.setConnected(solver, false);
+    game.tick();
+    game.setConnected(solver, true);
+    game.tick();
+
+    expect(game.solverId).toBe(solver);
+    expect(game.candidateId).toBeNull();
+  });
+
+  it('zieht nach einem Ablehnen sofort den nächsten', () => {
+    const { game, ids } = trialWith(['Mara', 'Jonas']);
+    const first = game.candidateId as string;
+    expect(game.declineSolver(first)).toBe('PASSED');
+    expect(game.candidateId).not.toBe(first);
+    expect(ids).toContain(game.candidateId);
+  });
+});
+
+describe('Gezielte Übergabe', () => {
+  it('übergibt an eine bestimmte Person und entzieht der vorherigen die Rechte', () => {
+    const { game, ids } = trialWith(['Mara', 'Jonas', 'Alex']);
+    const from = game.candidateId as string;
+    game.acceptSolver(from);
+    expect(game.solverId).toBe(from);
+
+    const target = ids.find((id) => id !== from) as string;
+    expect(game.handOverTo(target, from)).toBe('OFFERED');
+
+    expect(game.candidateId).toBe(target);
+    expect(game.solverId).toBeNull();
+    // die vorherige Person darf nichts mehr bedienen
+    const rejected = game.applyPuzzleAction(from, game.currentPuzzle.id, { type: 'swap', a: 0, b: 1 });
+    expect(rejected).toEqual({ ok: false, reason: 'NOT_SOLVER' });
+  });
+
+  it('lässt niemanden übergeben, der die Prüfung gar nicht hat', () => {
+    const { game, ids } = trialWith(['Mara', 'Jonas', 'Alex']);
+    const holder = game.candidateId as string;
+    const stranger = ids.find((id) => id !== holder) as string;
+    const other = ids.find((id) => id !== holder && id !== stranger) as string;
+    expect(game.handOverTo(other, stranger)).toBe('NOT_ALLOWED');
+    expect(game.candidateId).toBe(holder);
+  });
+
+  it('weist unbekannte, getrennte und bereits aktive Ziele ab', () => {
+    const { game, ids } = trialWith(['Mara', 'Jonas', 'Alex']);
+    const holder = game.candidateId as string;
+    const target = ids.find((id) => id !== holder) as string;
+
+    expect(game.handOverTo('gibt-es-nicht', holder)).toBe('UNKNOWN_TARGET');
+    expect(game.handOverTo(42, holder)).toBe('UNKNOWN_TARGET');
+    expect(game.handOverTo(holder, holder)).toBe('ALREADY_ACTIVE');
+
+    game.setConnected(target, false);
+    expect(game.handOverTo(target, holder)).toBe('TARGET_OFFLINE');
+    expect(game.candidateId).toBe(holder);
+  });
+
+  it('erlaubt der Spielleitung dasselbe ohne eigene Kennung', () => {
+    const { game, ids } = trialWith(['Mara', 'Jonas']);
+    const holder = game.candidateId as string;
+    const target = ids.find((id) => id !== holder) as string;
+    expect(game.handOverTo(target, null)).toBe('OFFERED');
+    expect(game.candidateId).toBe(target);
+  });
+
+  it('hebt ein früheres Ablehnen der Zielperson auf', () => {
+    const { game, ids } = trialWith(['Mara', 'Jonas', 'Alex']);
+    const first = game.candidateId as string;
+    game.declineSolver(first);
+    const second = game.candidateId as string;
+
+    // die erste Person hat abgelehnt - gezielt darf sie trotzdem gewählt werden
+    expect(game.getPlayer(first)?.declinedCurrentPuzzle).toBe(true);
+    expect(game.handOverTo(first, second)).toBe('OFFERED');
+    expect(game.candidateId).toBe(first);
+    expect(game.getPlayer(first)?.declinedCurrentPuzzle).toBe(false);
+    expect(ids).toContain(first);
+  });
+
+  it('lässt den Zufall unangetastet', () => {
+    const { game } = trialWith(['Mara', 'Jonas']);
+    const first = game.candidateId as string;
+    expect(game.rerollSolver()).toBe(true);
+    expect(game.candidateId).not.toBe(first);
+  });
+});

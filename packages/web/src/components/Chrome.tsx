@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { PuzzleMetaView, SolverView, TimerView } from '@kfw-escape/shared';
+import type { PlayerView, PuzzleMetaView, SolverView, TimerView } from '@kfw-escape/shared';
 import { describeClock, formatClock, useServerClock } from '../lib/useServerClock.js';
 import { sound } from '../lib/sound.js';
 import { DwarfArt, type DwarfMood } from '../scenes/Characters.js';
@@ -167,6 +167,64 @@ export function SolverBanner({
         )}
       </div>
       {children ? <div className="solver-banner__actions">{children}</div> : null}
+    </div>
+  );
+}
+
+/**
+ * Auswahl, an wen die Prüfung gehen soll.
+ *
+ * Wer noch nicht dran war, steht oben - das ist die Regel, nach der auch der
+ * Zufall zieht. Wer schon dran war, verschwindet nicht, sondern wird
+ * gekennzeichnet: In einer kleinen Runde ist irgendwann jeder einmal dran
+ * gewesen, und dann darf die Auswahl nicht leer sein.
+ */
+export function HandoverPicker({
+  players,
+  excludeId,
+  onPick,
+  onRandom,
+  onCancel,
+  title,
+}: {
+  players: PlayerView[];
+  excludeId: string | null;
+  onPick: (playerId: string) => void;
+  onRandom: () => void;
+  onCancel: () => void;
+  title: string;
+}): JSX.Element {
+  const available = players.filter((p) => p.connected && p.id !== excludeId);
+  const fresh = available.filter((p) => p.solverCount === 0 && !p.declinedCurrent);
+  const used = available.filter((p) => p.solverCount > 0 || p.declinedCurrent);
+
+  return (
+    <div className="handover" role="group" aria-label={title}>
+      <p className="handover__title">{title}</p>
+      {available.length === 0 ? (
+        <p className="field__hint">Es ist gerade niemand sonst verbunden.</p>
+      ) : (
+        <ul className="handover__list">
+          {[...fresh, ...used].map((player) => (
+            <li key={player.id}>
+              <button type="button" className="btn btn--block handover__pick" onClick={() => onPick(player.id)}>
+                <Avatar id={player.avatar} title={false} />
+                <span className="handover__name">{player.displayName}</span>
+                {player.solverCount > 0 ? <span className="chip">war schon dran</span> : null}
+                {player.declinedCurrent ? <span className="chip">hat abgelehnt</span> : null}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="handover__actions">
+        <button type="button" className="btn" onClick={onRandom}>
+          Zufällig auswählen
+        </button>
+        <button type="button" className="btn" onClick={onCancel}>
+          Abbrechen
+        </button>
+      </div>
     </div>
   );
 }

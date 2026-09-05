@@ -151,115 +151,78 @@
 .puzzle--wide .clues__list {
   font-size: var(--kfw-font-size-large);
 }
-
 /* ------------------------------------------------------------------ */
-/* P2 Cable labyrinth                                                  */
+/* P2 Die verlorene Verbindung - Runenkanäle                           */
 /* ------------------------------------------------------------------ */
-
-.cable__frame {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.4rem, 1.5vw, 1.25rem);
-  width: 100%;
-  justify-content: center;
-}
-
-.cable__board {
-  width: min(100%, 460px);
-  height: auto;
-}
 
 /*
- * On the big screen the board is bound by height, not width: a 16:9 beamer has
- * far more horizontal room than vertical, and the board must never push the
- * solver panel below the fold.
+ * Quelle und Fassung liegen im selben SVG wie das Brett und auf der Höhe ihrer
+ * tatsächlichen Reihe. Vorher standen sie als eigene Kästen daneben, vertikal
+ * zentriert - die Einspeisehöhe war damit schlicht nicht ablesbar.
  */
-.puzzle--wide .cable__board {
-  width: auto;
-  height: min(48vh, 460px);
-  max-width: 100%;
+.cable__board {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* an das Sichtfeld gebunden, nicht an die Breite: sonst läuft das Brett auf
+     der Grossbildansicht unter die Falz */
+  max-height: min(52vh, 520px);
+  overflow: visible;
 }
 
-.puzzle--wide .cable__port-core {
-  height: clamp(56px, 9vh, 92px);
+.cable__bed {
+  fill: color-mix(in srgb, var(--game-fx-stone-deep) 88%, transparent);
+  stroke: color-mix(in srgb, var(--game-fx-metal) 45%, transparent);
+  stroke-width: 3;
 }
 
-.cable__port {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35rem;
-  flex: none;
+/* Die aktiven Reihen sind am Rahmen markiert, damit man sie sieht statt liest. */
+.cable__lane {
+  fill: var(--game-fx-energy);
+  opacity: 0.55;
 }
 
-.cable__port-core {
-  width: clamp(18px, 3vw, 26px);
-  height: clamp(46px, 8vw, 74px);
-  border-radius: 6px;
-  background: var(--game-fx-metal-dark);
-  border: 1px solid var(--game-ui-line-strong);
-  transition: background var(--game-dur) var(--game-ease);
+.cable__lane--out {
+  fill: var(--game-fx-metal);
+  opacity: 0.45;
 }
 
-.cable__port-core.is-live {
-  background: var(--game-fx-energy);
-  box-shadow: 0 0 18px var(--game-fx-energy-glow);
+.cable__lane--out.is-live {
+  fill: var(--game-fx-energy);
+  opacity: 0.9;
 }
 
-.cable__port-label {
-  font-size: var(--kfw-font-size-xsmall);
-  color: var(--game-ui-text-muted);
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
+.cable__gap {
+  fill: rgb(0 0 0 / 0.55);
+  stroke: color-mix(in srgb, var(--game-fx-metal-dark) 70%, transparent);
+  stroke-dasharray: 7 7;
 }
+
+/* --- Platten ------------------------------------------------------- */
 
 .cable-tile__body {
-  fill: color-mix(in srgb, var(--game-fx-stone) 88%, transparent);
-  stroke: var(--game-fx-metal-dark);
-  stroke-width: 1.5;
-  transition: fill var(--game-dur-fast) var(--game-ease), stroke var(--game-dur-fast) var(--game-ease);
-}
-
-.cable-tile__conduit {
-  stroke: var(--game-fx-metal-dark);
-  stroke-width: 13;
-  stroke-linecap: round;
-}
-
-.cable-tile__core {
-  stroke: transparent;
-  stroke-width: 6;
-  stroke-linecap: round;
-  transition: stroke var(--game-dur) var(--game-ease);
-}
-
-.cable-tile__hub {
-  fill: var(--game-fx-metal-dark);
+  fill: url(#cable-plate);
+  stroke: #201b13;
+  stroke-width: 2.5;
   transition: fill var(--game-dur) var(--game-ease);
 }
 
-.cable-tile.is-live .cable-tile__core {
-  stroke: var(--game-fx-energy);
-  stroke-dasharray: 10 14;
-  animation: energy-dash 900ms linear infinite;
-  filter: drop-shadow(0 0 5px var(--game-fx-energy-glow));
+.cable-tile__bevel {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.07);
+  stroke-width: 2;
 }
 
-.cable-tile.is-live .cable-tile__hub {
-  fill: var(--game-fx-energy);
+.cable-tile.is-live .cable-tile__body {
+  fill: url(#cable-plate-live);
 }
 
 .cable-tile.is-movable {
   cursor: pointer;
 }
 
-.cable-tile.is-movable .cable-tile__body {
-  stroke: var(--game-fx-energy);
-  stroke-dasharray: 5 4;
-}
-
 .cable-tile.is-movable:hover .cable-tile__body {
-  fill: color-mix(in srgb, var(--game-fx-stone) 60%, #fff 8%);
+  stroke: var(--game-fx-rune);
 }
 
 .cable-tile:focus-visible {
@@ -267,9 +230,128 @@
 }
 
 .cable-tile:focus-visible .cable-tile__body {
-  stroke: var(--game-ui-focus);
-  stroke-width: 3.5;
-  stroke-dasharray: none;
+  stroke: var(--game-fx-rune);
+  stroke-width: 4;
+}
+
+/* --- Kanäle -------------------------------------------------------- */
+
+.cable-tile__conduit {
+  stroke: #17130d;
+  stroke-width: 15;
+  stroke-linecap: round;
+}
+
+.cable-tile__core {
+  stroke: color-mix(in srgb, var(--game-fx-metal) 60%, transparent);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke var(--game-dur) var(--game-ease);
+}
+
+.cable-tile.is-live .cable-tile__core {
+  stroke: var(--game-fx-energy);
+  stroke-dasharray: 10 12;
+  animation: energy-dash 900ms linear infinite;
+  filter: drop-shadow(0 0 5px var(--game-fx-energy-glow));
+}
+
+.cable-tile__hub {
+  fill: #17130d;
+  stroke: color-mix(in srgb, var(--game-fx-metal) 55%, transparent);
+  stroke-width: 3;
+}
+
+.cable-tile.is-live .cable-tile__hub {
+  fill: var(--game-fx-energy);
+  stroke: #ffe6ad;
+  filter: drop-shadow(0 0 7px var(--game-fx-energy-glow));
+}
+
+/* --- Quelle -------------------------------------------------------- */
+
+.cable__feed {
+  stroke: color-mix(in srgb, var(--game-fx-metal-dark) 80%, transparent);
+  stroke-width: 11;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.cable__source.is-live .cable__feed {
+  stroke: var(--game-fx-energy);
+  stroke-dasharray: 10 12;
+  animation: energy-dash 900ms linear infinite;
+  filter: drop-shadow(0 0 6px var(--game-fx-energy-glow));
+}
+
+.cable__source-halo {
+  fill: url(#cable-core);
+  opacity: 0.35;
+  transition: opacity var(--game-dur) var(--game-ease);
+}
+
+.cable__source.is-live .cable__source-halo {
+  opacity: 0.85;
+  animation: pulse-soft 2.6s var(--game-ease) infinite;
+}
+
+.cable__source-stone {
+  fill: #2a2318;
+  stroke: var(--game-fx-metal);
+  stroke-width: 3;
+}
+
+.cable__source-core {
+  fill: var(--game-fx-energy);
+  filter: drop-shadow(0 0 10px var(--game-fx-energy-glow));
+}
+
+.cable__source-rune {
+  stroke: var(--game-fx-rune);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+/* --- Fassung ------------------------------------------------------- */
+
+.cable__target-frame {
+  fill: #241d15;
+  stroke: var(--game-fx-metal);
+  stroke-width: 3;
+}
+
+.cable__target-crystal {
+  fill: #3b3223;
+  stroke: color-mix(in srgb, var(--game-fx-metal) 70%, transparent);
+  stroke-width: 3;
+  transition: fill var(--game-dur-slow) var(--game-ease-out);
+}
+
+.cable__target.is-open .cable__target-crystal {
+  fill: var(--game-fx-energy);
+  stroke: #ffe6ad;
+  filter: drop-shadow(0 0 14px var(--game-fx-energy-glow));
+}
+
+.cable__target.is-open .cable__feed {
+  stroke: var(--game-fx-energy);
+  filter: drop-shadow(0 0 6px var(--game-fx-energy-glow));
+}
+
+.cable__caption {
+  fill: var(--game-ui-text-muted);
+  font-size: 22px;
+  font-family: var(--game-font-story, inherit);
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cable-tile.is-live .cable-tile__core,
+  .cable__source.is-live .cable__feed,
+  .cable__source.is-live .cable__source-halo {
+    animation: none;
+  }
 }
 
 /* ------------------------------------------------------------------ */

@@ -57,6 +57,21 @@ export type ActionRejection =
  */
 export type DeclineResult = 'PASSED' | 'ALONE' | 'REJECTED';
 
+/** Warum eine gezielte Übergabe abgelehnt wurde. */
+export type HandoverResult =
+  | 'OFFERED'
+  | 'NOT_ALLOWED'
+  | 'UNKNOWN_TARGET'
+  | 'TARGET_OFFLINE'
+  | 'ALREADY_ACTIVE';
+
+export const HANDOVER_MESSAGES: Record<Exclude<HandoverResult, 'OFFERED'>, string> = {
+  NOT_ALLOWED: 'Diese Übergabe steht dir gerade nicht zu.',
+  UNKNOWN_TARGET: 'Diesen Gefährten gibt es in dieser Reisegruppe nicht.',
+  TARGET_OFFLINE: 'Dieser Gefährte ist gerade nicht verbunden.',
+  ALREADY_ACTIVE: 'Dieser Gefährte hat die Prüfung bereits.',
+};
+
 export type ActionResult =
   | { ok: true; state: PuzzleStateUnion; solved: boolean }
   | { ok: false; reason: ActionRejection };
@@ -253,6 +268,24 @@ export class GameSession {
     player.lastSeenAt = Date.now();
     this.persistPlayer(player);
     this.emit({ type: 'players' }, { type: 'snapshot' });
+
+    /*
+     * Wer sich verbindet, während die laufende Prüfung ohne Gefährten dasteht,
+     * bekommt sie sofort angeboten - statt bis zum nächsten Tick zu warten.
+     */
+    if (connected && this.needsSolverOffer()) this.offerSolver();
+  }
+
+  /**
+   * Läuft gerade eine Prüfung, für die weder ein Gefährte angenommen hat noch
+   * einer angeboten ist?
+   *
+   * Ein Verweis auf einen inzwischen verschwundenen Spieler zählt ebenfalls als
+   * "keiner": nach einem Zurücksetzen kann eine alte Kennung stehen bleiben.
+   */
+  private needsSolverOffer(): boolean {
+    if (this.status !== 'PUZZLE_ACTIVE') return false;
+    return this.getPlayer(this.solverId ?? this.candidateId) === undefined;
   }
 
   renamePlayer(playerId: string, raw: unknown): boolean {
@@ -396,6 +429,48 @@ export class GameSession {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Übergibt die Prüfung gezielt an eine bestimmte Person.
+   *
+   * `by` ist die auslösende Person oder null für die Spielleitung. Geprüft wird
+   * serverseitig und vollständig - ein Client darf hier nichts vorentscheiden.
+   */
+  handOverTo(targetId: unknown, by: string | null): HandoverResult {
+    if (this.status !== 'PUZZLE_ACTIVE') return 'NOT_ALLOWED';
+    // nur wer die Prüfung gerade hat, darf sie weitergeben; die Spielleitung immer
+    if (by !== null && by !== this.solverId && by !== this.candidateId) return 'NOT_ALLOWED';
+    if (typeof targetId !== 'string') return 'UNKNOWN_TARGET';
+
+    const target = this.players.get(targetId);
+    if (!target) return 'UNKNOWN_TARGET';
+    if (!target.connected) return 'TARGET_OFFLINE';
+    if (target.id === this.solverId || target.id === this.candidateId) return 'ALREADY_ACTIVE';
+
+    // eine gezielte Übergabe hebt ein früheres Ablehnen dieser Person auf
+    if (target.declinedCurrentPuzzle) {
+      target.declinedCurrentPuzzle = false;
+      this.persistPlayer(target);
+    }
+
+    const previous = this.solverId ?? this.candidateId;
+    this.solverId = null;
+    this.candidateId = target.id;
+    this.puzzleStatuses[this.currentPuzzleIndex] = 'SOLVER_OFFERED';
+    this.solverAbsentSince = null;
+    this.persist();
+    this.repo.recordEvent(this.id, 'solver.handover', this.currentPuzzle.id, target.id, {
+      from: previous,
+      by,
+    });
+    this.emit(
+      { type: 'solverOffered', candidateId: target.id, candidateName: target.displayName },
+      { type: 'solverChanged' },
+      { type: 'players' },
+      { type: 'snapshot' },
+    );
+    return 'OFFERED';
   }
 
   /** Host failsafe: draw a new companion even if one already accepted. */
@@ -616,6 +691,25 @@ export class GameSession {
         this.finish(true);
         return;
       }
+    }
+
+    /*
+     * Zusicherung: Eine laufende Prüfung hat immer einen Gefährten - angeboten
+     * oder angenommen.
+     *
+     * Das Angebot wurde bisher genau einmal beim Öffnen ausgesprochen. War in
+     * diesem Moment niemand verbunden - Bildschirmsperre, Reload, Netzwechsel
+     * im Übergang, und bei nur einer Person genügt schon eine Sekunde -, blieb
+     * die Prüfung dauerhaft ohne Gefährten stehen. Herausgekommen ist man da
+     * nur durch "Gefährten neu ziehen" von Hand.
+     */
+    if (this.needsSolverOffer()) {
+      this.solverAbsentSince = null;
+      if (this.connectedPlayers.length > 0) {
+        this.repo.recordEvent(this.id, 'solver.reoffered', this.currentPuzzle.id, null, null);
+        this.offerSolver();
+      }
+      return;
     }
 
     // A companion who vanished must never block the group: after a short grace

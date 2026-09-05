@@ -18,6 +18,7 @@ import {
 import type { SocketAuth } from '@kfw-escape/shared';
 import {
   ConnectionPill,
+  HandoverPicker,
   MuteButton,
   ProgressTrail,
   SealRow,
@@ -52,6 +53,7 @@ export function GameView(): JSX.Element {
   const channel = useSession(auth);
   const { snapshot, solverReveal, solvedFlash } = channel;
   const [revealShown, setRevealShown] = useState<string | null>(null);
+  const [handoverOpen, setHandoverOpen] = useState(false);
 
   useEffect(() => {
     if (!identity) navigate(`/join/${normalized}`, { replace: true });
@@ -71,6 +73,12 @@ export function GameView(): JSX.Element {
   useEffect(() => {
     if (solvedFlash) sound.play('seal');
   }, [solvedFlash]);
+
+  // die Auswahl darf nicht offen stehen bleiben, wenn die Prüfung weiterwandert
+  const candidateId = channel.snapshot?.solver.candidateId ?? null;
+  useEffect(() => {
+    setHandoverOpen(false);
+  }, [candidateId, phase]);
 
   if (!identity) return <div className="view" />;
 
@@ -257,7 +265,7 @@ export function GameView(): JSX.Element {
                       className="btn"
                       onClick={() => {
                         sound.play('click');
-                        channel.emit('solver:decline');
+                        setHandoverOpen((open) => !open);
                       }}
                     >
                       An anderen Gefährten weitergeben
@@ -274,6 +282,25 @@ export function GameView(): JSX.Element {
                 </button>
               ) : null}
             </SolverBanner>
+
+            {isCandidate && handoverOpen ? (
+              <HandoverPicker
+                title="Prüfung weitergeben an:"
+                players={snapshot.players}
+                excludeId={identity.playerId}
+                onPick={(playerId) => {
+                  sound.play('click');
+                  channel.emit('solver:handOver', { playerId });
+                  setHandoverOpen(false);
+                }}
+                onRandom={() => {
+                  sound.play('click');
+                  channel.emit('solver:decline');
+                  setHandoverOpen(false);
+                }}
+                onCancel={() => setHandoverOpen(false)}
+              />
+            ) : null}
           </footer>
         ) : null}
       </div>

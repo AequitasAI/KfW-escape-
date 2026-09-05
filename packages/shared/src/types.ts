@@ -254,6 +254,8 @@ export interface ClientToServerEvents {
   'player:ready': () => void;
   'solver:accept': () => void;
   'solver:decline': () => void;
+  /** Gezielte Übergabe an eine bestimmte Person durch den aktuellen Gefährten. */
+  'solver:handOver': (payload: { playerId: string }) => void;
   'puzzle:action': (payload: PuzzleActionEnvelope) => void;
   'hint:request': () => void;
   'host:start': () => void;
@@ -262,6 +264,8 @@ export interface ClientToServerEvents {
   'host:pause': () => void;
   'host:resume': () => void;
   'host:rerollSolver': () => void;
+  /** Spielleitung setzt den Gefährten gezielt. */
+  'host:setSolver': (payload: { playerId: string }) => void;
   'host:skipPuzzle': () => void;
   'host:addTime': () => void;
   'host:end': () => void;

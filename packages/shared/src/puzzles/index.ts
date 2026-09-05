@@ -46,10 +46,10 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     id: 'cable_labyrinth',
     station: 'Station 2/5',
     title: 'Die verlorene Verbindung',
-    task: 'Verschiebt die Kacheln, bis die Energie von links nach rechts fließt.',
+    task: 'Schiebt die Platten, bis die Energie von der Quelle bis in die Fassung läuft.',
     atmosphere:
-      'Zwei Welten, getrennt durch tote Leitungen. Eine Schnittstelle ist auch nur eine Brücke mit Kabeln.',
-    hint: 'Die Leitung muss in Reihe 2 beginnen und in Reihe 3 rechts austreten. Räumt zuerst den rechten Rand frei.',
+      'Die Energie erwacht links im Runenstein und sucht rechts ihre Fassung. Zwei Welten, getrennt durch tote Kanäle – eine Schnittstelle ist auch nur eine Brücke mit Kabeln.',
+    hint: 'Schiebt zuerst am rechten Rand Platz – von dort aus lässt sich die Leitung nach hinten aufrollen.',
     successLine: 'Die Verbindung steht. Energie fließt wieder durch die alten Leitungen.',
   },
   {

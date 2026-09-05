@@ -699,3 +699,92 @@ test.describe('Vorspann: jeder geht selbst vor', () => {
     await closeTable(table);
   });
 });
+
+test.describe('Gezielte Übergabe', () => {
+  test('der Gefährte wählt aus, wer übernimmt', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas', 'Alex']);
+    await startAdventure(table.host);
+
+    const offered = await findOfferedPlayer(table.players);
+    const others = table.players.filter((p) => p.name !== offered.name);
+    const chosen = others[0]!;
+
+    await offered.page.getByRole('button', { name: /weitergeben/ }).click();
+    // die Auswahl zeigt die anderen Verbundenen, nicht einen selbst
+    await expect(offered.page.locator('.handover__name')).toHaveCount(2);
+    await expect(offered.page.getByText(offered.name, { exact: true })).toHaveCount(0);
+
+    await offered.page.locator('.handover__pick', { hasText: chosen.name }).click();
+
+    // die gewählte Person bekommt das Angebot, die vorherige verliert es
+    await expect(chosen.page.getByRole('button', { name: 'Prüfung annehmen' })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(offered.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
+    // und alle Ansichten nennen dieselbe Person
+    await expect(table.host.getByText(new RegExp(`${chosen.name}.*wurde gewählt`))).toBeVisible();
+
+    await chosen.page.getByRole('button', { name: 'Prüfung annehmen' }).click();
+    await waitForStation(chosen.page, 0);
+
+    await closeTable(table);
+  });
+
+  test('die Spielleitung kann den Gefährten gezielt setzen', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await startAdventure(table.host);
+
+    const offered = await findOfferedPlayer(table.players);
+    const other = table.players.find((p) => p.name !== offered.name)!;
+
+    await table.host.getByRole('button', { name: 'Gefährten auswählen' }).click();
+    await table.host.locator('.handover__pick', { hasText: other.name }).click();
+
+    await expect(other.page.getByRole('button', { name: 'Prüfung annehmen' })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(offered.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
+
+    await closeTable(table);
+  });
+});
+
+test.describe('Die verlorene Verbindung', () => {
+  test('zeigt Ein- und Austritt auf der richtigen Höhe', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await startAdventure(table.host);
+    const solver = await acceptOfferedSolver(table.players);
+    await waitForStation(solver.page, 0);
+    await solveCurrentTrial(solver.page, 0);
+
+    const next = await acceptOfferedSolver(table.players);
+    await waitForStation(next.page, 1);
+
+    /*
+     * Quelle und Fassung liegen im selben SVG wie das Brett - und zwar auf der
+     * Höhe ihrer Reihe. Vorher standen sie vertikal zentriert daneben, sodass
+     * die Einspeisehöhe nur im Hinweistext stand.
+     */
+    const source = next.page.locator('.cable__source');
+    const target = next.page.locator('.cable__target');
+    await expect(source).toBeVisible();
+    await expect(target).toBeVisible();
+
+    const box = async (sel: string): Promise<{ y: number; h: number }> => {
+      const b = await next.page.locator(sel).boundingBox();
+      return { y: b?.y ?? 0, h: b?.height ?? 0 };
+    };
+    const src = await box('.cable__source');
+    const tgt = await box('.cable__target');
+    const row2 = await box('[aria-label^="Kachel Zeile 2 Spalte 1"]');
+    const row3 = await box('[aria-label^="Kachel Zeile 3 Spalte 4"]');
+
+    // Quelle auf Höhe von Reihe 2, Fassung auf Höhe von Reihe 3
+    expect(Math.abs(src.y + src.h / 2 - (row2.y + row2.h / 2))).toBeLessThan(row2.h);
+    expect(Math.abs(tgt.y + tgt.h / 2 - (row3.y + row3.h / 2))).toBeLessThan(row3.h);
+    // und sie liegen nicht auf derselben Höhe, sonst sagt der Test nichts
+    expect(Math.abs(src.y - tgt.y)).toBeGreaterThan(row2.h * 0.5);
+
+    await closeTable(table);
+  });
+});

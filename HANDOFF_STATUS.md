@@ -19,6 +19,9 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Dreissig Sigel der Gefährten, serverseitig und dopplungsfrei vergeben
 - [x] Rätsel 4 als Kettenrätsel mit Steckverbindungen, Eindeutigkeit bewiesen
 - [x] Vorspann mit 30 s Lesezeit; jeder geht selbst vor, das Rätsel öffnet für alle gemeinsam
+- [x] Prüfung bleibt nie ohne Gefährten stehen (Zusicherung im Tick statt Einmalangebot)
+- [x] Gezielte Übergabe der Prüfung durch Gefährte und Spielleitung
+- [x] Rätsel 2 zeigt Ein- und Austritt am Brett statt nur im Hinweistext
 
 ## Funktioniert
 
@@ -152,6 +155,63 @@ zehn Drehungen ab Start, weiterhin durch vollständige Aufzählung aller 4096 Zu
   Deep-Links, Assets und API auf einem Port aus. Der Image-Build ist auf dem Zielhost
   einmal auszuführen (`docker compose up --build -d`).
 - Safari iOS ist nicht getestet, in dieser Umgebung steht nur Chromium zur Verfügung.
+
+## Behobener Fehler: Prüfung ohne Gefährten
+
+**Beobachtung.** Mit genau einer Person in der Session wurde nach dem Start niemand als Gefährte
+gewählt. Nur „Gefährten neu ziehen" von Hand kam da wieder heraus.
+
+**Ursache.** Das Angebot wurde genau **einmal** ausgesprochen – beim Öffnen der Prüfung in
+`enterPuzzle()`. War in diesem Augenblick niemand verbunden, lieferte `choose()` `null`, der Status
+blieb auf `WAITING_FOR_SOLVER`, und **nichts versuchte es je wieder**. Die Absenz-Erkennung im Tick
+griff nicht, weil sie einen vorhandenen, aber getrennten Gefährten voraussetzt (`active &&
+!active.connected`) – bei gar keinem Gefährten lief sie in den `else`-Zweig.
+
+Bei einer einzelnen Person genügt eine Sekunde ohne Verbindung: Bildschirmsperre, Tabwechsel,
+Reload oder Netzwechsel genau im Übergang. Deshalb trat es sporadisch auf und liess sich schwer
+nachstellen.
+
+**Behebung.** Zwei Stellen, beide an der Ursache:
+
+1. `tick()` hält jetzt die Zusicherung aufrecht: *läuft eine Prüfung, gibt es einen Gefährten* –
+   angeboten oder angenommen. Fehlt er und ist jemand verbunden, wird neu angeboten. Ein Verweis auf
+   eine inzwischen verschwundene Person zählt dabei als „keiner".
+2. `setConnected(…, true)` bietet die Prüfung sofort an, wenn sie ohne Gefährten dasteht – ohne auf
+   den nächsten Tick zu warten.
+
+Kein Workaround im Client, keine Sonderbehandlung für eine einzelne Person.
+
+**Tests.** Sieben neue Fälle: eine Person, mehrere Personen, Abbruch genau im Übergang mit
+Wiederverbinden, Auffangen durch den Tick ohne Wiederverbinden, gar niemand verbunden (kein
+Absturz, Erholung danach), Ablehnen zieht sofort nach, kurzer Verbindungsabbruch verliert den
+Gefährten nicht.
+
+## Gezielte Übergabe der Prüfung
+
+Der Gefährte kann die Prüfung jetzt **gezielt** weitergeben statt nur zufällig. Die Auswahl zeigt
+alle verbundenen Personen ausser einem selbst; wer noch nicht dran war, steht oben, wer schon dran
+war oder abgelehnt hat, bleibt sichtbar und wird gekennzeichnet – in einer kleinen Runde ist
+irgendwann jeder einmal dran gewesen, und dann darf die Liste nicht leer sein. „Zufällig auswählen"
+bleibt daneben bestehen. Die Spielleitung hat dieselbe Auswahl.
+
+Geprüft wird serverseitig und vollständig (`handOverTo`): Ziel existiert, gehört zur Session, ist
+verbunden, ist nicht schon aktiv, und die auslösende Person hält die Prüfung tatsächlich. Ein
+früheres Ablehnen der Zielperson wird durch die gezielte Wahl aufgehoben.
+
+## Rätsel 2: Ein- und Austritt sind jetzt sichtbar
+
+**Ursache der Unklarheit.** Quelle und Ziel waren HTML-Kästen **neben** dem Brett und vertikal
+zentriert. Sie zeigten damit prinzipbedingt nicht auf ihre Reihe – die Einspeisehöhe stand nur im
+Hinweistext, und der musste sie deshalb ansagen.
+
+**Jetzt.** Beide liegen im selben SVG wie das Brett, auf der Höhe ihrer tatsächlichen Reihe:
+ein glühender Runenstein links mit Kanal ins Startfeld, eine versiegelte Kristallfassung rechts am
+Austrittsfeld. Die betroffenen Reihen sind zusätzlich am Rahmen markiert. Die Platten sind Stein mit
+eingelassener Fase und vergoldeten Runenkanälen statt nackter Kacheln; die Energie fliesst sichtbar
+von der Quelle bis in die Fassung.
+
+Der Hinweistext konnte dadurch von einer Wegbeschreibung auf einen Tipp zur Vorgehensweise
+zurückgenommen werden.
 
 ## Bekannte Bugs
 - keine offenen

@@ -506,3 +506,56 @@
   background: var(--game-ui-danger);
   animation: none;
 }
+
+/* ------------------------------------------------------------------ */
+/* Gezielte Übergabe                                                   */
+/* ------------------------------------------------------------------ */
+
+.handover {
+  display: grid;
+  gap: 0.5rem;
+  padding: var(--game-space-2);
+  border: 1px solid color-mix(in srgb, var(--game-fx-metal) 55%, transparent);
+  border-radius: var(--game-radius-m);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 92%, transparent);
+  animation: rise-in var(--game-dur) var(--game-ease-out) both;
+}
+
+.handover__title {
+  font-size: var(--kfw-font-size-small);
+  color: var(--game-ui-text-muted);
+}
+
+.handover__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  /* eine grosse Runde soll die Ansicht nicht sprengen */
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.handover__pick {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: left;
+  min-height: 44px;
+}
+
+.handover__name {
+  flex: 1;
+  font-weight: var(--kfw-font-weight-bold);
+}
+
+.handover__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.handover__actions .btn {
+  flex: 1 1 8rem;
+}
