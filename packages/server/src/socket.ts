@@ -259,6 +259,8 @@ export function createSocketServer(httpServer: HttpServer, manager: SessionManag
       io.to(room(session.code)).emit('session:snapshot', session.snapshot());
 
       if (result.solved) session.markSolved();
+      // eine verspielte letzte Prüfung beendet das Abenteuer sofort
+      else if (result.failed) session.markFailed();
       return undefined;
     });
 

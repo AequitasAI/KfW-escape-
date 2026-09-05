@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RUNE_GATES, RUNE_MASTER_COOLDOWN_MS, RUNE_MASTER_LINE } from '@kfw-escape/shared';
+import { RUNE_GATES, RUNE_MASTER_LINE } from '@kfw-escape/shared';
 import type { RuneMasterState } from '@kfw-escape/shared';
 import type { PuzzleProps } from './types.js';
 import { sound } from '../lib/sound.js';
@@ -7,10 +7,14 @@ import { sound } from '../lib/sound.js';
 /**
  * Die Prüfung des Runenmeisters.
  *
- * Zwei Angaben, ein Versuch: das Tor, das den Weg freigibt, und die Inschrift,
- * die als einzige wahr ist. Beides wird getrennt gewählt und gemeinsam
- * geprüft - deshalb liegt der Bestätigungsknopf auch abseits der Tore. Ein
- * Fehlgriff soll aus einer Überlegung kommen, nicht aus einem Daumen.
+ * Zwei Angaben, ein einziger Versuch: das Tor, das den Weg freigibt, und die
+ * Inschrift, die als einzige wahr ist. Beides wird getrennt gewählt und
+ * gemeinsam geprüft.
+ *
+ * Weil eine falsche Antwort das Abenteuer beendet, ist die Oberfläche hier
+ * ausdrücklich langsam: Die beiden Schritte stehen nummeriert da, der Knopf
+ * sagt, was noch fehlt, und vor der Abgabe wird einmal nachgefragt - mit der
+ * Folge im Klartext. Wer hier verliert, soll wissen, worauf er geklickt hat.
  */
 export function RuneMaster({
   state,
@@ -18,55 +22,67 @@ export function RuneMaster({
   onAction,
   size,
 }: PuzzleProps<RuneMasterState>): JSX.Element {
-  const [locked, setLocked] = useState(false);
-
-  /* Nach einer falschen Antwort bleibt der Knopf so lange stumm wie der Server. */
-  useEffect(() => {
-    if (state.lastRejectedAt === null) {
-      setLocked(false);
-      return undefined;
-    }
-    setLocked(true);
-    sound.play('fail');
-    const remaining = Math.max(0, state.lastRejectedAt + RUNE_MASTER_COOLDOWN_MS - Date.now());
-    const timeout = window.setTimeout(() => setLocked(false), remaining);
-    return () => window.clearTimeout(timeout);
-  }, [state.lastRejectedAt]);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     if (state.solved) sound.play('gate');
-  }, [state.solved]);
+    if (state.failed) sound.play('fail');
+  }, [state.solved, state.failed]);
+
+  const settled = state.solved || state.failed;
+  const locked = !interactive || settled;
 
   const pick = (slot: 'gate' | 'inscription', index: number): void => {
-    if (!interactive || state.solved) return;
+    if (locked) return;
     sound.play('click');
+    setConfirming(false);
     onAction({ type: 'pick', slot, index });
   };
 
   const ready = state.gate !== null && state.inscription !== null;
+  const buttonLabel =
+    state.gate === null
+      ? 'Zuerst ein Tor wählen'
+      : state.inscription === null
+        ? 'Jetzt die wahre Inschrift benennen'
+        : 'Das Tor durchschreiten';
 
   return (
-    <div className={`puzzle puzzle--runes-final puzzle--${size}${state.solved ? ' is-open' : ''}`}>
+    <div
+      className={`puzzle puzzle--runes-final puzzle--${size}${state.solved ? ' is-open' : ''}${
+        state.failed ? ' is-failed' : ''
+      }`}
+    >
       <p className="runemaster__npc">„{RUNE_MASTER_LINE}“</p>
+
+      {/* Zwei Schritte, sichtbar nummeriert - der Knopf wartet auf beide. */}
+      <ol className="runemaster__steps" aria-hidden="true">
+        <li className={`runemaster__step${state.gate !== null ? ' is-done' : ''}`}>
+          <span className="runemaster__step-mark">{state.gate !== null ? '✓' : '1'}</span>
+          Tor wählen
+        </li>
+        <li className={`runemaster__step${state.inscription !== null ? ' is-done' : ''}`}>
+          <span className="runemaster__step-mark">{state.inscription !== null ? '✓' : '2'}</span>
+          Wahre Inschrift benennen
+        </li>
+      </ol>
 
       <ol className="runemaster__gates">
         {RUNE_GATES.map((gate, index) => {
           const chosen = state.gate === index;
           const claimed = state.inscription === index;
-          const rejected =
-            state.lastRejected !== null &&
-            (state.lastRejected[0] === index || state.lastRejected[1] === index);
+          const wrong = state.failed && state.answered !== null && state.answered.includes(index);
           return (
             <li
               key={gate.id}
               className={`runemaster__gate${chosen ? ' is-chosen' : ''}${
                 claimed ? ' is-claimed' : ''
-              }${rejected ? ' is-rejected' : ''}${state.solved && chosen ? ' is-open' : ''}`}
+              }${wrong ? ' is-wrong' : ''}${state.solved && chosen ? ' is-open' : ''}`}
             >
               <button
                 type="button"
                 className="runemaster__arch"
-                disabled={!interactive || state.solved}
+                disabled={locked}
                 aria-pressed={chosen}
                 aria-label={`${gate.name} als Weg wählen`}
                 onClick={() => pick('gate', index)}
@@ -74,21 +90,21 @@ export function RuneMaster({
                 <GateArt sigil={gate.sigil} />
                 <span className="runemaster__gate-name">{gate.name}</span>
                 <span className="runemaster__gate-state">
-                  {chosen ? 'als Weg gewählt' : 'als Weg wählen'}
+                  {chosen ? '① als Weg gewählt' : '① als Weg wählen'}
                 </span>
               </button>
 
               <button
                 type="button"
                 className="runemaster__plaque"
-                disabled={!interactive || state.solved}
+                disabled={locked}
                 aria-pressed={claimed}
                 aria-label={`Inschrift des ${gate.name} für wahr erklären: ${gate.inscription}`}
                 onClick={() => pick('inscription', index)}
               >
                 <span className="runemaster__inscription">„{gate.inscription}“</span>
                 <span className="runemaster__gate-state">
-                  {claimed ? 'als einzig wahr benannt' : 'für wahr erklären'}
+                  {claimed ? '② als einzig wahr benannt' : '② für wahr erklären'}
                 </span>
               </button>
             </li>
@@ -97,26 +113,58 @@ export function RuneMaster({
       </ol>
 
       <div className="runemaster__verdict">
-        <button
-          type="button"
-          className="btn btn--primary btn--large"
-          disabled={!interactive || state.solved || !ready || locked}
-          onClick={() => {
-            sound.play('clunk');
-            onAction({ type: 'attempt' });
-          }}
-        >
-          {locked ? 'Der Stein prüft noch …' : 'Das Tor durchschreiten'}
-        </button>
+        {settled ? null : confirming ? (
+          <div className="runemaster__confirm" role="alertdialog" aria-label="Antwort abgeben">
+            <p className="runemaster__confirm-text">
+              <strong>Seid ihr sicher?</strong> Der Runenmeister fragt nur einmal. Eine falsche
+              Angabe beendet das Abenteuer.
+            </p>
+            <div className="runemaster__confirm-row">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  sound.play('click');
+                  setConfirming(false);
+                }}
+              >
+                Noch einmal nachdenken
+              </button>
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={() => {
+                  sound.play('clunk');
+                  setConfirming(false);
+                  onAction({ type: 'attempt' });
+                }}
+              >
+                Ja – durchschreiten
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="btn btn--primary btn--large"
+            disabled={locked || !ready}
+            onClick={() => {
+              sound.play('click');
+              setConfirming(true);
+            }}
+          >
+            {buttonLabel}
+          </button>
+        )}
       </div>
 
       <p className="puzzle__status" role="status" aria-live="polite">
         {state.solved
           ? 'Der Stein gibt nach. Der Weg ist frei.'
-          : state.lastRejected !== null
-            ? 'Das Tor bleibt verschlossen. Eine der beiden Angaben stimmt nicht.'
+          : state.failed
+            ? 'Der Stein schliesst sich. Es gab nur diesen einen Versuch.'
             : ready
-              ? 'Tor und Inschrift benannt. Der Stein wartet.'
+              ? 'Tor und Inschrift benannt. Der Runenmeister wartet auf euer Wort.'
               : 'Wählt ein Tor – und die Inschrift, die als einzige wahr ist.'}
       </p>
     </div>

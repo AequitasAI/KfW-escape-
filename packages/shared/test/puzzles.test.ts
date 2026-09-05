@@ -70,7 +70,6 @@ import {
   inscriptionHolds,
   reduceRuneMaster,
   RUNE_GATE_COUNT,
-  RUNE_MASTER_COOLDOWN_MS,
   RUNE_MASTER_SOLUTION,
   trueInscriptionCount,
 } from '../src/puzzles/runeMaster.js';
@@ -522,37 +521,36 @@ describe('P6 Prüfung des Runenmeisters', () => {
     )!;
     const solved = reduceRuneMaster(state, { type: 'attempt' }, 0)!;
     expect(solved.solved).toBe(true);
+    expect(solved.failed).toBe(false);
     // eine gelöste Prüfung nimmt nichts mehr an
     expect(reduceRuneMaster(solved, { type: 'attempt' }, 1_000)).toBeNull();
   });
 
   /*
-   * Das richtige Tor mit falsch benannter Inschrift zählt nicht: Wer nur rät,
-   * kommt nicht durch, auch wenn er zufällig das richtige Tor trifft.
+   * Ein Versuch, kein zweiter. Das richtige Tor mit falsch benannter Inschrift
+   * zählt genauso wenig wie ein falsches Tor - wer rät, verspielt den Abend,
+   * und genau deshalb wird hier gerechnet statt geraten.
    */
-  it('rejects the right gate with the wrong inscription and locks briefly', () => {
+  it('spends its only attempt on a wrong answer, whatever was wrong about it', () => {
     const wrongInscription = (RUNE_MASTER_SOLUTION.inscription + 1) % RUNE_GATE_COUNT;
     let state = createRuneMasterState();
     state = reduceRuneMaster(state, { type: 'pick', slot: 'gate', index: RUNE_MASTER_SOLUTION.gate }, 0)!;
     state = reduceRuneMaster(state, { type: 'pick', slot: 'inscription', index: wrongInscription }, 0)!;
 
-    const rejected = reduceRuneMaster(state, { type: 'attempt' }, 10_000)!;
-    expect(rejected.solved).toBe(false);
-    expect(rejected.attempts).toBe(1);
-    expect(rejected.lastRejected).toEqual([RUNE_MASTER_SOLUTION.gate, wrongInscription]);
+    const failed = reduceRuneMaster(state, { type: 'attempt' }, 10_000)!;
+    expect(failed.failed).toBe(true);
+    expect(failed.solved).toBe(false);
+    expect(failed.answered).toEqual([RUNE_MASTER_SOLUTION.gate, wrongInscription]);
 
-    // während der Sperre passiert nichts, danach wieder
+    // danach ist nichts mehr zu holen: kein zweiter Versuch, keine Korrektur
+    expect(reduceRuneMaster(failed, { type: 'attempt' }, 60_000)).toBeNull();
     expect(
-      reduceRuneMaster(rejected, { type: 'attempt' }, 10_000 + RUNE_MASTER_COOLDOWN_MS - 1),
+      reduceRuneMaster(
+        failed,
+        { type: 'pick', slot: 'inscription', index: RUNE_MASTER_SOLUTION.inscription },
+        60_000,
+      ),
     ).toBeNull();
-    const fixed = reduceRuneMaster(
-      rejected,
-      { type: 'pick', slot: 'inscription', index: RUNE_MASTER_SOLUTION.inscription },
-      10_000 + RUNE_MASTER_COOLDOWN_MS,
-    )!;
-    expect(reduceRuneMaster(fixed, { type: 'attempt' }, 10_000 + RUNE_MASTER_COOLDOWN_MS)!.solved).toBe(
-      true,
-    );
   });
 
   it('rejects picks outside the three gates', () => {

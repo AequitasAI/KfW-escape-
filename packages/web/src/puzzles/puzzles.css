@@ -1425,10 +1425,82 @@
   background: color-mix(in srgb, var(--game-fx-seal) 12%, transparent);
 }
 
-/* Eine abgelehnte Antwort zuckt einmal - und bleibt danach ruhig. */
-.runemaster__gate.is-rejected .runemaster__arch,
-.runemaster__gate.is-rejected .runemaster__plaque {
+/* Die eine falsche Antwort zuckt einmal - und bleibt danach ruhig. */
+.runemaster__gate.is-wrong .runemaster__arch,
+.runemaster__gate.is-wrong .runemaster__plaque {
+  border-color: var(--game-fx-seal);
   animation: gate-refuse 480ms var(--game-ease) both;
+}
+
+/* --- Zwei Schritte, sichtbar ---------------------------------------- */
+
+/*
+ * Der Knopf braucht beide Angaben. Ohne diese Leiste sah es aus, als sei er
+ * kaputt: Man wählt ein Tor, nichts passiert, und dass noch eine zweite Angabe
+ * fehlt, stand nirgends.
+ */
+.runemaster__steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.runemaster__step {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--game-ui-line);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 70%, transparent);
+  font-size: var(--kfw-font-size-small);
+  color: var(--game-ui-text-muted);
+}
+
+.runemaster__step.is-done {
+  border-color: var(--game-fx-rune);
+  color: var(--game-ui-text);
+}
+
+.runemaster__step-mark {
+  font-weight: var(--kfw-font-weight-bold);
+  color: var(--game-fx-rune);
+}
+
+/* --- Die eine Nachfrage ---------------------------------------------- */
+
+.runemaster__confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 34rem;
+  padding: var(--game-space-2);
+  border-radius: var(--game-radius-m);
+  border: 1px solid color-mix(in srgb, var(--game-fx-seal) 55%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 92%, transparent);
+  animation: rise-in var(--game-dur) var(--game-ease-out) both;
+}
+
+.runemaster__confirm-text {
+  margin: 0;
+  text-align: center;
+}
+
+.runemaster__confirm-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Das verspielte Tor bleibt dunkel - und sichtbar, damit man es nachvollzieht. */
+.puzzle--runes-final.is-failed .runemaster__opening {
+  fill: #0a0806;
 }
 
 @keyframes gate-refuse {

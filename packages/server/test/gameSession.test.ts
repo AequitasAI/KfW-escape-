@@ -86,7 +86,9 @@ function solveCurrentPuzzle(session: GameSession, solverId: string): void {
   const act = (action: Parameters<GameSession['applyPuzzleAction']>[2]): void => {
     const result = session.applyPuzzleAction(solverId, id, action);
     expect(result.ok).toBe(true);
-    if (result.ok && result.solved) session.markSolved();
+    if (!result.ok) return;
+    if (result.solved) session.markSolved();
+    else if (result.failed) session.markFailed();
   };
 
   if (id === 'archive_runes') {
@@ -477,6 +479,45 @@ describe('Game flow', () => {
     expect(session.currentPuzzle.id).toBe('rune_master');
     expect(session.snapshot().puzzles).toHaveLength(PUZZLE_COUNT);
     // und es bleiben fünf Siegel - die letzte Prüfung bringt keins
+    expect(session.seals).toBe(SEAL_COUNT);
+  });
+
+  /*
+   * Der eine Versuch. Eine falsche Antwort in der letzten Prüfung beendet das
+   * Abenteuer sofort - nicht als abgelehnter Zug, sondern als verlorenes Spiel,
+   * und unterscheidbar von einer abgelaufenen Uhr.
+   */
+  it('ends the adventure on a wrong answer in the final trial', () => {
+    const { session } = withPlayers(3);
+    startToFirstPuzzle(session);
+    for (let i = 0; i < PUZZLE_COUNT - 1; i += 1) {
+      const solver = acceptCurrentCandidate(session);
+      solveCurrentPuzzle(session, solver);
+      if (i < PUZZLE_COUNT - 2) advanceToNextPuzzle(session);
+    }
+    vi.advanceTimersByTime(SOLVED_HOLD_MS + 10);
+    session.tick();
+    vi.advanceTimersByTime(FALSE_VICTORY_DURATION_MS + 10);
+    session.tick();
+    expect(session.currentPuzzle.id).toBe('rune_master');
+
+    const solver = acceptCurrentCandidate(session);
+    const wrongGate = (RUNE_MASTER_SOLUTION.gate + 1) % 3;
+    session.applyPuzzleAction(solver, 'rune_master', { type: 'pick', slot: 'gate', index: wrongGate });
+    session.applyPuzzleAction(solver, 'rune_master', {
+      type: 'pick',
+      slot: 'inscription',
+      index: RUNE_MASTER_SOLUTION.inscription,
+    });
+    const result = session.applyPuzzleAction(solver, 'rune_master', { type: 'attempt' });
+    expect(result.ok).toBe(true);
+    expect(result.ok && result.failed).toBe(true);
+    expect(result.ok && result.solved).toBe(false);
+
+    session.markFailed();
+    expect(session.status).toBe('LOST');
+    expect(session.result).toMatchObject({ won: false, lostTo: 'FINAL_TRIAL' });
+    // die fünf Siegel sind trotzdem geholt worden
     expect(session.seals).toBe(SEAL_COUNT);
   });
 

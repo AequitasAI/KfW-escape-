@@ -75,7 +75,7 @@ export const HANDOVER_MESSAGES: Record<Exclude<HandoverResult, 'OFFERED'>, strin
 };
 
 export type ActionResult =
-  | { ok: true; state: PuzzleStateUnion; solved: boolean }
+  | { ok: true; state: PuzzleStateUnion; solved: boolean; failed: boolean }
   | { ok: false; reason: ActionRejection };
 
 export const REJECTION_MESSAGES: Record<ActionRejection, string> = {
@@ -531,7 +531,24 @@ export class GameSession {
     this.persist();
     this.repo.recordEvent(this.id, 'puzzle.action', puzzleId, playerId, { type: action.type });
 
-    return { ok: true, state: next, solved: next.solved };
+    /*
+     * Die letzte Prüfung kennt keinen zweiten Versuch. Eine falsche Antwort ist
+     * damit kein abgelehnter Zug, sondern das Ende des Abenteuers - der Aufrufer
+     * muss das wissen, deshalb steht es im Ergebnis.
+     */
+    const failed = 'failed' in next && next.failed === true;
+
+    return { ok: true, state: next, solved: next.solved, failed };
+  }
+
+  /**
+   * Eine Prüfung wurde endgültig verspielt. Es gibt nur eine, bei der das
+   * möglich ist, und sie ist die letzte: Danach ist das Abenteuer vorbei.
+   */
+  markFailed(): void {
+    if (this.status !== 'PUZZLE_ACTIVE') return;
+    this.repo.recordEvent(this.id, 'puzzle.failed', this.currentPuzzle.id, this.solverId, null);
+    this.finish(false, 'FINAL_TRIAL');
   }
 
   markSolved(): void {
@@ -653,7 +670,7 @@ export class GameSession {
     this.emit({ type: 'transition', from, to, phaseEndsAt: this.phaseEndsAt }, { type: 'snapshot' });
   }
 
-  private finish(won: boolean): void {
+  private finish(won: boolean, lostTo: 'TIMEOUT' | 'FINAL_TRIAL' = 'TIMEOUT'): void {
     const now = Date.now();
     let solved = 0;
     let skipped = 0;
@@ -663,6 +680,7 @@ export class GameSession {
     }
     const result: GameResultView = {
       won,
+      ...(won ? {} : { lostTo }),
       remainingMs: won ? Math.max(0, (this.endsAt(now) as number) - now) : 0,
       playerCount: this.players.size,
       hintsUsed: this.hintsUsed,

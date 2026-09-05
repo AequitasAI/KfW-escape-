@@ -872,15 +872,21 @@ test.describe('Der falsche Sieg', () => {
       .toBe(6);
 
     /*
-     * Raten hilft nicht: das richtige Tor mit falscher Inschrift bleibt zu.
-     * (Tor II ist der Weg, wahr ist die Inschrift von Tor III.)
+     * Raten hilft nicht, und es kostet den Abend: das richtige Tor mit falscher
+     * Inschrift ist eine falsche Antwort, und es gibt nur eine. (Tor II ist der
+     * Weg, wahr ist die Inschrift von Tor III.)
      */
     await last.page.getByRole('button', { name: 'Das zweite Tor als Weg wählen' }).click();
     await last.page.getByRole('button', { name: /Inschrift des Das erste Tor/ }).click();
     await last.page.getByRole('button', { name: 'Das Tor durchschreiten' }).click();
-    await expect(
-      last.page.getByText('Das Tor bleibt verschlossen. Eine der beiden Angaben stimmt nicht.'),
-    ).toBeVisible();
+
+    // vor der Abgabe wird einmal nachgefragt - mit der Folge im Klartext
+    await expect(last.page.getByText(/Eine falsche Angabe beendet das Abenteuer/)).toBeVisible();
+    await last.page.getByRole('button', { name: 'Ja – durchschreiten' }).click();
+
+    // und dann ist es vorbei, unterscheidbar von einer abgelaufenen Uhr
+    await expect(last.page.getByText('DER STEIN HAT GESPROCHEN.')).toBeVisible({ timeout: 20_000 });
+    await expect(display.getByText('DER STEIN HAT GESPROCHEN.')).toBeVisible();
     await expect(last.page.getByText('DIE BRÜCKE STEHT.')).toHaveCount(0);
 
     await displayContext.close();

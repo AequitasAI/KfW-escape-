@@ -135,6 +135,18 @@ export const LOSE_LINES: readonly string[] = [
   'Morgen ist auch noch ein Release-Tag.',
 ];
 
+/**
+ * Verloren an der letzten Prüfung statt an der Uhr. Der Ton bleibt ernst: Die
+ * Gruppe hat sich entschieden, und die Entscheidung war falsch - darüber macht
+ * man sich nicht lustig, dafür war der Abend zu lang.
+ */
+export const LOSE_FINAL_TRIAL_LINES: readonly string[] = Object.freeze([
+  'DER STEIN HAT GESPROCHEN.',
+  'Das falsche Tor. Die Brücke bleibt versiegelt.',
+  'Der Runenmeister fragt nur einmal – so war es abgemacht.',
+  'Fünf Siegel, zehn Schritte vor dem Ziel. Das nächste Mal.',
+]);
+
 export const LOSE_GAG =
   'Der Betriebszwerg behauptet, er habe es gleich gesagt. Er hat es nicht gleich gesagt.';
 

@@ -20,13 +20,17 @@ test.describe('Übungsraum', () => {
       await solveCurrentTrial(page, index);
       await expect(page.getByText(puzzle.successLine)).toBeVisible({ timeout: 15_000 });
 
+      // gelöst heisst weiter, ohne Knopf - genau wie im Abenteuer
       if (index < PUZZLES.length - 1) {
-        await page.getByRole('button', { name: 'Nächste Prüfung' }).click();
+        await expect(page.getByText(PUZZLES[index + 1]!.station).first()).toBeVisible({
+          timeout: 15_000,
+        });
       }
     }
 
     // Letzte Station: Der Weiterknopf hat kein Ziel mehr.
     await expect(page.getByRole('button', { name: 'Nächste Prüfung' })).toBeDisabled();
+    await expect(page.getByText('Alle Prüfungen durchgespielt.')).toBeVisible();
   });
 
   test('springt über die URL direkt in eine Prüfung und setzt sie zurück', async ({ page }) => {
@@ -36,8 +40,10 @@ test.describe('Übungsraum', () => {
     await solveCurrentTrial(page, 3);
     await expect(page.getByText(PUZZLES[3]!.successLine)).toBeVisible({ timeout: 15_000 });
 
+    // Zurücksetzen greift, solange die Nachschau läuft - danach ist man weiter
     await page.getByRole('button', { name: 'Prüfung zurücksetzen' }).click();
     await expect(page.getByText(PUZZLES[3]!.successLine)).toHaveCount(0);
+    await expect(page.getByText('Station 4/5')).toBeVisible();
   });
 
   /*
@@ -94,6 +100,35 @@ test.describe('Übungsraum', () => {
     await expect(page.getByText(PUZZLES[2]!.successLine)).toBeVisible({ timeout: 15_000 });
     // der Stempel der Prüfmeister liegt auf beiden Plänen
     await expect(page.locator('.plan__approval')).toHaveCount(2);
+  });
+
+  /*
+   * Der Übungsraum ist der einzige Ort, an dem man den einen Versuch gefahrlos
+   * verspielen kann - genau dafür ist er da.
+   */
+  test('die letzte Prüfung verzeiht keinen Fehlgriff', async ({ page }) => {
+    await page.goto('/demo/6');
+    await expect(page.getByRole('button', { name: /Zuerst ein Tor wählen/ })).toBeDisabled();
+
+    await page.getByRole('button', { name: 'Das erste Tor als Weg wählen' }).click();
+    await expect(page.getByRole('button', { name: /Jetzt die wahre Inschrift benennen/ })).toBeDisabled();
+    await page.getByRole('button', { name: /Inschrift des Das erste Tor/ }).click();
+
+    const go = page.getByRole('button', { name: 'Das Tor durchschreiten' });
+    await expect(go).toBeEnabled();
+    await go.click();
+
+    // erst zurück, dann doch
+    await page.getByRole('button', { name: 'Noch einmal nachdenken' }).click();
+    await expect(page.getByText(/Eine falsche Angabe beendet das Abenteuer/)).toHaveCount(0);
+    await go.click();
+    await page.getByRole('button', { name: 'Ja – durchschreiten' }).click();
+
+    await expect(
+      page.getByText('Der Stein schliesst sich. Es gab nur diesen einen Versuch.'),
+    ).toBeVisible();
+    // kein zweiter Anlauf: die Tore nehmen nichts mehr an
+    await expect(page.getByRole('button', { name: 'Das zweite Tor als Weg wählen' })).toBeDisabled();
   });
 
   test('ist ohne Anmeldung von der Startseite aus erreichbar', async ({ page }) => {

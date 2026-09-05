@@ -9,6 +9,7 @@ import {
   INTRO_WAIT_LINE,
   LOSE_FOOTNOTE,
   LOSE_GAG,
+  LOSE_FINAL_TRIAL_LINES,
   LOSE_LINES,
   PUZZLES,
   WIN_FOOTNOTE,
@@ -250,7 +251,12 @@ function DisplayEnd({
   snapshot: NonNullable<ReturnType<typeof useSession>['snapshot']>;
 }): JSX.Element {
   const won = snapshot.status === 'WON';
-  const lines = won ? WIN_LINES : LOSE_LINES;
+  /* an der Uhr gescheitert oder am letzten Tor - das ist nicht dasselbe */
+  const lines = won
+    ? WIN_LINES
+    : snapshot.result?.lostTo === 'FINAL_TRIAL'
+      ? LOSE_FINAL_TRIAL_LINES
+      : LOSE_LINES;
   const result = snapshot.result;
 
   return (

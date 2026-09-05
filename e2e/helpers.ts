@@ -226,6 +226,8 @@ export async function solveRuneMaster(page: Page): Promise<void> {
     .click();
   await page.waitForTimeout(200);
   await page.getByRole('button', { name: 'Das Tor durchschreiten' }).click();
+  // der Runenmeister fragt einmal nach, bevor die Antwort zählt
+  await page.getByRole('button', { name: 'Ja – durchschreiten' }).click();
 }
 
 export async function solveCurrentTrial(page: Page, index: number): Promise<void> {

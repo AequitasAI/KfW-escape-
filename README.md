@@ -79,7 +79,7 @@ Die Gruppe kennt fünf Stationen. Es sind sechs – die letzte taucht erst auf, 
 | 3 | Halle der Prüfmeister | fünf subtile Abweichungen in zwei gezeichneten Prüfplänen | genau fünf Befunde in zwölf überlappungsfreien Prüffeldern |
 | 4 | Minen des Betriebs | Kette aus 5 Rädern zwischen festem Motor und Tor, Steckverbindungen in vier Formen | alle 8⁵ = 32768 Zustände → genau eine Lösung `[2,1,4,4,3]` |
 | 5 | Das Schwarze Tor | Deduktions-Code | alle 1000 Codes → genau einer (`042`) |
-| 6 | Prüfung des Runenmeisters | drei Tore, genau eine wahre Inschrift; Weg **und** wahre Inschrift benennen | alle 9 Kombinationen → genau eine widerspruchsfreie |
+| 6 | Prüfung des Runenmeisters | drei Tore, genau eine wahre Inschrift; Weg **und** wahre Inschrift benennen – **ein einziger Versuch** | alle 9 Kombinationen → genau eine widerspruchsfreie |
 
 ### Der falsche Sieg
 

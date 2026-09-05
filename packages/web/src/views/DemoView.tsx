@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PUZZLES, createPuzzleState, reducePuzzle } from '@kfw-escape/shared';
+import { PUZZLES, SOLVED_HOLD_MS, createPuzzleState, reducePuzzle } from '@kfw-escape/shared';
 import type { PuzzleAction, PuzzleMetaView, PuzzleStateUnion } from '@kfw-escape/shared';
 import { MuteButton, ProgressTrail } from '../components/Chrome.js';
 import { PuzzleHost } from '../puzzles/PuzzleHost.js';
@@ -46,11 +46,21 @@ export function DemoView(): JSX.Element {
     setHintOpen(false);
   }, [puzzleId]);
 
+  /*
+   * Gelöst heisst weiter - wie im Spiel. Vorher blieb der Übungsraum stehen und
+   * wartete auf den Knopf unter der Werkbank; auf dem Zahnradbildschirm steht
+   * der so weit unten, dass es aussieht, als sei das Spiel hängen geblieben.
+   * Die Nachschau ist dieselbe wie im Abenteuer, damit man die Erfolgsanimation
+   * auch hier zu sehen bekommt.
+   */
   useEffect(() => {
-    if (!state.solved || !puzzleId) return;
+    if (!state.solved || !puzzleId) return undefined;
     sound.play('seal');
     setSolvedIds((current) => (current.includes(puzzleId) ? current : [...current, puzzleId]));
-  }, [state.solved, puzzleId]);
+    if (index >= PUZZLES.length - 1) return undefined;
+    const timeout = window.setTimeout(() => navigate(`/demo/${index + 2}`), SOLVED_HOLD_MS + 900);
+    return () => window.clearTimeout(timeout);
+  }, [state.solved, puzzleId, index, navigate]);
 
   const onAction = useCallback((action: PuzzleAction) => {
     // Ungültige Züge geben null zurück - im echten Spiel eine Ablehnung vom
@@ -120,6 +130,11 @@ export function DemoView(): JSX.Element {
             {state.solved ? (
               <p className="stage__solved demo__solved" role="status">
                 {puzzle.successLine}
+                <span className="demo__next-note">
+                  {isLast
+                    ? 'Alle Prüfungen durchgespielt.'
+                    : 'Die nächste Prüfung öffnet sich …'}
+                </span>
               </p>
             ) : null}
           </section>

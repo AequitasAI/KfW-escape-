@@ -1101,3 +1101,10 @@
   color: var(--game-ui-text-muted);
   opacity: 0.85;
 }
+
+.demo__next-note {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--kfw-font-size-small);
+  color: var(--game-ui-text-muted);
+}

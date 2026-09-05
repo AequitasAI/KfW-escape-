@@ -83,6 +83,8 @@ export interface PuzzleMetaView {
 
 export interface GameResultView {
   won: boolean;
+  /** woran es lag, wenn nicht gewonnen wurde */
+  lostTo?: 'TIMEOUT' | 'FINAL_TRIAL';
   remainingMs: number;
   playerCount: number;
   hintsUsed: number;
@@ -180,10 +182,13 @@ export interface RuneMasterState {
   gate: number | null;
   /** Inschrift, die die Gruppe für die einzig wahre hält */
   inscription: number | null;
-  attempts: number;
-  /** letzte abgelehnte Antwort als [Tor, Inschrift] */
-  lastRejected: [number, number] | null;
-  lastRejectedAt: number | null;
+  /**
+   * Der eine Versuch ist verbraucht und war falsch. Es gibt keinen zweiten -
+   * das Abenteuer endet damit.
+   */
+  failed: boolean;
+  /** die abgegebene Antwort als [Tor, Inschrift] */
+  answered: [number, number] | null;
   solved: boolean;
 }
 

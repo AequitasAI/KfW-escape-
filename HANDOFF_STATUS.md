@@ -291,10 +291,16 @@ das ist Teil der Täuschung. Sie heisst deshalb auch „Die letzte Prüfung" und
 **Das Rätsel.** Drei Tore, drei Inschriften, genau eine davon wahr. Verlangt werden zwei Angaben: das
 Tor, das den Weg freigibt, **und** die Inschrift, die als einzige wahr ist. Mit nur einer Angabe wäre
 die letzte Hürde des Abends ein Ratespiel mit drei Feldern; mit beiden sind es neun Möglichkeiten,
-und die richtige nennt nur, wer die Aussagen gegeneinander geprüft hat. Nach einer falschen Antwort
-bleibt der Stein drei Sekunden stumm – keine Zeitstrafe, aber der Grund, warum sich Durchprobieren
-nicht lohnt. Die Lösung steht nicht als Zahl im Code, sondern wird aus der Regel ausgerechnet;
-`enumerateRuneMasterSolutions()` beweist im Test, dass es genau eine gibt.
+und die richtige nennt nur, wer die Aussagen gegeneinander geprüft hat. Die Lösung steht nicht als
+Zahl im Code, sondern wird aus der Regel ausgerechnet; `enumerateRuneMasterSolutions()` beweist im
+Test, dass es genau eine gibt.
+
+**Ein Versuch.** Es gibt keinen zweiten: Eine falsche Antwort beendet das Abenteuer (`LOST` mit
+`lostTo: 'FINAL_TRIAL'`, eigene Schlusszeilen, unterscheidbar von der abgelaufenen Uhr). Deshalb ist
+die Oberfläche an dieser Stelle ausdrücklich langsam – die beiden Schritte stehen nummeriert da, der
+Knopf sagt, was noch fehlt („Zuerst ein Tor wählen" → „Jetzt die wahre Inschrift benennen" → „Das Tor
+durchschreiten"), und vor der Abgabe wird einmal nachgefragt, mit der Folge im Klartext. Wer hier
+verliert, soll wissen, worauf er geklickt hat.
 
 ## Lore-Pass: die Förderwelt als Landkarte
 
@@ -354,6 +360,15 @@ Brücke. In den Rätselräumen gehört der Platz dem Rätsel.
 ## Bekannte Bugs
 - keine offenen
 
+Aus dem Testlauf gemeldet und behoben:
+6. Der Übungsraum blieb nach einer gelösten Prüfung stehen und wartete auf „Nächste Prüfung" unter
+   der Werkbank – auf dem Zahnradbildschirm steht der Knopf so weit unten, dass es aussieht, als sei
+   das Spiel hängen geblieben. Er läuft jetzt weiter wie das Abenteuer: kurze Nachschau, dann die
+   nächste Station. (Das Spiel selbst war nie betroffen – nachgemessen: Station 5 öffnet 9,8 s nach
+   dem letzten Zahnrad, also Nachschau plus Übergang.)
+7. In der letzten Prüfung sah der Knopf kaputt aus: Man wählte ein Tor, und er blieb grau. Er braucht
+   zwei Angaben, und das stand nirgends. Jetzt sagen die Schritte und der Knopf selbst, was fehlt.
+
 Beim Durchspielen im echten Browser gefunden und behoben:
 1. Der Solver-Reveal verschwand nie – die Elternkomponente rendert im Sekundentakt neu,
    wodurch der Dismiss-Timer bei jedem Tick neu startete.
@@ -367,7 +382,7 @@ Beim Durchspielen im echten Browser gefunden und behoben:
    Servercode ausgeliefert worden. Der Cache liegt jetzt in `dist/` und ist ignoriert.
 
 ## Tests
-- `npm run verify` (Typecheck strict + Vitest): **96/96 grün**
+- `npm run verify` (Typecheck strict + Vitest): **97/97 grün**
   - 24 Rätsel-Unit-Tests inkl. der vier Eindeutigkeits-/Lösbarkeitsbeweise
   - 27 Server-Tests: Autorisierung, Solver-Regeln, Timer, kompletter Durchlauf, Failsafes,
     Identität, Neustart-Wiederherstellung

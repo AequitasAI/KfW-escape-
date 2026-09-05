@@ -51,8 +51,16 @@ export const RUNE_GATES: readonly RuneGate[] = Object.freeze([
 
 export const RUNE_GATE_COUNT = RUNE_GATES.length;
 
-/** Nach einer falschen Antwort bleibt das Tor kurz verschlossen. */
-export const RUNE_MASTER_COOLDOWN_MS = 3_000;
+/**
+ * Es gibt genau einen Versuch.
+ *
+ * Vor der Antwort wird einmal nachgefragt; danach entscheidet sie. Wer falsch
+ * antwortet, kommt nicht durch - das Abenteuer endet an dieser Stelle. Das ist
+ * hart, aber es ist auch der Grund, warum in dieser Halle wirklich überlegt und
+ * nicht durchprobiert wird. Deshalb steht die Warnung auch vor dem Klick und
+ * nicht danach.
+ */
+export const RUNE_MASTER_ATTEMPTS = 1;
 
 /**
  * Gilt die Inschrift von Tor `gate`, wenn der Weg durch Tor `path` führt?
@@ -118,9 +126,8 @@ export function createRuneMasterState(): RuneMasterState {
     kind: 'rune_master',
     gate: null,
     inscription: null,
-    attempts: 0,
-    lastRejected: null,
-    lastRejectedAt: null,
+    failed: false,
+    answered: null,
     solved: false,
   };
 }
@@ -128,9 +135,10 @@ export function createRuneMasterState(): RuneMasterState {
 export function reduceRuneMaster(
   state: RuneMasterState,
   action: RuneMasterAction,
-  now: number,
+  _now: number,
 ): RuneMasterState | null {
-  if (state.solved) return null;
+  // gelöst oder verspielt: hier nimmt niemand mehr etwas entgegen
+  if (state.solved || state.failed) return null;
 
   if (action.type === 'pick') {
     if (!Number.isInteger(action.index) || action.index < 0 || action.index >= RUNE_GATE_COUNT) {
@@ -138,11 +146,11 @@ export function reduceRuneMaster(
     }
     if (action.slot === 'gate') {
       if (state.gate === action.index) return null;
-      return { ...state, gate: action.index, lastRejected: null };
+      return { ...state, gate: action.index };
     }
     if (action.slot === 'inscription') {
       if (state.inscription === action.index) return null;
-      return { ...state, inscription: action.index, lastRejected: null };
+      return { ...state, inscription: action.index };
     }
     return null;
   }
@@ -150,23 +158,9 @@ export function reduceRuneMaster(
   if (action.type !== 'attempt') return null;
   if (state.gate === null || state.inscription === null) return null;
 
-  /*
-   * Nach einer falschen Antwort bleibt das Tor kurz zu. Das ist keine
-   * Zeitstrafe - die Uhr läuft ohnehin -, sondern der Grund, warum sich
-   * Durchprobieren nicht lohnt.
-   */
-  if (state.lastRejectedAt !== null && now - state.lastRejectedAt < RUNE_MASTER_COOLDOWN_MS) {
-    return null;
-  }
-
+  const answered: [number, number] = [state.gate, state.inscription];
   if (isRuneMasterAnswerCorrect(state.gate, state.inscription)) {
-    return { ...state, attempts: state.attempts + 1, lastRejected: null, solved: true };
+    return { ...state, answered, solved: true };
   }
-
-  return {
-    ...state,
-    attempts: state.attempts + 1,
-    lastRejected: [state.gate, state.inscription],
-    lastRejectedAt: now,
-  };
+  return { ...state, answered, failed: true };
 }
