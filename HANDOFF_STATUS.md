@@ -358,6 +358,34 @@ Bestand. Auch nach dem dritten Zeitalter.").
 **Auf dem Telefon** bleiben die Marken nur dort stehen, wo ohnehin gewartet wird – Vorhalle und
 Brücke. In den Rätselräumen gehört der Platz dem Rätsel.
 
+## Usability-Durchgang (gemessen, nicht geschätzt)
+
+Für jedes Rätsel wurde nachgemessen, was ein Erstspieler sieht: Zahl und Grösse der bedienbaren
+Ziele, ob die erste Aktion überhaupt eine sichtbare Reaktion hat, ob die Aufgabe dasteht, ob etwas
+seitlich aus dem Bild läuft – bei 1440 px und bei 390 px. Vier Funde, alle behoben:
+
+1. **Kabelrätsel: die beweglichen Platten waren nicht zu erkennen.** Von fünfzehn Platten lassen sich
+   genau drei schieben; der einzige Unterschied war der Mauszeiger – auf dem Telefon also gar keiner.
+   Wer die falsche Platte antippt, hält das Rätsel für kaputt. Die beweglichen tragen jetzt eine warme
+   Fase und zwei Griffkerben.
+2. **Archiv: der Griff stand nirgends.** „Ordnet die fünf Runen" nennt das Ziel, nicht die Bedienung,
+   und Ziehen ist auf dem Telefon keine Option. Jetzt sagt eine Statuszeile, was zu tun ist – und nach
+   der ersten Rune, was als Nächstes kommt. Die Schiebepfeile waren 36 px gross; auf schmalen Geräten
+   sind es jetzt 44.
+3. **Prüfpläne: die Befundfelder waren auf dem Telefon zu klein** (kleinstes 23 px). Die fünf echten
+   Befunde messen jetzt mindestens 45 px; die Felder ohne Befund dürfen klein bleiben, ein Fehlgriff
+   dort kostet nichts.
+4. **Zahnräder: die Drehpfeile lagen bei 0,35 Deckkraft** – der einzige Hinweis darauf, dass man am
+   Rad selbst dreht, und praktisch unsichtbar. Jetzt 0,6, beim Zeigen 1,0.
+
+Ausserdem aus dem Bild gefallen: Der Titel „PRÜFPLAN · GROSSE HALLE" ist 210 Einheiten breit, seine
+Kartusche war 180 – die Schrift stand links und rechts heraus. Der Kasten ist jetzt so breit wie
+seine Schrift.
+
+Was gemessen gut war und deshalb blieb: Alle sechs Rätsel haben auf die erste Aktion eine sichtbare
+Reaktion, keine Ansicht läuft seitlich aus dem Bild, und ausser den genannten Stellen liegt jedes
+bedienbare Ziel über 44 px.
+
 ## Bekannte Bugs
 - keine offenen
 

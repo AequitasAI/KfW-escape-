@@ -53,7 +53,14 @@ export interface DiffDecoy {
   readonly area: DiffArea;
 }
 
-/** Beide Pläne werden in diesem Raster gezeichnet. */
+/**
+ * Beide Pläne werden in diesem Raster gezeichnet.
+ *
+ * Die Trefferflächen sind bewusst grosszügig: Auf dem Telefon ist ein Plan rund
+ * 340 px breit, ein Feld von 72 Einheiten also gerade einmal 44 px - die
+ * Untergrenze für einen Daumen. Wer die Abweichung gesehen hat, soll sie auch
+ * treffen.
+ */
 export const DIFF_PLAN_WIDTH = 560;
 export const DIFF_PLAN_HEIGHT = 420;
 
@@ -68,7 +75,7 @@ export const DIFF_HOTSPOTS: readonly DiffHotspot[] = Object.freeze([
     label: 'Runenband über dem Titel',
     left: 'fünf Runen',
     right: 'die mittlere Rune fehlt',
-    area: { x: 32, y: 74, w: 172, h: 48 },
+    area: { x: 32, y: 66, w: 172, h: 76 },
   },
   {
     id: 'valve_arrow',
@@ -76,7 +83,7 @@ export const DIFF_HOTSPOTS: readonly DiffHotspot[] = Object.freeze([
     label: 'Flussrichtung am Hauptventil',
     left: 'Pfeil nach rechts',
     right: 'Pfeil nach links',
-    area: { x: 212, y: 148, w: 74, h: 62 },
+    area: { x: 207, y: 143, w: 84, h: 76 },
   },
   {
     id: 'crossing_route',
@@ -84,7 +91,7 @@ export const DIFF_HOTSPOTS: readonly DiffHotspot[] = Object.freeze([
     label: 'Kreuzung der Hauptleitung',
     left: 'die Hauptleitung führt über die Steigleitung hinweg',
     right: 'beide Leitungen sind verbunden',
-    area: { x: 336, y: 150, w: 74, h: 74 },
+    area: { x: 331, y: 146, w: 84, h: 84 },
   },
   {
     id: 'gear_spoke',
@@ -109,10 +116,10 @@ export const DIFF_HOTSPOTS: readonly DiffHotspot[] = Object.freeze([
  * Ohne sie stünden in der Tab-Reihenfolge genau die fünf Lösungen.
  */
 export const DIFF_DECOYS: readonly DiffDecoy[] = Object.freeze([
-  { field: 'I', note: 'Titelkartusche', area: { x: 190, y: 26, w: 180, h: 40 } },
+  { field: 'I', note: 'Titelkartusche', area: { x: 164, y: 26, w: 232, h: 40 } },
   { field: 'II', note: 'Kompassrose', area: { x: 464, y: 64, w: 64, h: 64 } },
   { field: 'IV', note: 'Manometer', area: { x: 340, y: 92, w: 66, h: 52 } },
-  { field: 'V', note: 'Kessel I', area: { x: 32, y: 142, w: 116, h: 116 } },
+  { field: 'V', note: 'Kessel I', area: { x: 32, y: 146, w: 116, h: 112 } },
   { field: 'X', note: 'Verteilerkasten', area: { x: 340, y: 286, w: 66, h: 44 } },
   { field: 'XI', note: 'kleines Rad', area: { x: 234, y: 306, w: 58, h: 62 } },
   { field: 'XII', note: 'Stempelfeld', area: { x: 300, y: 336, w: 124, h: 66 } },

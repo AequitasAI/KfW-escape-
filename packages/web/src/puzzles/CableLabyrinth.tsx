@@ -164,6 +164,11 @@ export function CableLabyrinth({
                 />
               ))}
               <circle className="cable-tile__hub" cx={HALF} cy={HALF} r="10" />
+              {/* zwei Griffkerben - nur die beweglichen Platten zeigen sie */}
+              <path
+                className="cable-tile__grip"
+                d={`M ${HALF - 12} ${CELL - 16} L ${HALF + 12} ${CELL - 16} M ${HALF - 8} ${CELL - 11} L ${HALF + 8} ${CELL - 11}`}
+              />
             </g>
           );
         })}

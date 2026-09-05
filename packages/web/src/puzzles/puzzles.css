@@ -124,6 +124,14 @@
   padding: 0.2rem 0.4rem;
 }
 
+/* Auf dem Telefon wird getippt, nicht geklickt - da sind 36 px zu wenig. */
+@media (max-width: 40rem) {
+  .runes__nudge .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
 .clues {
   max-width: 46rem;
   padding: var(--game-space-2);
@@ -217,12 +225,42 @@
   fill: url(#cable-plate-live);
 }
 
+/*
+ * Von fünfzehn Platten lassen sich genau drei schieben - und das war bisher nur
+ * am Mauszeiger zu erkennen, auf dem Telefon also gar nicht. Wer die falsche
+ * Platte antippt, hält das Rätsel für kaputt. Die beweglichen tragen jetzt eine
+ * warme Fase und einen Griffpunkt; sie sehen aus, als läge Spiel in ihnen.
+ */
 .cable-tile.is-movable {
   cursor: pointer;
 }
 
+.cable-tile.is-movable .cable-tile__body {
+  stroke: color-mix(in srgb, var(--game-fx-rune) 70%, transparent);
+  stroke-width: 3;
+}
+
+.cable-tile.is-movable .cable-tile__bevel {
+  stroke: color-mix(in srgb, var(--game-fx-rune) 45%, transparent);
+}
+
+.cable-tile.is-movable .cable-tile__grip {
+  opacity: 0.75;
+}
+
+.cable-tile__grip {
+  fill: none;
+  stroke: var(--game-fx-rune);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--game-dur) var(--game-ease);
+}
+
 .cable-tile.is-movable:hover .cable-tile__body {
   stroke: var(--game-fx-rune);
+  stroke-width: 4;
 }
 
 .cable-tile:focus-visible {
@@ -954,10 +992,12 @@
   cursor: pointer;
 }
 
+/* Die Pfeile sind der einzige Hinweis darauf, dass man am Rad selbst dreht.
+   Bei 0,35 hat sie niemand gesehen. */
 .gear-grip__arrow,
 .gear-grip__arrow-head {
   pointer-events: none;
-  opacity: 0.35;
+  opacity: 0.6;
   transition: opacity var(--game-dur-fast) var(--game-ease);
 }
 
@@ -974,7 +1014,7 @@
 
 .gear-grip__half:hover .gear-grip__arrow,
 .gear-grip__half:hover .gear-grip__arrow-head {
-  opacity: 0.85;
+  opacity: 1;
 }
 
 .gear-grip__half:hover .gear-grip__hit {

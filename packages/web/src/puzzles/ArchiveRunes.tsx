@@ -125,6 +125,19 @@ export function ArchiveRunes({ state, interactive, onAction, size }: PuzzleProps
           ))}
         </ol>
       </div>
+
+      {/*
+        Wie man die Runen bewegt, stand nirgends. „Ordnet die fünf Runen" sagt
+        das Ziel, nicht den Griff - und Ziehen ist auf dem Telefon ohnehin keine
+        Option. Diese Zeile sagt den Griff, ohne die Lösung zu verraten.
+      */}
+      <p className="puzzle__status" role="status" aria-live="polite">
+        {state.solved
+          ? 'Der Bestand ist geordnet.'
+          : selected === null
+            ? 'Tippt eine Rune an, dann eine zweite – sie tauschen den Platz. Die Pfeile schieben sie einzeln.'
+            : 'Und jetzt die Rune, mit der sie tauschen soll.'}
+      </p>
     </div>
   );
 }

@@ -273,7 +273,12 @@ function Paper({ side }: { side: Side }): JSX.Element {
 function TitleBlock({ side }: { side: Side }): JSX.Element {
   return (
     <g>
-      <rect className="plan__cartouche" x="190" y="26" width="180" height="40" rx="3" />
+      {/*
+        Die Kartusche ist so breit wie ihre Schrift und nicht so breit, wie es
+        beim Zeichnen gerade passte: Der Titel misst 210 Einheiten, der Kasten
+        war 180 - die Schrift stand links und rechts heraus.
+      */}
+      <rect className="plan__cartouche" x="164" y="26" width="232" height="40" rx="3" />
       <text className="plan__title" x="280" y="44" textAnchor="middle">
         PRÜFPLAN · GROSSE HALLE
       </text>
