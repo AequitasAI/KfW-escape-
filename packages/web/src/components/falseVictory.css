@@ -1,0 +1,213 @@
+/* ------------------------------------------------------------------ */
+/* Der falsche Sieg                                                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Erst fährt die Brücke aus und alles ist gewonnen, dann steht sie still und
+ * ein Tor steigt aus ihr auf. Beide Bilder liegen übereinander im selben
+ * Kasten; umgeschaltet wird über die Klasse am Wurzelelement, nicht über zwei
+ * getrennte Bäume - so springt nichts im Layout, wenn der Umschlag kommt.
+ */
+
+.fv {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--game-space-2);
+  width: min(100%, 60rem);
+  padding: var(--game-space-3) var(--game-space-2);
+  text-align: center;
+}
+
+.fv__scene {
+  position: relative;
+  width: min(100%, 560px);
+}
+
+.fv__art {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Die Energie läuft über die Brücke - von links, wie der Weg. */
+.fv__beam {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: fv-extend 2.6s var(--game-ease-out) both;
+  filter: drop-shadow(0 0 12px var(--game-fx-energy-glow));
+}
+
+@keyframes fv-extend {
+  from {
+    transform: scaleX(0.02);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Im Umschlag steht sie still - abrupt, nicht ausklingend. */
+.fv--twist .fv__beam {
+  animation: none;
+  transform: scaleX(0.74);
+  filter: saturate(0.65);
+}
+
+/* Das Tor steigt erst im zweiten Schlag aus der Brücke. */
+.fv__stone {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transform: translateY(60%) scaleY(0.2);
+  opacity: 0;
+}
+
+.fv--twist .fv__stone {
+  animation: fv-rise 1.4s var(--game-ease-out) both;
+}
+
+@keyframes fv-rise {
+  from {
+    transform: translateY(60%) scaleY(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.fv__stone-body {
+  fill: #241d15;
+  stroke: #6d5c40;
+  stroke-width: 3;
+}
+
+.fv__stone-opening {
+  fill: #0d0b07;
+  stroke: #4a4133;
+  stroke-width: 2;
+}
+
+.fv__stone-joint {
+  stroke: #4a4133;
+  stroke-width: 2;
+}
+
+.fv__stone-rune {
+  fill: var(--game-fx-rune);
+  animation: fv-flicker 1.6s var(--game-ease) infinite alternate;
+}
+
+.fv__stone-lock {
+  fill: color-mix(in srgb, var(--game-fx-seal) 24%, transparent);
+  stroke: var(--game-fx-seal);
+  stroke-width: 3;
+}
+
+@keyframes fv-flicker {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Text ------------------------------------------------------------ */
+
+/*
+ * Der Text liegt auf einer ruhigen Fläche. Ohne sie steht goldene Schrift auf
+ * dem goldenen Sonnenaufgang der Brücke - auf dem Beamer geht das gerade noch,
+ * auf dem Telefon war der Titel praktisch unsichtbar.
+ */
+.fv__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: min(100%, 46rem);
+  padding: var(--game-space-2);
+  border-radius: var(--game-radius-m);
+  border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 45%, transparent);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 80%, transparent);
+  backdrop-filter: blur(5px);
+  animation: rise-in var(--game-dur) var(--game-ease-out) both;
+}
+
+.fv__title {
+  margin: 0;
+  font-family: var(--kfw-font-display, serif);
+  font-size: clamp(1.5rem, 4vw, 2.6rem);
+  color: var(--game-fx-rune);
+}
+
+.fv--display .fv__title {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.fv__title--twist {
+  color: var(--game-fx-seal);
+}
+
+.fv__line {
+  margin: 0;
+  max-width: 42rem;
+  font-size: var(--kfw-font-size-medium);
+}
+
+.fv--display .fv__line {
+  font-size: var(--kfw-font-size-large);
+  max-width: 56rem;
+}
+
+.fv__note {
+  margin: 0;
+  color: var(--game-ui-text-muted);
+  font-size: var(--kfw-font-size-small);
+  font-style: italic;
+}
+
+/* Das Grollen: ein kurzes Zucken der ganzen Szene, einmal. */
+.fv--twist {
+  animation: fv-shake 700ms var(--game-ease) both;
+}
+
+@keyframes fv-shake {
+  0%,
+  100% {
+    transform: none;
+  }
+  15% {
+    transform: translate3d(-4px, 2px, 0);
+  }
+  35% {
+    transform: translate3d(5px, -2px, 0);
+  }
+  55% {
+    transform: translate3d(-3px, 1px, 0);
+  }
+  75% {
+    transform: translate3d(2px, -1px, 0);
+  }
+}
+
+/*
+ * Ohne Bewegung bleiben beide Bilder stehen. Der Umschlag selbst bleibt - er
+ * ist die Dramaturgie, nicht die Verzierung.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .fv--twist,
+  .fv__beam,
+  .fv__stone-rune,
+  .fv--twist .fv__stone,
+  .fv__text {
+    animation: none;
+  }
+
+  .fv--twist .fv__stone {
+    transform: none;
+    opacity: 1;
+  }
+}

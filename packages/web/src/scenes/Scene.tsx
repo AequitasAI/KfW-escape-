@@ -18,6 +18,8 @@ export const SCENE_BY_PUZZLE: readonly SceneId[] = [
   'testmasters',
   'mine',
   'gate',
+  // die letzte Prüfung steht auf der Brücke, nicht mehr in einer Halle
+  'bridge',
 ];
 
 /**

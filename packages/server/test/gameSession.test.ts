@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ARCHIVE_SOLUTION,
   DIFF_HOTSPOT_IDS,
+  FALSE_VICTORY_DURATION_MS,
   GAME_DURATION_MS,
   GEAR_SOLUTION,
   HINT_AFTER_MS,
@@ -9,6 +10,8 @@ import {
   INTRO_DURATION_MS,
   SOLVED_HOLD_MS,
   PUZZLE_COUNT,
+  RUNE_MASTER_SOLUTION,
+  SEAL_COUNT,
   TRANSITION_DURATION_MS,
   solveCable,
 } from '@kfw-escape/shared';
@@ -62,10 +65,18 @@ function acceptCurrentCandidate(session: GameSession): string {
  * die Erfolgsanimation überhaupt sichtbar wird, und erst danach läuft der
  * Übergang.
  */
+/**
+ * Von einer gelösten Prüfung zur nächsten. Vor der verborgenen letzten Prüfung
+ * liegt statt des Siegelbildschirms der falsche Sieg - er dauert länger, ist
+ * aber genauso eine wartende Phase.
+ */
 function advanceToNextPuzzle(session: GameSession): void {
   vi.advanceTimersByTime(SOLVED_HOLD_MS + 10);
   session.tick();
-  vi.advanceTimersByTime(TRANSITION_DURATION_MS + 10);
+  const phase = session.status;
+  vi.advanceTimersByTime(
+    (phase === 'FALSE_VICTORY' ? FALSE_VICTORY_DURATION_MS : TRANSITION_DURATION_MS) + 10,
+  );
   session.tick();
 }
 
@@ -111,6 +122,12 @@ function solveCurrentPuzzle(session: GameSession, solverId: string): void {
   if (id === 'black_gate_code') {
     for (const digit of [0, 4, 2]) act({ type: 'digit', digit });
     act({ type: 'submit' });
+    return;
+  }
+  if (id === 'rune_master') {
+    act({ type: 'pick', slot: 'gate', index: RUNE_MASTER_SOLUTION.gate });
+    act({ type: 'pick', slot: 'inscription', index: RUNE_MASTER_SOLUTION.inscription });
+    act({ type: 'attempt' });
     return;
   }
   throw new Error(`Unhandled puzzle ${id}`);
@@ -396,7 +413,7 @@ describe('Timer', () => {
 /* ------------------------------------------------------------------ */
 
 describe('Game flow', () => {
-  it('plays through all five trials and wins with time left', () => {
+  it('plays through every trial and wins with time left', () => {
     const { session } = withPlayers(6);
     startToFirstPuzzle(session);
 
@@ -405,7 +422,8 @@ describe('Game flow', () => {
       expect(session.currentPuzzleIndex).toBe(i);
       const solver = acceptCurrentCandidate(session);
       solveCurrentPuzzle(session, solver);
-      expect(session.seals).toBe(i + 1);
+      // die letzte Prüfung bringt kein Siegel mehr, es bleiben fünf
+      expect(session.seals).toBe(Math.min(i + 1, SEAL_COUNT));
       advanceToNextPuzzle(session);
     }
 
@@ -414,9 +432,70 @@ describe('Game flow', () => {
     session.tick();
 
     expect(session.status).toBe('WON');
-    expect(session.result).toMatchObject({ won: true, playerCount: 6, solvedCount: 5, skippedCount: 0 });
+    expect(session.result).toMatchObject({
+      won: true,
+      playerCount: 6,
+      solvedCount: PUZZLE_COUNT,
+      skippedCount: 0,
+    });
     expect(session.result?.remainingMs).toBeGreaterThan(0);
-    expect(session.snapshot().seals).toBe(5);
+    expect(session.snapshot().seals).toBe(SEAL_COUNT);
+  });
+
+  /*
+   * Der falsche Sieg. Nach dem Schwarzen Tor sieht alles nach Sieg aus - fünf
+   * Siegel, offenes Tor -, und dann steht doch noch eine Prüfung im Weg. Der
+   * Test hält beides fest: dass die Phase überhaupt kommt, und dass sie vorher
+   * nirgends zu erkennen ist.
+   */
+  it('slips a false victory between the black gate and the last trial', () => {
+    const { session } = withPlayers(4);
+    startToFirstPuzzle(session);
+
+    for (let i = 0; i < PUZZLE_COUNT - 1; i += 1) {
+      const solver = acceptCurrentCandidate(session);
+      // solange die letzte Prüfung nicht dran ist, kennt der Pfad fünf Stationen
+      expect(session.snapshot().puzzles).toHaveLength(SEAL_COUNT);
+      solveCurrentPuzzle(session, solver);
+      if (i < PUZZLE_COUNT - 2) advanceToNextPuzzle(session);
+    }
+
+    // gelöstes Schwarzes Tor: fünf Siegel, und die Gruppe glaubt, das war es
+    expect(session.seals).toBe(SEAL_COUNT);
+    vi.advanceTimersByTime(SOLVED_HOLD_MS + 10);
+    session.tick();
+
+    expect(session.status).toBe('FALSE_VICTORY');
+    expect(session.snapshot().phaseEndsAt).not.toBeNull();
+    // auch jetzt steht die sechste Station noch nicht im Pfad
+    expect(session.snapshot().puzzles).toHaveLength(SEAL_COUNT);
+
+    vi.advanceTimersByTime(FALSE_VICTORY_DURATION_MS + 10);
+    session.tick();
+
+    expect(session.status).toBe('PUZZLE_ACTIVE');
+    expect(session.currentPuzzle.id).toBe('rune_master');
+    expect(session.snapshot().puzzles).toHaveLength(PUZZLE_COUNT);
+    // und es bleiben fünf Siegel - die letzte Prüfung bringt keins
+    expect(session.seals).toBe(SEAL_COUNT);
+  });
+
+  /* Die Spielleitung kann die Zwischensequenz überspringen. */
+  it('lets the host skip the false victory', () => {
+    const { session } = withPlayers(2);
+    startToFirstPuzzle(session);
+    for (let i = 0; i < PUZZLE_COUNT - 1; i += 1) {
+      const solver = acceptCurrentCandidate(session);
+      solveCurrentPuzzle(session, solver);
+      if (i < PUZZLE_COUNT - 2) advanceToNextPuzzle(session);
+    }
+    vi.advanceTimersByTime(SOLVED_HOLD_MS + 10);
+    session.tick();
+    expect(session.status).toBe('FALSE_VICTORY');
+
+    expect(session.advancePhase()).toBe(true);
+    expect(session.status).toBe('PUZZLE_ACTIVE');
+    expect(session.currentPuzzle.id).toBe('rune_master');
   });
 
   it('the first trial only solves on the exact rune order', () => {

@@ -1339,3 +1339,191 @@
   max-width: 60rem;
 }
 
+/* ------------------------------------------------------------------ */
+/* P6 Die Prüfung des Runenmeisters                                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Drei Tore nebeneinander, unter jedem seine Inschrift. Tor und Inschrift sind
+ * getrennte Schaltflächen, weil sie zwei verschiedene Aussagen sind: „hier geht
+ * es durch" und „das hier ist die wahre Zeile". Wer beides zusammenlegt, macht
+ * aus der Prüfung ein Ratespiel mit drei Feldern.
+ */
+
+.puzzle--runes-final {
+  gap: var(--game-space-2);
+}
+
+.runemaster__npc {
+  max-width: 46rem;
+  text-align: center;
+  font-style: italic;
+  color: var(--game-ui-text-muted);
+}
+
+.runemaster__gates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--game-space-2);
+  width: 100%;
+  max-width: 64rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.runemaster__gate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.runemaster__arch,
+.runemaster__plaque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: var(--game-space-1);
+  border-radius: var(--game-radius-m);
+  border: 1px solid var(--game-ui-line);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 82%, transparent);
+  color: var(--game-ui-text);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color var(--game-dur) var(--game-ease),
+    background var(--game-dur) var(--game-ease);
+}
+
+.runemaster__arch {
+  min-height: 44px;
+}
+
+.runemaster__plaque {
+  min-height: 44px;
+  text-align: center;
+}
+
+.runemaster__arch:hover,
+.runemaster__plaque:hover {
+  border-color: var(--game-fx-rune);
+}
+
+.runemaster__arch:disabled,
+.runemaster__plaque:disabled {
+  cursor: default;
+}
+
+.runemaster__gate.is-chosen .runemaster__arch {
+  border-color: var(--game-fx-rune);
+  background: color-mix(in srgb, var(--game-fx-rune) 12%, transparent);
+}
+
+.runemaster__gate.is-claimed .runemaster__plaque {
+  border-color: var(--game-fx-seal);
+  background: color-mix(in srgb, var(--game-fx-seal) 12%, transparent);
+}
+
+/* Eine abgelehnte Antwort zuckt einmal - und bleibt danach ruhig. */
+.runemaster__gate.is-rejected .runemaster__arch,
+.runemaster__gate.is-rejected .runemaster__plaque {
+  animation: gate-refuse 480ms var(--game-ease) both;
+}
+
+@keyframes gate-refuse {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+.runemaster__art {
+  width: min(100%, 150px);
+  height: auto;
+}
+
+.runemaster__stone {
+  fill: #2f2718;
+  stroke: #6d5c40;
+  stroke-width: 3;
+}
+
+.runemaster__opening {
+  fill: #12100b;
+  stroke: #4a4133;
+  stroke-width: 2;
+  transition: fill var(--game-dur-slow) var(--game-ease-out);
+}
+
+/* Das gewählte Tor steht offen, sobald der Stein nachgibt. */
+.puzzle--runes-final.is-open .runemaster__gate.is-open .runemaster__opening {
+  fill: var(--game-fx-energy);
+  filter: drop-shadow(0 0 18px var(--game-fx-energy-glow));
+}
+
+.runemaster__joint {
+  stroke: #4a4133;
+  stroke-width: 2;
+}
+
+.runemaster__sigil {
+  fill: var(--game-fx-rune);
+  font-family: var(--kfw-font-display, serif);
+  font-size: 34px;
+  letter-spacing: 2px;
+}
+
+.runemaster__gate-name {
+  font-weight: var(--kfw-font-weight-bold);
+}
+
+.runemaster__gate-state {
+  font-size: var(--kfw-font-size-xsmall);
+  color: var(--game-ui-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.runemaster__inscription {
+  font-size: var(--kfw-font-size-small);
+}
+
+.runemaster__verdict {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.puzzle--wide .runemaster__inscription {
+  font-size: var(--kfw-font-size-medium);
+}
+
+.puzzle--wide .runemaster__npc {
+  font-size: var(--kfw-font-size-large);
+  max-width: 60rem;
+}
+
+/* Auf dem Telefon stehen die drei Tore untereinander; dann darf der Bogen
+   kleiner sein, damit man alle drei ohne langes Wischen vergleichen kann. */
+@media (max-width: 40rem) {
+  .puzzle--compact .runemaster__art {
+    width: min(100%, 104px);
+  }
+
+  .puzzle--compact .runemaster__gates {
+    gap: 0.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .runemaster__gate.is-rejected .runemaster__arch,
+  .runemaster__gate.is-rejected .runemaster__plaque {
+    animation: none;
+  }
+}

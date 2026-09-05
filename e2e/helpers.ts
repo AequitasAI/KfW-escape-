@@ -1,5 +1,13 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
-import { companionsGathered, DIFF_HOTSPOTS, GEAR_LABELS, GEAR_SOLUTION } from '@kfw-escape/shared';
+import {
+  companionsGathered,
+  DIFF_HOTSPOTS,
+  GEAR_LABELS,
+  GEAR_SOLUTION,
+  PUZZLES,
+  RUNE_GATES,
+  RUNE_MASTER_SOLUTION,
+} from '@kfw-escape/shared';
 
 export interface PlayerHandle {
   name: string;
@@ -126,8 +134,15 @@ export async function findOfferedPlayer(players: PlayerHandle[]): Promise<Player
   throw new Error('No companion was offered the trial');
 }
 
+/**
+ * Wartet auf die Station mit diesem Index. Der Name kommt aus der
+ * Rätseldefinition, weil die letzte Prüfung bewusst nicht mitzählt: Sie heisst
+ * „Die letzte Prüfung" und nicht „Station 6/5" - sonst verriete die Beschriftung
+ * den falschen Sieg, bevor er da ist.
+ */
 export async function waitForStation(page: Page, index: number): Promise<void> {
-  await expect(page.getByText(`Station ${index + 1}/5`)).toBeVisible({ timeout: 45_000 });
+  const station = PUZZLES[index]?.station as string;
+  await expect(page.getByText(station).first()).toBeVisible({ timeout: 45_000 });
 }
 
 /* ------------------------------------------------------------------ */
@@ -201,6 +216,18 @@ export async function enterCode(page: Page, code: string): Promise<void> {
   await page.getByRole('button', { name: 'Code prüfen' }).click();
 }
 
+export async function solveRuneMaster(page: Page): Promise<void> {
+  const gate = RUNE_GATES[RUNE_MASTER_SOLUTION.gate];
+  const inscription = RUNE_GATES[RUNE_MASTER_SOLUTION.inscription];
+  await page.getByRole('button', { name: `${gate?.name} als Weg wählen` }).click();
+  await page.waitForTimeout(200);
+  await page
+    .getByRole('button', { name: new RegExp(`Inschrift des ${inscription?.name}`) })
+    .click();
+  await page.waitForTimeout(200);
+  await page.getByRole('button', { name: 'Das Tor durchschreiten' }).click();
+}
+
 export async function solveCurrentTrial(page: Page, index: number): Promise<void> {
   switch (index) {
     case 0:
@@ -213,6 +240,8 @@ export async function solveCurrentTrial(page: Page, index: number): Promise<void
       return solveGears(page);
     case 4:
       return enterCode(page, '042');
+    case 5:
+      return solveRuneMaster(page);
     default:
       throw new Error(`Unknown trial ${index}`);
   }

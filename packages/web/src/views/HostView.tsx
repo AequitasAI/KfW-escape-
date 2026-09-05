@@ -286,6 +286,7 @@ export function HostView(): JSX.Element {
   const waiting =
     snapshot?.status === 'INTRO' ||
     snapshot?.status === 'TRANSITION' ||
+    snapshot?.status === 'FALSE_VICTORY' ||
     snapshot?.status === 'FINALE';
 
   return (
@@ -371,7 +372,11 @@ export function HostView(): JSX.Element {
                     className="btn btn--primary btn--large btn--block"
                     onClick={() => channel.emit('host:continue')}
                   >
-                    {snapshot?.status === 'INTRO' ? 'Weiter zur ersten Prüfung' : 'Weiter'}
+                    {snapshot?.status === 'INTRO'
+                      ? 'Weiter zur ersten Prüfung'
+                      : snapshot?.status === 'FALSE_VICTORY'
+                        ? 'Weiter zur letzten Prüfung'
+                        : 'Weiter'}
                   </button>
                   {snapshot?.status === 'INTRO' ? (
                     <p className="field__hint">

@@ -64,6 +64,16 @@ import {
   reduceBlackGate,
   scoreGuess,
 } from '../src/puzzles/blackGate.js';
+import {
+  createRuneMasterState,
+  enumerateRuneMasterSolutions,
+  inscriptionHolds,
+  reduceRuneMaster,
+  RUNE_GATE_COUNT,
+  RUNE_MASTER_COOLDOWN_MS,
+  RUNE_MASTER_SOLUTION,
+  trueInscriptionCount,
+} from '../src/puzzles/runeMaster.js';
 
 /* ------------------------------------------------------------------ */
 /* A06 - Puzzle 1: unique rune solution                                */
@@ -465,5 +475,89 @@ describe('P5 Das Schwarze Tor', () => {
     let full = state;
     for (const digit of [1, 2, 3]) full = reduceBlackGate(full, { type: 'digit', digit })!;
     expect(reduceBlackGate(full, { type: 'digit', digit: 4 })).toBeNull();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* Puzzle 6: drei Tore, genau eine wahre Inschrift                     */
+/* ------------------------------------------------------------------ */
+
+describe('P6 Prüfung des Runenmeisters', () => {
+  /*
+   * Der Kern der Prüfung. Von den neun Kombinationen aus Tor und benannter
+   * Inschrift darf genau eine zur Regel passen - sonst wäre die letzte Hürde
+   * des Abends entweder unlösbar oder durch Raten zu haben.
+   */
+  it('has exactly one consistent answer among all nine combinations', () => {
+    const solutions = enumerateRuneMasterSolutions();
+    expect(solutions).toHaveLength(1);
+    expect(solutions[0]).toEqual(RUNE_MASTER_SOLUTION);
+
+    let consistent = 0;
+    for (let gate = 0; gate < RUNE_GATE_COUNT; gate += 1) {
+      for (let inscription = 0; inscription < RUNE_GATE_COUNT; inscription += 1) {
+        if (trueInscriptionCount(gate) === 1 && inscriptionHolds(inscription, gate)) consistent += 1;
+      }
+    }
+    expect(consistent).toBe(1);
+  });
+
+  /* Genau ein Tor lässt überhaupt „genau eine wahre Inschrift" zu. */
+  it('leaves exactly one path with a single true inscription', () => {
+    const counts = [0, 1, 2].map((path) => trueInscriptionCount(path));
+    expect(counts.filter((count) => count === 1)).toHaveLength(1);
+    expect(counts[RUNE_MASTER_SOLUTION.gate]).toBe(1);
+  });
+
+  it('opens only when both the path and the true inscription are named', () => {
+    let state = createRuneMasterState();
+    // nur das Tor genügt nicht
+    state = reduceRuneMaster(state, { type: 'pick', slot: 'gate', index: RUNE_MASTER_SOLUTION.gate }, 0)!;
+    expect(reduceRuneMaster(state, { type: 'attempt' }, 0)).toBeNull();
+
+    state = reduceRuneMaster(
+      state,
+      { type: 'pick', slot: 'inscription', index: RUNE_MASTER_SOLUTION.inscription },
+      0,
+    )!;
+    const solved = reduceRuneMaster(state, { type: 'attempt' }, 0)!;
+    expect(solved.solved).toBe(true);
+    // eine gelöste Prüfung nimmt nichts mehr an
+    expect(reduceRuneMaster(solved, { type: 'attempt' }, 1_000)).toBeNull();
+  });
+
+  /*
+   * Das richtige Tor mit falsch benannter Inschrift zählt nicht: Wer nur rät,
+   * kommt nicht durch, auch wenn er zufällig das richtige Tor trifft.
+   */
+  it('rejects the right gate with the wrong inscription and locks briefly', () => {
+    const wrongInscription = (RUNE_MASTER_SOLUTION.inscription + 1) % RUNE_GATE_COUNT;
+    let state = createRuneMasterState();
+    state = reduceRuneMaster(state, { type: 'pick', slot: 'gate', index: RUNE_MASTER_SOLUTION.gate }, 0)!;
+    state = reduceRuneMaster(state, { type: 'pick', slot: 'inscription', index: wrongInscription }, 0)!;
+
+    const rejected = reduceRuneMaster(state, { type: 'attempt' }, 10_000)!;
+    expect(rejected.solved).toBe(false);
+    expect(rejected.attempts).toBe(1);
+    expect(rejected.lastRejected).toEqual([RUNE_MASTER_SOLUTION.gate, wrongInscription]);
+
+    // während der Sperre passiert nichts, danach wieder
+    expect(
+      reduceRuneMaster(rejected, { type: 'attempt' }, 10_000 + RUNE_MASTER_COOLDOWN_MS - 1),
+    ).toBeNull();
+    const fixed = reduceRuneMaster(
+      rejected,
+      { type: 'pick', slot: 'inscription', index: RUNE_MASTER_SOLUTION.inscription },
+      10_000 + RUNE_MASTER_COOLDOWN_MS,
+    )!;
+    expect(reduceRuneMaster(fixed, { type: 'attempt' }, 10_000 + RUNE_MASTER_COOLDOWN_MS)!.solved).toBe(
+      true,
+    );
+  });
+
+  it('rejects picks outside the three gates', () => {
+    const state = createRuneMasterState();
+    expect(reduceRuneMaster(state, { type: 'pick', slot: 'gate', index: 3 }, 0)).toBeNull();
+    expect(reduceRuneMaster(state, { type: 'pick', slot: 'gate', index: -1 }, 0)).toBeNull();
   });
 });

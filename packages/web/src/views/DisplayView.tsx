@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import {
   dwarfIdleLine,
   FINALE_LINE,
+  SEAL_COUNT,
   GAME_TITLE,
   INTRO_LINES,
   INTRO_WAIT_LINE,
@@ -20,6 +21,7 @@ import { Avatar } from '../components/Avatar.js';
 import { ProgressTrail, SealRow, SolverBanner, SolverReveal, Timer, Dwarf } from '../components/Chrome.js';
 import { PuzzleHost } from '../puzzles/PuzzleHost.js';
 import { SCENE_BY_PUZZLE, Scene, type SceneId } from '../scenes/Scene.js';
+import { FalseVictory } from '../components/FalseVictory.js';
 import { api } from '../lib/api.js';
 import { useSession } from '../lib/useSession.js';
 import { formatClock } from '../lib/useServerClock.js';
@@ -81,7 +83,9 @@ export function DisplayView(): JSX.Element {
 
   const puzzle = PUZZLES[snapshot.currentPuzzleIndex];
   const scene: SceneId =
-    snapshot.status === 'WON' || snapshot.status === 'FINALE'
+    snapshot.status === 'WON' ||
+    snapshot.status === 'FINALE' ||
+    snapshot.status === 'FALSE_VICTORY'
       ? 'bridge'
       : snapshot.status === 'LOST'
         ? 'defeat'
@@ -162,9 +166,13 @@ export function DisplayView(): JSX.Element {
             </div>
           ) : null}
 
+          {snapshot.status === 'FALSE_VICTORY' ? (
+            <FalseVictory phaseEndsAt={snapshot.phaseEndsAt} size="display" />
+          ) : null}
+
           {snapshot.status === 'FINALE' ? (
             <div className="display__message display__message--finale">
-              <SealRow count={5} />
+              <SealRow count={SEAL_COUNT} />
               <h2 className="display__headline">{FINALE_LINE}</h2>
             </div>
           ) : null}
@@ -244,7 +252,9 @@ function DisplayEnd({
 
   return (
     <div className={`display__end ${won ? 'is-win' : 'is-loss'}`}>
-      <SealRow count={won ? 5 : (result?.solvedCount ?? 0) + (result?.skippedCount ?? 0)} />
+      <SealRow count={
+          won ? SEAL_COUNT : Math.min(SEAL_COUNT, (result?.solvedCount ?? 0) + (result?.skippedCount ?? 0))
+        } />
       <h2 className="display__end-headline">{lines[0]}</h2>
       {lines.slice(1).map((line, index) => (
         <p key={line} className="display__end-line" style={{ animationDelay: `${(index + 1) * 320}ms` }}>

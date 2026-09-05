@@ -6,6 +6,8 @@ import {
   GATE_SOLUTION,
   GEAR_LABELS,
   GEAR_SOLUTION,
+  RUNE_GATES,
+  RUNE_MASTER_SOLUTION,
   RUNES,
   solveCable,
 } from '@kfw-escape/shared';
@@ -135,6 +137,30 @@ function describe(state: PuzzleStateUnion, cableMoves: number[] | null): JSX.Ele
           <p className="field__hint">
             Jeder Klick auf ein Rad dreht es eine Stellung weiter. Häkchen heisst: steht schon
             richtig.
+          </p>
+        </>
+      );
+    }
+
+    case 'rune_master': {
+      const gate = RUNE_GATES[RUNE_MASTER_SOLUTION.gate];
+      const inscription = RUNE_GATES[RUNE_MASTER_SOLUTION.inscription];
+      return (
+        <>
+          <p className="field__label">Weg und wahre Inschrift</p>
+          <ul className="host__solution-list">
+            <li>
+              Weg: <strong>{gate?.name}</strong>
+              {state.gate === RUNE_MASTER_SOLUTION.gate ? ' ✓' : ''}
+            </li>
+            <li>
+              Einzig wahre Inschrift: <strong>{inscription?.name}</strong>
+              {state.inscription === RUNE_MASTER_SOLUTION.inscription ? ' ✓' : ''}
+            </li>
+          </ul>
+          <p className="field__hint">
+            Nimmt man jedes Tor einmal als den Weg an, ist nur in einem Fall genau eine Inschrift
+            wahr. Beides muss benannt sein, dann öffnet der Stein.
           </p>
         </>
       );

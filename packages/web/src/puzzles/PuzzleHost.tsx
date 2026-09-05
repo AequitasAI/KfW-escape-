@@ -4,6 +4,7 @@ import { CableLabyrinth } from './CableLabyrinth.js';
 import { TestmastersDiff } from './TestmastersDiff.js';
 import { OperationsGears } from './OperationsGears.js';
 import { BlackGate } from './BlackGate.js';
+import { RuneMaster } from './RuneMaster.js';
 import type { PuzzleSurface } from './types.js';
 import './puzzles.css';
 
@@ -36,6 +37,8 @@ export function PuzzleHost({
       return <OperationsGears state={state} interactive={interactive} onAction={onAction} size={size} />;
     case 'black_gate_code':
       return <BlackGate state={state} interactive={interactive} onAction={onAction} size={size} />;
+    case 'rune_master':
+      return <RuneMaster state={state} interactive={interactive} onAction={onAction} size={size} />;
     default:
       return null;
   }

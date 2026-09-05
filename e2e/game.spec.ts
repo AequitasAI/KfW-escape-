@@ -215,6 +215,17 @@ test.describe('Kompletter Durchlauf', () => {
         .toBeGreaterThanOrEqual(index + 1);
     }
 
+    /*
+     * Fünf Siegel - und trotzdem noch nicht gewonnen. Zwischen dem Schwarzen
+     * Tor und dem Sieg liegt der falsche Sieg und danach die letzte Prüfung.
+     */
+    await expect(display.locator('.fv')).toBeVisible({ timeout: 30_000 });
+    await expect(display.getByText('DIE BRÜCKE STEHT.')).toHaveCount(0);
+
+    const last = await acceptOfferedSolver(table.players);
+    await waitForStation(last.page, 5);
+    await solveCurrentTrial(last.page, 5);
+
     await expect(display.getByText('DIE BRÜCKE STEHT.')).toBeVisible({ timeout: 40_000 });
     await expect(table.players[0]!.page.getByText('DIE BRÜCKE STEHT.')).toBeVisible();
     await expect(table.host.getByText('Gewonnen')).toBeVisible();
@@ -246,8 +257,18 @@ test.describe('Kompletter Durchlauf', () => {
     await expect(solver.page.getByText('Das Tor bleibt verschlossen. Versucht es erneut.')).toBeVisible();
     await expect(solver.page.getByText('DIE BRÜCKE STEHT.')).toHaveCount(0);
 
+    /*
+     * Der richtige Code öffnet das Tor - aber noch nicht die Brücke. Was folgt,
+     * ist der falsche Sieg und danach die Prüfung des Runenmeisters.
+     */
     await enterCode(solver.page, '042');
-    await expect(solver.page.getByText('DIE BRÜCKE STEHT.')).toBeVisible({ timeout: 40_000 });
+    await expect(solver.page.locator('.fv')).toBeVisible({ timeout: 40_000 });
+
+    const last = await acceptOfferedSolver(table.players);
+    await waitForStation(last.page, 5);
+    await expect(last.page.getByText('DIE BRÜCKE STEHT.')).toHaveCount(0);
+    await solveCurrentTrial(last.page, 5);
+    await expect(last.page.getByText('DIE BRÜCKE STEHT.')).toBeVisible({ timeout: 40_000 });
 
     await closeTable(table);
   });
@@ -803,6 +824,86 @@ test.describe('Die verlorene Verbindung', () => {
     expect(Math.abs(tgt.y + tgt.h / 2 - (row3.y + row3.h / 2))).toBeLessThan(row3.h);
     // und sie liegen nicht auf derselben Höhe, sonst sagt der Test nichts
     expect(Math.abs(src.y - tgt.y)).toBeGreaterThan(row2.h * 0.5);
+
+    await closeTable(table);
+  });
+});
+
+test.describe('Der falsche Sieg', () => {
+  /*
+   * Die Dramaturgie des Abends hängt an dieser Sequenz: Nach dem Schwarzen Tor
+   * sieht alles nach Sieg aus - Brücke, fünf Siegel, „Der Weg ist frei" -, und
+   * dann steht mitten darauf doch noch ein Tor. Der Test hält beide Schläge
+   * fest und dass die letzte Prüfung erst danach kommt.
+   */
+  test('zwischen Tor und Brücke steht eine letzte Prüfung', async ({ browser }) => {
+    test.setTimeout(180_000);
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    const displayContext = await browser.newContext({ viewport: { width: 1600, height: 900 } });
+    const display = await displayContext.newPage();
+    await display.goto(`/display/${table.code}`);
+
+    await startAdventure(table.host);
+    for (let index = 0; index < 4; index += 1) {
+      await acceptOfferedSolver(table.players);
+      await table.host.getByRole('button', { name: 'Prüfung überspringen' }).click();
+      await table.host.waitForTimeout(1_200);
+    }
+
+    const solver = await acceptOfferedSolver(table.players);
+    await waitForStation(solver.page, 4);
+    await enterCode(solver.page, '042');
+
+    // erster Schlag: gewonnen
+    await expect(display.getByText('Die Brücke erwacht')).toBeVisible({ timeout: 40_000 });
+    // zweiter Schlag: doch nicht
+    await expect(display.getByText('Eine letzte Prüfung bleibt')).toBeVisible({ timeout: 20_000 });
+    await expect(display.locator('.fv--twist')).toHaveCount(1);
+
+    // erst danach öffnet die Prüfung des Runenmeisters
+    const last = await acceptOfferedSolver(table.players);
+    await waitForStation(last.page, 5);
+    await expect(
+      last.page.getByRole('heading', { name: 'Die Prüfung des Runenmeisters' }),
+    ).toBeVisible();
+    // und der Fortschrittspfad zeigt sie jetzt erst
+    await expect
+      .poll(async () => display.locator('.trail__item').count(), { timeout: 20_000 })
+      .toBe(6);
+
+    /*
+     * Raten hilft nicht: das richtige Tor mit falscher Inschrift bleibt zu.
+     * (Tor II ist der Weg, wahr ist die Inschrift von Tor III.)
+     */
+    await last.page.getByRole('button', { name: 'Das zweite Tor als Weg wählen' }).click();
+    await last.page.getByRole('button', { name: /Inschrift des Das erste Tor/ }).click();
+    await last.page.getByRole('button', { name: 'Das Tor durchschreiten' }).click();
+    await expect(
+      last.page.getByText('Das Tor bleibt verschlossen. Eine der beiden Angaben stimmt nicht.'),
+    ).toBeVisible();
+    await expect(last.page.getByText('DIE BRÜCKE STEHT.')).toHaveCount(0);
+
+    await displayContext.close();
+    await closeTable(table);
+  });
+
+  test('die Spielleitung kann die Zwischensequenz überspringen', async ({ browser }) => {
+    test.setTimeout(180_000);
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await startAdventure(table.host);
+    for (let index = 0; index < 4; index += 1) {
+      await acceptOfferedSolver(table.players);
+      await table.host.getByRole('button', { name: 'Prüfung überspringen' }).click();
+      await table.host.waitForTimeout(1_200);
+    }
+    const solver = await acceptOfferedSolver(table.players);
+    await waitForStation(solver.page, 4);
+    await enterCode(solver.page, '042');
+
+    await table.host
+      .getByRole('button', { name: 'Weiter zur letzten Prüfung' })
+      .click({ timeout: 40_000 });
+    await waitForStation(solver.page, 5);
 
     await closeTable(table);
   });

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   FINALE_LINE,
+  SEAL_COUNT,
   GAME_TITLE,
   INTRO_LINES,
   INTRO_WAIT_LINE,
@@ -29,6 +30,7 @@ import {
 import { Avatar } from '../components/Avatar.js';
 import { PuzzleHost } from '../puzzles/PuzzleHost.js';
 import { SCENE_BY_PUZZLE, Scene, type SceneId } from '../scenes/Scene.js';
+import { FalseVictory } from '../components/FalseVictory.js';
 import { loadIdentity } from '../lib/identity.js';
 import { sound } from '../lib/sound.js';
 import { useSession } from '../lib/useSession.js';
@@ -124,7 +126,7 @@ export function GameView(): JSX.Element {
       ? 'bridge'
       : snapshot.status === 'LOST'
         ? 'defeat'
-        : snapshot.status === 'FINALE'
+        : snapshot.status === 'FINALE' || snapshot.status === 'FALSE_VICTORY'
           ? 'bridge'
           : snapshot.status === 'LOBBY' || snapshot.status === 'INTRO'
             ? 'lobby'
@@ -188,9 +190,13 @@ export function GameView(): JSX.Element {
             </section>
           ) : null}
 
+          {snapshot.status === 'FALSE_VICTORY' ? (
+            <FalseVictory phaseEndsAt={snapshot.phaseEndsAt} />
+          ) : null}
+
           {snapshot.status === 'FINALE' ? (
             <section className="stage stage--message">
-              <SealRow count={5} />
+              <SealRow count={SEAL_COUNT} />
               <h2 className="stage__title">{FINALE_LINE}</h2>
             </section>
           ) : null}
@@ -460,7 +466,9 @@ function EndScreen({
 
   return (
     <section className={`stage stage--end ${won ? 'is-win' : 'is-loss'}`}>
-      <SealRow count={won ? 5 : (result?.solvedCount ?? 0) + (result?.skippedCount ?? 0)} />
+      <SealRow count={
+          won ? SEAL_COUNT : Math.min(SEAL_COUNT, (result?.solvedCount ?? 0) + (result?.skippedCount ?? 0))
+        } />
       <h2 className="end__headline">{lines[0]}</h2>
       {lines.slice(1).map((line, index) => (
         <p key={line} className="end__line" style={{ animationDelay: `${(index + 1) * 260}ms` }}>

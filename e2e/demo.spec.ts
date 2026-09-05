@@ -13,7 +13,8 @@ test.describe('Übungsraum', () => {
     await page.goto('/demo');
 
     for (const [index, puzzle] of PUZZLES.entries()) {
-      await expect(page.getByText(`Station ${index + 1}/5`)).toBeVisible();
+      // die letzte Prüfung heisst nicht „Station 6/5" - sie zählt bewusst nicht mit
+      await expect(page.getByText(puzzle.station).first()).toBeVisible();
       await expect(page.getByRole('heading', { name: puzzle.title })).toBeVisible();
 
       await solveCurrentTrial(page, index);

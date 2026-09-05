@@ -1,5 +1,6 @@
 import {
   AVATARS,
+  FALSE_VICTORY_DURATION_MS,
   FINALE_DURATION_MS,
   GAME_DURATION_MS,
   HINT_AFTER_MS,
@@ -7,6 +8,7 @@ import {
   INTRO_DURATION_MS,
   PUZZLES,
   PUZZLE_COUNT,
+  SEAL_COUNT,
   SOLVED_HOLD_MS,
   TRANSITION_DURATION_MS,
   createPuzzleState,
@@ -97,7 +99,13 @@ export type SessionEvent =
   | { type: 'won'; result: GameResultView }
   | { type: 'lost'; result: GameResultView };
 
-const ACTIVE_STATUSES: readonly SessionStatus[] = ['INTRO', 'PUZZLE_ACTIVE', 'TRANSITION', 'FINALE'];
+const ACTIVE_STATUSES: readonly SessionStatus[] = [
+  'INTRO',
+  'PUZZLE_ACTIVE',
+  'TRANSITION',
+  'FALSE_VICTORY',
+  'FINALE',
+];
 
 /** How long a disconnected companion keeps the trial before the server rerolls. */
 export const SOLVER_ABSENCE_GRACE_MS = 15_000;
@@ -420,7 +428,7 @@ export class GameSession {
       this.enterPuzzle(0);
       return true;
     }
-    if (this.status === 'TRANSITION') {
+    if (this.status === 'TRANSITION' || this.status === 'FALSE_VICTORY') {
       this.enterPuzzle(this.currentPuzzleIndex + 1);
       return true;
     }
@@ -549,9 +557,14 @@ export class GameSession {
     );
   }
 
+  /**
+   * Siegel gibt es für die fünf Hallen. Die letzte Prüfung auf der Brücke
+   * bringt keins - sonst stünden nach dem Schwarzen Tor vier von sechs und der
+   * falsche Sieg wäre schon an der Anzeige zu erkennen.
+   */
   get seals(): number {
     let count = 0;
-    for (let i = 0; i < PUZZLE_COUNT; i += 1) {
+    for (let i = 0; i < SEAL_COUNT; i += 1) {
       const status = this.puzzleStatuses[i];
       if (status === 'SOLVED' || status === 'SKIPPED') count += 1;
     }
@@ -621,6 +634,19 @@ export class GameSession {
       this.emit({ type: 'snapshot' });
       return;
     }
+    /*
+     * Vor einer verborgenen Prüfung steht kein Siegelbildschirm, sondern der
+     * falsche Sieg: Die Brücke baut sich auf, die Gruppe hat gewonnen - und
+     * dann steht da doch noch ein Tor. Erst danach öffnet die letzte Prüfung.
+     */
+    if (getPuzzle(to).hidden === true) {
+      this.status = 'FALSE_VICTORY';
+      this.phaseEndsAt = now + FALSE_VICTORY_DURATION_MS;
+      this.persist();
+      this.repo.recordEvent(this.id, 'game.falseVictory', getPuzzle(to).id, null, { from, to });
+      this.emit({ type: 'snapshot' });
+      return;
+    }
     this.status = 'TRANSITION';
     this.phaseEndsAt = now + TRANSITION_DURATION_MS;
     this.persist();
@@ -683,7 +709,7 @@ export class GameSession {
         this.enterPuzzle(0);
         return;
       }
-      if (this.status === 'TRANSITION') {
+      if (this.status === 'TRANSITION' || this.status === 'FALSE_VICTORY') {
         this.enterPuzzle(this.currentPuzzleIndex + 1);
         return;
       }
@@ -890,8 +916,18 @@ export class GameSession {
     };
   }
 
+  /**
+   * Was der Fortschrittspfad zeigen darf.
+   *
+   * Eine verborgene Prüfung taucht erst auf, wenn die Gruppe bei ihr angekommen
+   * ist. Das ist keine Kosmetik: Stünde die sechste Station von Anfang an im
+   * Pfad, wüsste jede Gruppe nach dem Schwarzen Tor, dass noch etwas kommt -
+   * und der falsche Sieg wäre keiner.
+   */
   puzzleMetaViews(): PuzzleMetaView[] {
-    return PUZZLES.map((puzzle) => ({
+    return PUZZLES.filter(
+      (puzzle) => puzzle.hidden !== true || this.currentPuzzleIndex >= puzzle.index,
+    ).map((puzzle) => ({
       index: puzzle.index,
       id: puzzle.id,
       station: puzzle.station,

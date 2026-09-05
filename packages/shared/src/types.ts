@@ -8,6 +8,12 @@ export type SessionStatus =
   | 'INTRO'
   | 'PUZZLE_ACTIVE'
   | 'TRANSITION'
+  /**
+   * Der falsche Sieg: Das Schwarze Tor steht offen, die Brücke baut sich auf -
+   * und bricht dann ab, weil noch ein Tor im Weg steht. Eine eigene Phase, weil
+   * sie weder Übergang noch Finale ist und die Gruppe in ihr nichts tun kann.
+   */
+  | 'FALSE_VICTORY'
   | 'FINALE'
   | 'WON'
   | 'LOST'
@@ -26,7 +32,8 @@ export type PuzzleId =
   | 'cable_labyrinth'
   | 'testmasters_diff'
   | 'operations_gears'
-  | 'black_gate_code';
+  | 'black_gate_code'
+  | 'rune_master';
 
 export type ClientRole = 'player' | 'host' | 'display';
 
@@ -99,7 +106,7 @@ export interface SessionSnapshot {
   hintsUsed: number;
   hintAvailable: boolean;
   hintText: string | null;
-  /** epoch ms at which the current transition/intro/finale phase auto-advances */
+  /** epoch ms at which the current intro/transition/false-victory/finale phase auto-advances */
   phaseEndsAt: number | null;
   result: GameResultView | null;
   revision: number;
@@ -167,12 +174,26 @@ export interface BlackGateState {
   solved: boolean;
 }
 
+export interface RuneMasterState {
+  kind: 'rune_master';
+  /** gewähltes Tor, noch nicht geprüft */
+  gate: number | null;
+  /** Inschrift, die die Gruppe für die einzig wahre hält */
+  inscription: number | null;
+  attempts: number;
+  /** letzte abgelehnte Antwort als [Tor, Inschrift] */
+  lastRejected: [number, number] | null;
+  lastRejectedAt: number | null;
+  solved: boolean;
+}
+
 export type PuzzleStateUnion =
   | ArchiveRunesState
   | CableLabyrinthState
   | TestmastersDiffState
   | OperationsGearsState
-  | BlackGateState;
+  | BlackGateState
+  | RuneMasterState;
 
 /* ------------------------------------------------------------------ */
 /* Puzzle actions (client -> server)                                   */
@@ -196,12 +217,17 @@ export type BlackGateAction =
   | { type: 'clear' }
   | { type: 'submit' };
 
+export type RuneMasterAction =
+  | { type: 'pick'; slot: 'gate' | 'inscription'; index: number }
+  | { type: 'attempt' };
+
 export type PuzzleAction =
   | ArchiveRunesAction
   | CableLabyrinthAction
   | TestmastersDiffAction
   | OperationsGearsAction
-  | BlackGateAction;
+  | BlackGateAction
+  | RuneMasterAction;
 
 export interface PuzzleActionEnvelope {
   code: string;

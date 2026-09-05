@@ -118,6 +118,26 @@ export const LOSE_GAG =
 
 export const FINALE_LINE = 'Die Siegel erwachen. Die Brücke formt sich aus Runen und Energie.';
 
+/**
+ * Der falsche Sieg.
+ *
+ * Zwei Schläge in einer Sequenz: Erst hat die Gruppe gewonnen - fünf Siegel,
+ * offenes Tor, die Brücke fährt aus. Dann grollt es, die Brücke steht still,
+ * und mitten darauf steigt ein Tor aus dem Stein, das auf keinem Plan steht.
+ * Der Ton bleibt ernst; der Witz liegt im Umschlag, nicht in der Sprache.
+ */
+export const FALSE_VICTORY = {
+  triumphTitle: 'Die Brücke erwacht',
+  triumphLine: 'Fünf Siegel, ein offenes Tor. Der Weg in die Zwei-Programme-Welt liegt frei.',
+  triumphNote: 'Mission fast erfüllt.',
+  twistTitle: 'Eine letzte Prüfung bleibt',
+  twistLine: 'Nicht jeder, der die Brücke erreicht, darf sie auch überschreiten.',
+  twistNote: 'Mitten auf der Brücke steigt ein Tor aus dem Stein. Auf keinem Plan ist es verzeichnet.',
+} as const;
+
+/** Der Runenmeister spricht nur einmal - und hilft dabei nicht. */
+export const RUNE_MASTER_LINE =
+  'Drei Tore. Drei Inschriften. Genau eine sagt die Wahrheit – und ich verrate nicht, welche.';
 
 /* ------------------------------------------------------------------ */
 /* House flavour                                                       */

@@ -24,6 +24,9 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Rätsel 2 zeigt Ein- und Austritt am Brett statt nur im Hinweistext
 - [x] Übungsraum `/demo`: alle fünf Prüfungen ohne Session, ohne Anmeldung, ohne Gefährten
 - [x] Rätsel 4 lesbar (Steintafel statt blanker Glut) und ohne Seitenüberlauf auf dem Telefon
+- [x] Rätsel 3 als Fehlersuche in zwei gezeichneten Prüfplänen, fünf subtile Abweichungen
+- [x] Rätsel 4 auf die Maschine reduziert: kein Erklärtext, Drehen am Rad, zwei Kettenlagen
+- [x] Falscher Sieg nach dem Schwarzen Tor und eine sechste, verborgene Prüfung
 
 ## Funktioniert
 
@@ -264,6 +267,33 @@ ausserhalb des Bildes. Zwei Ursachen, beide gemessen statt geraten:
 
 Ein E2E-Test hält das fest: `/demo/4` bei 360 px Breite, `scrollWidth <= clientWidth`, Knopfgrösse
 mindestens 44 px.
+
+## Der falsche Sieg und die letzte Prüfung
+
+**Dramaturgie.** Nach dem Schwarzen Tor glaubt die Gruppe, gewonnen zu haben: fünf Siegel, offenes
+Tor, die Brücke baut sich auf, „Die Brücke erwacht – der Weg liegt frei". Nach drei Sekunden kippt
+es: Grollen, die Energie steht still, mitten auf der Brücke steigt ein Tor aus dem Stein, „Eine
+letzte Prüfung bleibt". Erst danach öffnet die Prüfung des Runenmeisters.
+
+**Als Phase, nicht als Animation.** `FALSE_VICTORY` ist ein eigener Sitzungszustand (6,5 s), getaktet
+vom Server über `phaseEndsAt`. Ein lokaler Timer je Gerät würde um Sekunden auseinanderlaufen – und
+genau in dieser Sekunde liegt der ganze Effekt. Die Spielleitung kann überspringen („Weiter zur
+letzten Prüfung"); bei `prefers-reduced-motion` bleiben beide Bilder ohne Fahrt stehen, der Umschlag
+selbst bleibt.
+
+**Warum die sechste Station unsichtbar bleibt.** Prüfungen können `hidden` sein; der Server nimmt sie
+aus `snapshot.puzzles`, bis die Gruppe bei ihnen ankommt. Stünde die sechste Station von Anfang an im
+Fortschrittspfad, zählte man sie ab und der falsche Sieg wäre keiner. Aus demselben Grund zählt die
+letzte Prüfung nicht als Siegel: `SEAL_COUNT` bleibt 5, nach dem Schwarzen Tor sind alle fünf da –
+das ist Teil der Täuschung. Sie heisst deshalb auch „Die letzte Prüfung" und nicht „Station 6/5".
+
+**Das Rätsel.** Drei Tore, drei Inschriften, genau eine davon wahr. Verlangt werden zwei Angaben: das
+Tor, das den Weg freigibt, **und** die Inschrift, die als einzige wahr ist. Mit nur einer Angabe wäre
+die letzte Hürde des Abends ein Ratespiel mit drei Feldern; mit beiden sind es neun Möglichkeiten,
+und die richtige nennt nur, wer die Aussagen gegeneinander geprüft hat. Nach einer falschen Antwort
+bleibt der Stein drei Sekunden stumm – keine Zeitstrafe, aber der Grund, warum sich Durchprobieren
+nicht lohnt. Die Lösung steht nicht als Zahl im Code, sondern wird aus der Regel ausgerechnet;
+`enumerateRuneMasterSolutions()` beweist im Test, dass es genau eine gibt.
 
 ## Bekannte Bugs
 - keine offenen

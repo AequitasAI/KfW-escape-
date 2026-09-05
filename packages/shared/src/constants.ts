@@ -24,8 +24,26 @@ export const SOLVED_HOLD_MS = 2_600;
 /** Seal reveal / room change between two trials. */
 export const TRANSITION_DURATION_MS = 4_000;
 
+/**
+ * Der falsche Sieg zwischen dem Schwarzen Tor und der letzten Prüfung.
+ *
+ * Kurz genug, dass niemand ungeduldig wird, lang genug für beide Schläge: erst
+ * „geschafft", dann „doch nicht". Die Spielleitung kann jederzeit weiterklicken.
+ */
+export const FALSE_VICTORY_DURATION_MS = 6_500;
+
+/** Ab hier kippt der Triumph - Grollen, Flackern, das letzte Tor steigt auf. */
+export const FALSE_VICTORY_TWIST_AT_MS = 3_000;
+
 /** Bridge finale before the win screen. */
 export const FINALE_DURATION_MS = 6_500;
+
+/**
+ * Siegel gibt es für die fünf Hallen. Die letzte Prüfung auf der Brücke bringt
+ * kein sechstes - sie ist die Bedingung dafür, die fünf überhaupt zu behalten.
+ * Der Fortschrittspfad zeigt deshalb bis zuletzt fünf Stationen.
+ */
+export const SEAL_COUNT = 5;
 
 /** A hint can be offered after this much time in the same trial. */
 export const HINT_AFTER_MS = 75_000;

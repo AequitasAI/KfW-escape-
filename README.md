@@ -67,15 +67,29 @@ verbleibende Zeit nicht.
 | `/display/:code` | Großbild-/Beamer-/Teams-Ansicht, ohne jede Adminsteuerung |
 | `/demo`, `/demo/:nr` | Übungsraum: alle fünf Prüfungen allein durchspielen – ohne Session, ohne Anmeldung, ohne Gefährten |
 
-## Die fünf Prüfungen
+## Die Prüfungen
+
+Die Gruppe kennt fünf Stationen. Es sind sechs – die letzte taucht erst auf, wenn sie dran ist
+(siehe „Der falsche Sieg" weiter unten). Der Fortschrittspfad zeigt sie bis dahin nicht.
 
 | # | Station | Mechanik | Beweis |
 |---|---|---|---|
 | 1 | Archiv der alten Bestände | Runenreihenfolge | 120 Permutationen → genau eine Lösung |
 | 2 | Die verlorene Verbindung | 4×4 Sliding-Kabelpuzzle | BFS beweist Lösbarkeit des eingefrorenen Startzustands |
-| 3 | Halle der Prüfmeister | 4 Unterschiede in zwei SVG-Plänen | genau vier Hotspots, jeder einmal zählbar |
+| 3 | Halle der Prüfmeister | fünf subtile Abweichungen in zwei gezeichneten Prüfplänen | genau fünf Befunde in zwölf überlappungsfreien Prüffeldern |
 | 4 | Minen des Betriebs | Kette aus 5 Rädern zwischen festem Motor und Tor, Steckverbindungen in vier Formen | alle 8⁵ = 32768 Zustände → genau eine Lösung `[2,1,4,4,3]` |
 | 5 | Das Schwarze Tor | Deduktions-Code | alle 1000 Codes → genau einer (`042`) |
+| 6 | Prüfung des Runenmeisters | drei Tore, genau eine wahre Inschrift; Weg **und** wahre Inschrift benennen | alle 9 Kombinationen → genau eine widerspruchsfreie |
+
+### Der falsche Sieg
+
+Nach dem Schwarzen Tor sieht alles nach Sieg aus: fünf Siegel, das Tor offen, die Brücke baut sich
+auf, „Die Brücke erwacht". Drei Sekunden später grollt es, die Energie bleibt stehen und mitten auf
+der Brücke steigt ein Tor aus dem Stein – „Eine letzte Prüfung bleibt". Erst danach öffnet Prüfung 6.
+
+Die Sequenz ist eine eigene Phase (`FALSE_VICTORY`, 6,5 s), getaktet vom Server, damit Spieler-,
+Grossbild- und Spielleitungsansicht im selben Moment umschlagen. Die Spielleitung kann sie
+überspringen; bei `prefers-reduced-motion` bleiben beide Bilder ohne Bewegung stehen.
 
 ## Befehle
 
