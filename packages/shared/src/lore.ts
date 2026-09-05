@@ -102,14 +102,19 @@ export const LORE_MARKS: readonly LoreMark[] = Object.freeze([
     line: 'Die Chroniken reichen weiter zurück als jede bekannte Release-Dokumentation.',
     scale: 1.2,
   },
+  /*
+   * Das Standbild in der Vorhalle. Vorname und Beiname, wie es sich für eine
+   * Sage gehört - kein Nachname, kein Abbild, kein Amt. Die zweite Zeile ist
+   * für die gedacht, die das Format kennen: Alliteration und offene Halle.
+   */
   {
     id: 'lobby-baumeister',
     scene: 'lobby',
     kind: 'statue',
     x: 6,
     y: 30,
-    label: 'Der Erste Baumeister',
-    line: 'Er soll gesagt haben, man müsse eine Brücke von beiden Seiten bauen.',
+    label: 'Stefan der Weise',
+    line: 'Erster Baumeister der Brücke. Lädt zum Met mit dem Meister, jeden Mondwechsel.',
     wideOnly: true,
   },
 

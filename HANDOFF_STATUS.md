@@ -341,10 +341,11 @@ Abhängigkeiten." – und ein Spruch des Betriebszwergs über den gesperrten Sto
 Stiftung kommt nirgends vor, weder als Witz noch als Erklärung. Die Schreibweise bleibt „HuHi": aus
 Versalien würde ein Wort, das niemandem etwas sagt.
 
-**Der Erste Baumeister.** Ein Standbild in der Vorhalle, ohne Namen, mit einer freundlichen Zeile
-(„Er soll gesagt haben, man müsse eine Brücke von beiden Seiten bauen."). Eine reale Person mit Namen
-steht bewusst in keinem Artefakt dieses Repos – wer den Namen dennoch will, ändert eine Zeile in
-`lore.ts`.
+**Stefan der Weise.** Ein Standbild in der Vorhalle: „Erster Baumeister der Brücke. Lädt zum Met mit
+dem Meister, jeden Mondwechsel." Auf ausdrücklichen Wunsch und in der Form, die dafür verabredet
+wurde: Vorname und Beiname wie in einer Sage, kein Nachname, kein Amt, kein Abbild – und freundlich.
+Die zweite Zeile ist für die, die das alliterierende Vorstandsformat kennen. Wie alles hier steht sie
+in `lore.ts` und ist eine Zeile weit von einer Änderung entfernt.
 
 **Auch in der Sprache.** Jede Prüfung liegt jetzt in einem benannten Flügel, klein unter der Station:
 Flügel der Bildung · Bestände, Werk der Wohnlande, Kammer der Nachweise, Stollen der

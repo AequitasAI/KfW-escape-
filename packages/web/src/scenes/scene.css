@@ -153,6 +153,11 @@
   opacity: 0.62;
 }
 
+/* Ein Standbild trägt einen Namen, den man lesen können soll. */
+.lore--statue {
+  opacity: 0.75;
+}
+
 .lore__art {
   width: 100%;
   height: auto;
@@ -189,6 +194,14 @@
 }
 
 /* Die Zahl ist die eigentliche Anspielung - sie darf lesbar sein. */
+/* Die Marken liegen auf gemalten Bildern - mal auf Nachthimmel, mal auf Glut.
+   Ein Schatten hält die Schrift auf beidem lesbar. */
+.lore__rune,
+.lore__label,
+.lore__line {
+  text-shadow: 0 1px 3px rgb(0 0 0 / 85%);
+}
+
 .lore__rune {
   font-family: var(--kfw-font-display, serif);
   font-size: clamp(0.7rem, 1vw, 0.95rem);
