@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { GATE_CLUES, GATE_CODE_LENGTH, GUARD_LINES } from '@kfw-escape/shared';
+import { GATE_CLUES, GATE_CODE_LENGTH, GUARD_LINES, guardChallenge } from '@kfw-escape/shared';
 import type { BlackGateState } from '@kfw-escape/shared';
 import type { PuzzleProps } from './types.js';
 import { sound } from '../lib/sound.js';
@@ -40,7 +40,18 @@ export function BlackGate({ state, interactive, onAction, size }: PuzzleProps<Bl
           <GuardArt open={state.solved} />
         </div>
         <div className="gate__speech">
-          <p className="gate__speech-hail">{state.solved ? GUARD_LINES.success : GUARD_LINES.start}</p>
+          {/*
+            Bei jedem Fehlversuch fragt der Wächter knapper nach. Er ist nicht
+            der Gegner - er macht seine Arbeit, und die besteht aus genau einer
+            Frage nach der anderen.
+          */}
+          <p className="gate__speech-hail">
+            {state.solved
+              ? GUARD_LINES.success
+              : state.attempts.length > 0
+                ? guardChallenge(state.attempts.length)
+                : GUARD_LINES.start}
+          </p>
           {!state.solved ? <p className="gate__speech-body">{GUARD_LINES.continue}</p> : null}
         </div>
       </div>

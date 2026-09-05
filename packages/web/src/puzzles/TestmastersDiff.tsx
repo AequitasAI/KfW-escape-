@@ -350,6 +350,10 @@ function Boiler(): JSX.Element {
       <text className="plan__note" x="90" y="242" textAnchor="middle">
         KESSEL I
       </text>
+      {/* Beiwerk, auf beiden Blättern gleich - sonst wäre es eine Abweichung */}
+      <text className="plan__note" x="90" y="152" textAnchor="middle">
+        BAUREIHE 261
+      </text>
       <line className="plan__line" x1="134" y1="186" x2="150" y2="186" />
     </g>
   );
@@ -556,7 +560,7 @@ function StampField(): JSX.Element {
     <g>
       <rect className="plan__stamp-field" x="302" y="340" width="120" height="58" rx="3" />
       <text className="plan__note" x="362" y="356" textAnchor="middle">
-        PRÜFSTEMPEL
+        PRÜFSTEMPEL · BnD
       </text>
     </g>
   );
@@ -592,6 +596,9 @@ function NoteBlock(): JSX.Element {
       </text>
       <text className="plan__note" x="34" y="374">
         GEZ. MEISTER HALVAR
+      </text>
+      <text className="plan__note" x="34" y="330">
+        AKTE 174
       </text>
     </g>
   );

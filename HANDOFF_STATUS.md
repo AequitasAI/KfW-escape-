@@ -27,6 +27,7 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Rätsel 3 als Fehlersuche in zwei gezeichneten Prüfplänen, fünf subtile Abweichungen
 - [x] Rätsel 4 auf die Maschine reduziert: kein Erklärtext, Drehen am Rad, zwei Kettenlagen
 - [x] Falscher Sieg nach dem Schwarzen Tor und eine sechste, verborgene Prüfung
+- [x] Lore-Pass: die Förderwelt als Landkarte, rund zwanzig Anspielungen im Hintergrund
 
 ## Funktioniert
 
@@ -295,6 +296,44 @@ bleibt der Stein drei Sekunden stumm – keine Zeitstrafe, aber der Grund, warum
 nicht lohnt. Die Lösung steht nicht als Zahl im Code, sondern wird aus der Regel ausgerechnet;
 `enumerateRuneMasterSolutions()` beweist im Test, dass es genau eine gibt.
 
+## Lore-Pass: die Förderwelt als Landkarte
+
+**Dosis.** Ein bis drei erkennbare Anspielungen pro Bild, alles andere bleibt Fantasy. Nichts davon
+wird erklärt, nichts ist Teil einer Aufgabe, nichts muss man kennen, um zu gewinnen. Wer den Kontext
+hat, erkennt es; wer nicht, sieht eine Kulisse.
+
+**Wo sie stehen.** `packages/shared/src/lore.ts` hält alle Marken samt Ort in Prozent, Text und
+Sichtbarkeit – neue Anspielungen brauchen keine Zeile Code, nur einen Eintrag. Gezeichnet werden sie
+von `SceneLore` als eigene Ebene über dem Szenenbild und unter der Vignette.
+
+Diese Ebene ist nötig, nicht bequem: Wo ein gemaltes Artwork liegt, verdeckt es das generierte
+Szenen-SVG vollständig. Marken darin wären ausgerechnet in den Räumen unsichtbar, die am Spieleabend
+tatsächlich zu sehen sind.
+
+| Szene | Anspielungen |
+|---|---|
+| Vorhalle | Akademien von Studoria (174), Die Wohnlande (124), HuHi als dunkles Gebirge am Horizont |
+| Archiv | Bildung – laufende Chroniken (173 · 174), Bestände vergangener Zeitalter (170), Gewölbe der Altschulden |
+| Verbindung | Der sanierte Turm (261), Neue Höfe (297 · 298) |
+| Prüfmeister | Erlass aus der Hauptstadt, BnD – Siegel der Durchführung; auf den Plänen „BAUREIHE 261", „AKTE 174", „PRÜFSTEMPEL · BnD" |
+| Minen | „Freitags keine neuen Expeditionen.", Loren mit BnD/Bestand, Gilde des Aufstiegs (172) |
+| Schwarzes Tor | Pult der Nachweise (BnD); der Wächter fragt bei jedem Fehlversuch knapper: „Nachweis?", „Berechtigung?", „Dokumentiert?" |
+| Brücke | HuHi am Horizont, Studoria (173) |
+
+**Regeln, die dabei galten.** Nur öffentlich bekannte Programmnummern und Aufgabenbereiche sowie die
+im Projekt vorgegebenen Kürzel; keine Kunden-, Vertrags- oder Produktionsdaten; keine echten
+Dokumente. Erlasse kommen von „der Hauptstadt" und nicht von einem Ministerium mit Namen – die
+Zuständigkeiten haben sich zuletzt verschoben, und ein überholtes Kürzel wäre schlicht falsch.
+
+**HuHi.** Der Witz gilt ausschliesslich dem Alter der Anwendung und dem Pflegeaufwand, nie dem Zweck
+der Stiftung und nie den Menschen, um die es dort geht. Deshalb betritt man diese Hallen im Spiel
+auch nicht: Sie stehen als dunkles Gebirge am Horizont, alle sehen sie, und alle sind froh, heute
+woanders zu sein. Die eine Zeile dazu („Nur wenige kennen noch alle Wege durch diese Hallen.") steht
+auf der Brücke.
+
+**Auf dem Telefon** bleiben die Marken nur dort stehen, wo ohnehin gewartet wird – Vorhalle und
+Brücke. In den Rätselräumen gehört der Platz dem Rätsel.
+
 ## Bekannte Bugs
 - keine offenen
 
@@ -311,7 +350,7 @@ Beim Durchspielen im echten Browser gefunden und behoben:
    Servercode ausgeliefert worden. Der Cache liegt jetzt in `dist/` und ist ignoriert.
 
 ## Tests
-- `npm run verify` (Typecheck strict + Vitest): **87/87 grün**
+- `npm run verify` (Typecheck strict + Vitest): **96/96 grün**
   - 24 Rätsel-Unit-Tests inkl. der vier Eindeutigkeits-/Lösbarkeitsbeweise
   - 27 Server-Tests: Autorisierung, Solver-Regeln, Timer, kompletter Durchlauf, Failsafes,
     Identität, Neustart-Wiederherstellung

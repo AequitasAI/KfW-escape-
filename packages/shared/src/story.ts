@@ -94,8 +94,24 @@ export const GUARD_LINES = {
   start: 'HALT.',
   continue:
     'Ihr habt geprüft. Ihr habt die Maschinen erweckt. Doch ohne das letzte Siegel überschreitet niemand diese Brücke. Auch nicht mit Termindruck.',
-  success: 'Eure Unterlagen sind vollständig. Das kommt seltener vor, als ihr denkt.',
+  success:
+    'Dann dürft ihr passieren. Eure Unterlagen sind vollständig – das kommt seltener vor, als ihr denkt.',
 } as const;
+
+/**
+ * Was der Wächter bei einem falschen Code sagt. Ein Wort pro Versuch, in dieser
+ * Reihenfolge - er ist nicht der Gegner, er macht nur seine Arbeit.
+ */
+export const GUARD_CHALLENGES: readonly string[] = Object.freeze([
+  'Nachweis?',
+  'Berechtigung?',
+  'Dokumentiert?',
+]);
+
+export function guardChallenge(attempts: number): string {
+  const index = Math.max(0, attempts - 1) % GUARD_CHALLENGES.length;
+  return GUARD_CHALLENGES[index] as string;
+}
 
 export const SOLVER_REVEAL_PREFIX = 'Der nächste Gefährte wird bestimmt …';
 

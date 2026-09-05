@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
+import type { LoreScene } from '@kfw-escape/shared';
 import { useSceneArt } from './sceneArt.js';
+import { SceneLore } from './SceneLore.js';
 import './scene.css';
 
 export type SceneId =
@@ -54,6 +56,8 @@ export function Scene({
       <div className="scene__bg" aria-hidden="true">
         <SceneArt id={id} />
       </div>
+      {/* Anspielungen im Hintergrund - über dem Bild, unter der Vignette */}
+      <SceneLore scene={id as LoreScene} />
       <div className="scene__fx" aria-hidden="true" />
       <div className="scene__content">{children}</div>
     </div>
