@@ -524,7 +524,9 @@ export function HostView(): JSX.Element {
                 </div>
                 <div>
                   <dt>Aktueller Gefährte</dt>
-                  <dd>{snapshot?.solver.solverName ?? snapshot?.solver.candidateName ?? '—'}</dd>
+                  <dd className="host__solver">
+                    {snapshot?.solver.solverName ?? snapshot?.solver.candidateName ?? '—'}
+                  </dd>
                 </div>
                 <div>
                   <dt>Restzeit</dt>

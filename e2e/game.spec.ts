@@ -14,6 +14,7 @@ import {
   findOfferedPlayer,
   hostLogin,
   HOST_PASSWORD,
+  playerIdOf,
   startAdventure,
   joinPlayer,
   seatTable,
@@ -723,7 +724,7 @@ test.describe('Gezielte Übergabe', () => {
       offered.page.locator('.handover__name', { hasText: offered.name }),
     ).toHaveCount(0);
 
-    await offered.page.locator('.handover__pick', { hasText: chosen.name }).click();
+    await offered.page.locator(`.handover__pick[data-player="${await playerIdOf(chosen)}"]`).click();
 
     // die gewählte Person bekommt das Angebot, die vorherige verliert es
     await expect(chosen.page.getByRole('button', { name: 'Prüfung annehmen' })).toBeVisible({
@@ -731,7 +732,7 @@ test.describe('Gezielte Übergabe', () => {
     });
     await expect(offered.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
     // und alle Ansichten nennen dieselbe Person
-    await expect(table.host.getByText(new RegExp(`${chosen.name}.*wurde gewählt`))).toBeVisible();
+    await expect(table.host.locator('.host__solver')).toHaveText(chosen.name);
 
     await chosen.page.getByRole('button', { name: 'Prüfung annehmen' }).click();
     await waitForStation(chosen.page, 0);
@@ -751,16 +752,17 @@ test.describe('Gezielte Übergabe', () => {
      * stabil. Sonst listet sie kurz alle Verbundenen, ordnet sich unter dem
      * Klick neu - und der Klick landet auf der falschen Zeile.
      */
-    await expect(table.host.getByText(new RegExp(`${offered.name}.*wurde gewählt`))).toBeVisible();
+    await expect(table.host.locator('.host__solver')).toHaveText(offered.name);
 
     await table.host.getByRole('button', { name: 'Gefährten auswählen' }).click();
     await expect(table.host.locator('.handover__name')).toHaveCount(1);
-    await table.host.locator('.handover__pick', { hasText: other.name }).click();
+    await table.host.locator(`.handover__pick[data-player="${await playerIdOf(other)}"]`).click();
 
     await expect(other.page.getByRole('button', { name: 'Prüfung annehmen' })).toBeVisible({
       timeout: 20_000,
     });
     await expect(offered.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
+    await expect(table.host.locator('.host__solver')).toHaveText(other.name);
 
     await closeTable(table);
   });

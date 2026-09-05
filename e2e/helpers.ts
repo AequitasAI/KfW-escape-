@@ -79,6 +79,22 @@ export async function startAdventure(host: Page): Promise<void> {
   await expect(onward).toHaveCount(0);
 }
 
+/**
+ * Die Kennung einer Person aus ihrer eigenen Ansicht.
+ *
+ * Über den Namen zu klicken ist unzuverlässig: In einer Auswahlzeile stehen
+ * ausser dem Namen auch die Bezeichnung des Sigels und mögliche
+ * Kennzeichnungen.
+ */
+export async function playerIdOf(player: PlayerHandle): Promise<string> {
+  const code = player.page.url().split('/').pop() as string;
+  const raw = await player.page.evaluate(
+    (key) => window.localStorage.getItem(key),
+    `kfw-escape:player:${code.toUpperCase()}`,
+  );
+  return (JSON.parse(raw as string) as { playerId: string }).playerId;
+}
+
 export async function closeTable(table: Table): Promise<void> {
   for (const player of table.players) await player.context.close();
   await table.hostContext.close();

@@ -28,6 +28,9 @@ export default defineConfig({
     command: 'npm run build && node packages/server/dist/index.js',
     url: `${BASE_URL}/api/health`,
     reuseExistingServer: !process.env['CI'],
+    // sonst verwirft Playwright die Serverausgabe und man debuggt blind
+    stdout: 'pipe',
+    stderr: 'pipe',
     timeout: 180_000,
     env: {
       PORT: String(PORT),

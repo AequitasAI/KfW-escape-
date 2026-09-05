@@ -207,7 +207,14 @@ export function HandoverPicker({
         <ul className="handover__list">
           {[...fresh, ...used].map((player) => (
             <li key={player.id}>
-              <button type="button" className="btn btn--block handover__pick" onClick={() => onPick(player.id)}>
+              <button
+                type="button"
+                className="btn btn--block handover__pick"
+                /* eindeutige Adresse: der Name allein reicht nicht, im Knopf
+                   stehen auch Sigelbezeichnung und Kennzeichnungen */
+                data-player={player.id}
+                onClick={() => onPick(player.id)}
+              >
                 <Avatar id={player.avatar} title={false} />
                 <span className="handover__name">{player.displayName}</span>
                 {player.solverCount > 0 ? <span className="chip">war schon dran</span> : null}
