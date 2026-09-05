@@ -97,7 +97,9 @@ test.describe('Solver-Mechanik', () => {
     await startAdventure(table.host);
 
     const first = await findOfferedPlayer(table.players);
+    // Weitergeben öffnet jetzt eine Auswahl; der Zufallsknopf darin ist das alte Verhalten
     await first.page.getByRole('button', { name: 'An anderen Gefährten weitergeben' }).click();
+    await first.page.getByRole('button', { name: 'Zufällig auswählen' }).click();
     // the offer has to be gone here, otherwise the next search races the update
     await expect(first.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
 
@@ -106,6 +108,7 @@ test.describe('Solver-Mechanik', () => {
 
     // the player who declined is not offered again for this trial
     await second.page.getByRole('button', { name: 'An anderen Gefährten weitergeben' }).click();
+    await second.page.getByRole('button', { name: 'Zufällig auswählen' }).click();
     await expect(second.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
     const third = await findOfferedPlayer(table.players);
     expect([first.name, second.name]).not.toContain(third.name);
@@ -710,9 +713,15 @@ test.describe('Gezielte Übergabe', () => {
     const chosen = others[0]!;
 
     await offered.page.getByRole('button', { name: /weitergeben/ }).click();
-    // die Auswahl zeigt die anderen Verbundenen, nicht einen selbst
+    /*
+     * Die Auswahl zeigt die anderen Verbundenen, nicht einen selbst. Geprüft
+     * wird innerhalb der Auswahl - der eigene Name steht auch im Banner
+     * darüber, eine Suche über die ganze Seite fände also immer etwas.
+     */
     await expect(offered.page.locator('.handover__name')).toHaveCount(2);
-    await expect(offered.page.getByText(offered.name, { exact: true })).toHaveCount(0);
+    await expect(
+      offered.page.locator('.handover__name', { hasText: offered.name }),
+    ).toHaveCount(0);
 
     await offered.page.locator('.handover__pick', { hasText: chosen.name }).click();
 
@@ -737,7 +746,15 @@ test.describe('Gezielte Übergabe', () => {
     const offered = await findOfferedPlayer(table.players);
     const other = table.players.find((p) => p.name !== offered.name)!;
 
+    /*
+     * Erst wenn die Spielleitungsansicht den Kandidaten kennt, ist die Auswahl
+     * stabil. Sonst listet sie kurz alle Verbundenen, ordnet sich unter dem
+     * Klick neu - und der Klick landet auf der falschen Zeile.
+     */
+    await expect(table.host.getByText(new RegExp(`${offered.name}.*wurde gewählt`))).toBeVisible();
+
     await table.host.getByRole('button', { name: 'Gefährten auswählen' }).click();
+    await expect(table.host.locator('.handover__name')).toHaveCount(1);
     await table.host.locator('.handover__pick', { hasText: other.name }).click();
 
     await expect(other.page.getByRole('button', { name: 'Prüfung annehmen' })).toBeVisible({
