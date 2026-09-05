@@ -8,10 +8,13 @@ import {
   RUNES,
   solveCable,
 } from '@kfw-escape/shared';
-import type { PuzzleStateUnion, SessionSnapshot } from '@kfw-escape/shared';
+import type { PuzzleStateUnion } from '@kfw-escape/shared';
 
 /**
- * Die Lösung der laufenden Prüfung, nur in der Spielleitungsansicht.
+ * Die Lösung der laufenden Prüfung - für die Spielleitung und für die Demo.
+ *
+ * Nimmt den Rätselzustand statt eines Snapshots entgegen: Die Demo läuft ohne
+ * Session, hat also keinen Snapshot, braucht die Lösung beim Testen aber genauso.
  *
  * Bewusst eingeklappt: Wer sie braucht, klappt sie auf; wer über die Schulter
  * schaut, sieht sie nicht. Für das Kabelrätsel steht keine feste Lösung im
@@ -19,9 +22,8 @@ import type { PuzzleStateUnion, SessionSnapshot } from '@kfw-escape/shared';
  * Zustand berechnet, damit auch nach ein paar Zügen der richtige nächste Zug
  * dasteht.
  */
-export function SolutionPanel({ snapshot }: { snapshot: SessionSnapshot }): JSX.Element | null {
+export function SolutionPanel({ state }: { state: PuzzleStateUnion | null }): JSX.Element | null {
   const [open, setOpen] = useState(false);
-  const state = snapshot.status === 'PUZZLE_ACTIVE' ? snapshot.puzzleState : null;
 
   /*
    * Der Kabelweg wird gesucht, nicht nachgeschlagen. Die Ansicht rendert im

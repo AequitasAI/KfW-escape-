@@ -20,6 +20,7 @@ npm run dev
 - Spielleitung: <http://localhost:5173/host>
 - Spieler: Join-Link/QR aus der Host-Ansicht
 - Großbild/Teams: `/display/<CODE>`
+- Rätsel testen ohne Session, Anmeldung und Mitspieler: <http://localhost:5173/demo>
 
 Der Vite-Dev-Server (Port 5173) proxyt `/api` und `/socket.io` auf den Node-Server (Port 3001).
 
@@ -64,6 +65,7 @@ verbleibende Zeit nicht.
 | `/join/:code` | Anzeigename eingeben, beitreten (kein Login, keine Mail) |
 | `/game/:code` | Spieleransicht (mobile-first) |
 | `/display/:code` | Großbild-/Beamer-/Teams-Ansicht, ohne jede Adminsteuerung |
+| `/demo`, `/demo/:nr` | Übungsraum: alle fünf Prüfungen allein durchspielen – ohne Session, ohne Anmeldung, ohne Gefährten |
 
 ## Die fünf Prüfungen
 

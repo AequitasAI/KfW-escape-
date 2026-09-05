@@ -123,6 +123,15 @@ export function LandingView(): JSX.Element {
               {error}
             </p>
           ) : null}
+
+          {/* Übungsraum: bewusst klein und unten, damit ihn am Spieleabend
+              niemand mit dem Beitritt verwechselt. */}
+          <p className="landing__demo">
+            Nur die Rätsel ausprobieren?{' '}
+            <button type="button" className="landing__demo-link" onClick={() => navigate('/demo')}>
+              Zum Übungsraum
+            </button>
+          </p>
         </div>
       </main>
     </Scene>

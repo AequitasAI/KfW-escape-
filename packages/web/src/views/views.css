@@ -1000,3 +1000,93 @@
   margin-top: var(--game-space-2);
   animation: rise-in var(--game-dur-slow) var(--game-ease-out) both;
 }
+
+/* ------------------------------------------------------------------ */
+/* Übungsraum (/demo)                                                  */
+/* ------------------------------------------------------------------ */
+
+/* Der Übungsraum trägt dieselbe Bühne wie das echte Spiel; nur die Leiste
+   darunter ist eine andere - statt Gefährtenwechsel steht dort die Auswahl der
+   Prüfung, ein Rücksetzknopf und die Lösung. */
+.demo__badge {
+  border-color: color-mix(in srgb, var(--game-fx-rune) 50%, transparent);
+  color: var(--game-fx-rune);
+}
+
+/* Anders als die Gefährtenleiste im Spiel klebt die Werkbank nicht am unteren
+   Rand: Sie ist deutlich höher und würde auf dem Telefon sonst das halbe
+   Rätsel verdecken. Sie scrollt mit. */
+.demo__foot {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: var(--game-space-1);
+  padding: var(--game-space-2);
+  border-top: 1px solid var(--game-ui-line);
+  background: color-mix(in srgb, var(--game-ui-surface-deep) 88%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.demo__actions,
+.demo__stations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Fingerkuppen, nicht Mauszeiger: die Demo läuft auch auf dem Telefon. */
+.demo__actions .btn,
+.demo__station {
+  min-height: 44px;
+}
+
+.demo__station {
+  cursor: pointer;
+  text-align: left;
+}
+
+.demo__station.is-current {
+  border-color: var(--game-fx-rune);
+  color: var(--game-fx-rune);
+}
+
+.demo__solved {
+  padding: var(--game-space-1) var(--game-space-2);
+  border-radius: var(--game-radius-m);
+  border: 1px solid color-mix(in srgb, var(--game-fx-rune) 55%, transparent);
+  background: color-mix(in srgb, var(--game-fx-rune) 10%, transparent);
+  text-align: center;
+  animation: rise-in var(--game-dur) var(--game-ease-out) both;
+}
+
+.demo__note {
+  margin: 0;
+}
+
+@media (max-width: 40rem) {
+  /* zwei Knöpfe pro Reihe statt vier Reihen untereinander */
+  .demo__actions .btn {
+    flex: 1 1 calc(50% - 0.25rem);
+  }
+
+  .demo__station {
+    font-size: var(--kfw-font-size-small);
+  }
+}
+
+.landing__demo {
+  margin: 0;
+  text-align: center;
+  color: var(--game-ui-text-muted);
+  font-size: var(--kfw-font-size-small);
+}
+
+.landing__demo-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--game-fx-rune);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

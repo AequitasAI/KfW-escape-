@@ -22,6 +22,7 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Prüfung bleibt nie ohne Gefährten stehen (Zusicherung im Tick statt Einmalangebot)
 - [x] Gezielte Übergabe der Prüfung durch Gefährte und Spielleitung
 - [x] Rätsel 2 zeigt Ein- und Austritt am Brett statt nur im Hinweistext
+- [x] Übungsraum `/demo`: alle fünf Prüfungen ohne Session, ohne Anmeldung, ohne Gefährten
 
 ## Funktioniert
 
@@ -213,6 +214,33 @@ von der Quelle bis in die Fassung.
 Der Hinweistext konnte dadurch von einer Wegbeschreibung auf einen Tipp zur Vorgehensweise
 zurückgenommen werden.
 
+## Übungsraum: `/demo`
+
+**Zweck.** Die Rätsel testen und verbessern, ohne jedes Mal eine Session anzulegen, sich als
+Spielleitung anzumelden und Gefährten zu verteilen. `/demo` öffnet direkt die erste Prüfung,
+`/demo/1` bis `/demo/5` springen gezielt hinein.
+
+**Bauart.** Der Übungsraum baut nichts nach. Die Rätsellogik liegt als reines
+`createPuzzleState` / `reducePuzzle` in `@kfw-escape/shared` – derselbe Code, den der Server im
+echten Spiel fährt. `DemoView` hält diesen Zustand einfach im React-State statt in einer Session
+und rendert dieselbe `PuzzleHost`-Komponente wie Spieler-, Host- und Grossbildansicht. Damit kann
+der Übungsraum gar nicht vom Spiel abweichen: Was hier funktioniert, funktioniert am Spieleabend
+genauso.
+
+Kein Socket, keine Uhr, keine Solver-Prüfung – `interactive` ist immer wahr. Es gibt also auch
+nichts zu autorisieren: Die Route berührt weder Sessions noch den Host-Schlüssel und kann keine
+laufende Runde beeinflussen. Sie ist bewusst auch in der Produktion erreichbar, weil genau dort
+getestet wird; von der Startseite führt ein kleiner Link unten hinein, damit er am Spieleabend
+nicht mit dem Beitritt verwechselt wird.
+
+**Werkbank.** Unter der Bühne: Prüfung zurücksetzen, Hinweis ein-/ausblenden, vor und zurück,
+Sprungleiste über alle fünf Stationen (gelöste tragen ein Häkchen) und dieselbe eingeklappte
+Lösung, die die Spielleitung sieht. `SolutionPanel` nimmt dafür jetzt den Rätselzustand statt
+eines Snapshots entgegen – die Demo hat keinen.
+
+Anders als die Gefährtenleiste im Spiel klebt diese Leiste nicht am unteren Rand: Sie ist deutlich
+höher und hätte auf dem Telefon sonst das halbe Rätsel verdeckt.
+
 ## Bekannte Bugs
 - keine offenen
 
@@ -229,14 +257,14 @@ Beim Durchspielen im echten Browser gefunden und behoben:
    Servercode ausgeliefert worden. Der Cache liegt jetzt in `dist/` und ist ignoriert.
 
 ## Tests
-- `npm run verify` (Typecheck strict + Vitest): **67/67 grün**
+- `npm run verify` (Typecheck strict + Vitest): **87/87 grün**
   - 24 Rätsel-Unit-Tests inkl. der vier Eindeutigkeits-/Lösbarkeitsbeweise
   - 27 Server-Tests: Autorisierung, Solver-Regeln, Timer, kompletter Durchlauf, Failsafes,
     Identität, Neustart-Wiederherstellung
   - 1 Lasttest mit 30 gleichzeitigen Socket-Clients
   - 15 Tests zu Spielleitungs-Login (Token, Ablauf, Neustart, Sperre) und Sigel-Vergabe
 - `npm run test:e2e` (Playwright gegen den echten Produktions-Build, mit gesetztem
-  `HOST_PASSWORD`): **17/17 grün**
+  `HOST_PASSWORD`): **30/30 grün**
   - Beitritt, gleiche Namen, Reload-Wiederherstellung
   - Solver-Autorisierung, Weitergabe, Host-Reroll
   - Timer inkl. Reload und Pause/Resume
@@ -248,6 +276,8 @@ Beim Durchspielen im echten Browser gefunden und behoben:
     Abweisung ohne Anmeldung, Anmeldung übersteht einen Reload
   - dreissig Sigel: eigenes Zeichen benannt, drei Spieler drei verschiedene Zeichen,
     identisch auf Host- und Grossbildansicht
+  - Übungsraum: alle fünf Prüfungen ohne Session durchgespielt, Direktsprung über die URL,
+    Zurücksetzen, Erreichbarkeit von der Startseite ohne jede Anmeldung
 
 ## Nächste Schritte
 1. Auf dem Zielhost `docker compose up --build -d` ausführen und `PUBLIC_BASE_URL` setzen
@@ -265,7 +295,7 @@ Der MVP ist funktionsfähig, getestet, committet und gepusht. Für den nächsten
 ```bash
 git checkout claude/mvp-build
 npm install
-npm run verify          # 52 Tests
-npm run test:e2e        # 12 E2E-Tests, baut und startet die App selbst
+npm run verify          # 87 Tests
+npm run test:e2e        # 30 E2E-Tests, baut und startet die App selbst
 npm run dev             # Host: http://localhost:5173/host
 ```

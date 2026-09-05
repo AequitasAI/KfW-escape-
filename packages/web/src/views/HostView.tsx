@@ -346,7 +346,11 @@ export function HostView(): JSX.Element {
                 <ProgressTrail puzzles={snapshot.puzzles} currentIndex={snapshot.currentPuzzleIndex} />
               ) : null}
 
-              {snapshot ? <SolutionPanel snapshot={snapshot} /> : null}
+              {snapshot ? (
+                <SolutionPanel
+                  state={snapshot.status === 'PUZZLE_ACTIVE' ? snapshot.puzzleState : null}
+                />
+              ) : null}
 
               <button
                 type="button"
