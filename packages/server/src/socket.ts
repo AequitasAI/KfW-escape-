@@ -177,6 +177,13 @@ export function createSocketServer(httpServer: HttpServer, manager: SessionManag
       }
     });
 
+    socket.on('player:ready', () => {
+      if (!allowControl()) return;
+      const playerId = socket.data.playerId;
+      if (!playerId) return;
+      session.markReady(playerId);
+    });
+
     socket.on('solver:accept', () => {
       if (!allowControl()) return;
       const playerId = socket.data.playerId;

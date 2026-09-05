@@ -159,10 +159,11 @@ export async function solveDiff(page: Page): Promise<void> {
 
 /**
  * Aus der Lösung abgeleitet statt abgeschrieben - sonst geht der Plan beim
- * nächsten Umbau des Rätsels still daneben. Rad 0 ist der feste Motor.
+ * nächsten Umbau des Rätsels still daneben. Motor und Tor sind fest, alle fünf
+ * Räder drehen.
  */
-export const GEAR_PLAN: [string, number][] = GEAR_SOLUTION.slice(1).map((orientation, index) => [
-  GEAR_LABELS[index + 1] as string,
+export const GEAR_PLAN: [string, number][] = GEAR_SOLUTION.map((orientation, index) => [
+  GEAR_LABELS[index] as string,
   orientation,
 ]);
 

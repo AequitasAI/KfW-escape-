@@ -1,5 +1,12 @@
 import { expect, test } from '@playwright/test';
 import {
+  GEAR_LABELS,
+  GEAR_SOLUTION,
+  MOTOR_CONNECTOR,
+  connectorsFit,
+  leftConnector,
+} from '@kfw-escape/shared';
+import {
   acceptOfferedSolver,
   closeTable,
   createSession,
@@ -278,7 +285,9 @@ test.describe('Minen des Betriebs', () => {
     expect(before).toHaveLength(5);
 
     for (let i = 0; i < 3; i += 1) {
-      await solver.page.locator('[aria-label="Zahnrad II im Uhrzeigersinn drehen"]').click();
+      await solver.page
+        .locator(`[aria-label="${GEAR_LABELS[1]} im Uhrzeigersinn drehen"]`)
+        .click();
       await solver.page.waitForTimeout(200);
     }
     await solver.page.waitForTimeout(600);
@@ -525,13 +534,12 @@ test.describe('Lösung für die Spielleitung', () => {
   });
 });
 
-test.describe('Minen des Betriebs: kein Signal pro Zahnradpaar', () => {
-  test('verrät einzelne Paare nicht', async ({ browser }) => {
+test.describe('Minen des Betriebs: Kette statt Einzelkontakte', () => {
+  test('ein passender Kontakt leuchtet, ohne dass die Maschine läuft', async ({ browser }) => {
     test.setTimeout(180_000);
     const table = await seatTable(browser, ['Mara', 'Jonas']);
     await startAdventure(table.host);
 
-    // der Gefährte wechselt nach jeder Prüfung - eine Seite festzuhalten geht schief
     for (let station = 0; station < 3; station += 1) {
       const solver = await acceptOfferedSolver(table.players);
       await waitForStation(solver.page, station);
@@ -541,12 +549,45 @@ test.describe('Minen des Betriebs: kein Signal pro Zahnradpaar', () => {
     const atGears = await acceptOfferedSolver(table.players);
     await waitForStation(atGears.page, 3);
 
-    // keine Kontaktlampen, kein Zähler - die Zahnformen tragen die Information
-    await expect(atGears.page.locator('.gear__contact')).toHaveCount(0);
-    await expect(atGears.page.locator('.puzzle--gears .puzzle__status')).not.toContainText(
-      /von \d+ Kontakten/,
-    );
-    await expect(atGears.page.locator('.gear__focus').first()).toBeVisible();
+    // Ausgangslage: nichts greift
+    await expect(atGears.page.locator('.gears__contact')).toHaveCount(0);
+
+    /*
+     * Rad I nimmt den Motor in mehreren Stellungen auf. Sobald eine davon
+     * eingestellt ist, leuchtet dieser eine Kontakt - und nur dieser. Genau
+     * daran hängt das Rätsel: lokal richtig heisst hier nicht global richtig.
+     */
+    const first = GEAR_LABELS[0] as string;
+    for (let i = 0; i < (GEAR_SOLUTION[0] as number); i += 1) {
+      await atGears.page.locator(`[aria-label="${first} im Uhrzeigersinn drehen"]`).click();
+      await atGears.page.waitForTimeout(150);
+    }
+
+    await expect(atGears.page.locator('.gears__contact')).toHaveCount(1);
+    await expect(atGears.page.locator('.gears__contact-item.is-live')).toHaveCount(1);
+    // die Maschine läuft deswegen noch lange nicht
+    await expect(atGears.page.locator('.puzzle--gears.is-running')).toHaveCount(0);
+
+    /*
+     * Wegdrehen löscht den Kontakt - aber nicht schon nach einem Schritt: Rad I
+     * hat drei Dreieck-Kerben, mehrere benachbarte Stellungen nehmen den Motor
+     * also an. Genau das ist die gewollte Mehrdeutigkeit, deshalb wird bis zur
+     * ersten Stellung gedreht, die wirklich nicht passt.
+     */
+    const accepting = new Set<number>();
+    for (let o = 0; o < 8; o += 1) {
+      if (connectorsFit(MOTOR_CONNECTOR, leftConnector(0, o))) accepting.add(o);
+    }
+    expect(accepting.size).toBeGreaterThanOrEqual(3);
+
+    let orientation = GEAR_SOLUTION[0] as number;
+    do {
+      await atGears.page.locator(`[aria-label="${first} im Uhrzeigersinn drehen"]`).click();
+      await atGears.page.waitForTimeout(150);
+      orientation = (orientation + 1) % 8;
+    } while (accepting.has(orientation));
+
+    await expect(atGears.page.locator('.gears__contact')).toHaveCount(0);
 
     await closeTable(table);
   });
@@ -559,7 +600,7 @@ test.describe('Vorspann', () => {
 
     const player = table.players[0]!.page;
     await expect(player.getByText('Vor langer Zeit beschloss man den Wiederaufbau.')).toBeVisible();
-    await expect(player.getByText(/Die Spielleitung führt euch weiter/)).toBeVisible();
+    await expect(player.getByText(/Wer so weit ist, geht schon vor/)).toBeVisible();
 
     // die Uhr steht: nach mehreren Sekunden immer noch die volle Zeit
     await expect(player.locator('.timer__value')).toHaveText('10:00');
@@ -596,10 +637,41 @@ test.describe('Der Betriebszwerg', () => {
     const first = await bubble.innerText();
     // ein Spruch hält ein paar Züge, dann kommt der nächste
     for (let i = 0; i < 4; i += 1) {
-      await atGears.page.locator('[aria-label="Torrad im Uhrzeigersinn drehen"]').click();
+      await atGears.page
+        .locator(`[aria-label="${GEAR_LABELS[GEAR_LABELS.length - 1]} im Uhrzeigersinn drehen"]`)
+        .click();
       await atGears.page.waitForTimeout(200);
     }
     await expect.poll(async () => bubble.innerText(), { timeout: 10_000 }).not.toBe(first);
+
+    await closeTable(table);
+  });
+});
+
+test.describe('Vorspann: jeder geht selbst vor', () => {
+  test('das Rätsel öffnet erst, wenn alle weitergeklickt haben', async ({ browser }) => {
+    const table = await seatTable(browser, ['Mara', 'Jonas']);
+    await table.host.getByRole('button', { name: 'Abenteuer beginnen' }).click();
+
+    const [first, second] = table.players as [(typeof table.players)[0], (typeof table.players)[0]];
+    const weiter = /Gelesen – weiter zur ersten Halle/;
+
+    await expect(first.page.getByRole('button', { name: weiter })).toBeVisible({ timeout: 20_000 });
+    await first.page.getByRole('button', { name: weiter }).click();
+
+    // vorgegangen: schon in der Halle, aber ohne Rätsel und ohne Gefährten
+    await expect(first.page.getByText('Das Archiv der alten Bestände')).toBeVisible();
+    await expect(first.page.getByText(/Es fehlt noch ein Gefährte/)).toBeVisible();
+    await expect(first.page.getByText('Station 1/5')).toHaveCount(0);
+    await expect(first.page.getByRole('button', { name: 'Prüfung annehmen' })).toHaveCount(0);
+
+    // die zweite Person liest noch
+    await expect(second.page.getByRole('button', { name: weiter })).toBeVisible();
+
+    // sobald sie nachzieht, öffnet die erste Prüfung für alle
+    await second.page.getByRole('button', { name: weiter }).click();
+    await expect(first.page.getByText('Station 1/5')).toBeVisible({ timeout: 20_000 });
+    await expect(second.page.getByText('Station 1/5')).toBeVisible();
 
     await closeTable(table);
   });

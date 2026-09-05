@@ -6,6 +6,7 @@ import {
   HINT_AFTER_MS,
   HOST_BONUS_TIME_MS,
   INTRO_DURATION_MS,
+  SOLVED_HOLD_MS,
   PUZZLE_COUNT,
   TRANSITION_DURATION_MS,
   solveCable,
@@ -53,6 +54,20 @@ function acceptCurrentCandidate(session: GameSession): string {
   return candidate as string;
 }
 
+/**
+ * Vom gelösten Rätsel bis zur nächsten offenen Prüfung.
+ *
+ * Zwei Phasen, nicht eine: Die gelöste Prüfung bleibt erst kurz stehen, damit
+ * die Erfolgsanimation überhaupt sichtbar wird, und erst danach läuft der
+ * Übergang.
+ */
+function advanceToNextPuzzle(session: GameSession): void {
+  vi.advanceTimersByTime(SOLVED_HOLD_MS + 10);
+  session.tick();
+  vi.advanceTimersByTime(TRANSITION_DURATION_MS + 10);
+  session.tick();
+}
+
 /** Solves whichever trial is currently open, as the accepted solver. */
 function solveCurrentPuzzle(session: GameSession, solverId: string): void {
   const id = session.currentPuzzle.id as PuzzleId;
@@ -87,7 +102,8 @@ function solveCurrentPuzzle(session: GameSession, solverId: string): void {
     return;
   }
   if (id === 'operations_gears') {
-    for (let gear = 1; gear < GEAR_SOLUTION.length; gear += 1) {
+    // alle fünf Räder drehen; Motor und Tor sind die festen Enden
+    for (let gear = 0; gear < GEAR_SOLUTION.length; gear += 1) {
       for (let i = 0; i < (GEAR_SOLUTION[gear] as number); i += 1) act({ type: 'rotate', gear, dir: 1 });
     }
     return;
@@ -210,8 +226,7 @@ describe('Solver selection', () => {
     const firstSolver = acceptCurrentCandidate(session);
     solveCurrentPuzzle(session, firstSolver);
 
-    vi.advanceTimersByTime(TRANSITION_DURATION_MS + 10);
-    session.tick();
+    advanceToNextPuzzle(session);
 
     const secondCandidate = session.snapshot().solver.candidateId as string;
     expect(secondCandidate).not.toBe(firstSolver);
@@ -230,8 +245,7 @@ describe('Solver selection', () => {
       previous = candidate;
       const solver = acceptCurrentCandidate(session);
       solveCurrentPuzzle(session, solver);
-      vi.advanceTimersByTime(TRANSITION_DURATION_MS + 10);
-      session.tick();
+      advanceToNextPuzzle(session);
     }
     // with only two players the third trial has to fall back to a used player
     expect(session.snapshot().solver.candidateId).toBeTruthy();
@@ -244,8 +258,7 @@ describe('Solver selection', () => {
     session.declineSolver(first);
     const solver = acceptCurrentCandidate(session);
     solveCurrentPuzzle(session, solver);
-    vi.advanceTimersByTime(TRANSITION_DURATION_MS + 10);
-    session.tick();
+    advanceToNextPuzzle(session);
     expect(session.snapshot().players.every((p) => !p.declinedCurrent)).toBe(true);
   });
 
@@ -393,8 +406,7 @@ describe('Game flow', () => {
       const solver = acceptCurrentCandidate(session);
       solveCurrentPuzzle(session, solver);
       expect(session.seals).toBe(i + 1);
-      vi.advanceTimersByTime(TRANSITION_DURATION_MS + 10);
-      session.tick();
+      advanceToNextPuzzle(session);
     }
 
     expect(session.status).toBe('FINALE');
@@ -430,8 +442,7 @@ describe('Game flow', () => {
     expect(session.skipPuzzle()).toBe(true);
     expect(session.puzzleMetaViews()[0]?.status).toBe('SKIPPED');
     expect(session.seals).toBe(1);
-    vi.advanceTimersByTime(TRANSITION_DURATION_MS + 10);
-    session.tick();
+    advanceToNextPuzzle(session);
     expect(session.currentPuzzleIndex).toBe(1);
   });
 

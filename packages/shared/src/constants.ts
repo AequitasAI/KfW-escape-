@@ -2,14 +2,24 @@
 export const GAME_DURATION_MS = 10 * 60 * 1000;
 
 /**
- * Notausgang, kein Taktgeber: Normalerweise klickt die Spielleitung das Intro
- * weiter, wenn sie es vorgelesen hat. Diese Dauer verhindert nur, dass eine
- * vergessene Session ewig im Vorspann steht.
+ * Lesezeit für den Vorspann, kein Taktgeber für die Gruppe.
  *
- * Sie darf grosszügig sein, weil die Spieluhr erst mit der ersten Prüfung
- * anläuft - das Intro kostet keine Spielzeit.
+ * Wer fertig gelesen hat, klickt selbst weiter und steht dann schon in der
+ * ersten Halle. Die erste Prüfung öffnet, sobald alle so weit sind - spätestens
+ * aber nach dieser Zeit, damit eine unaufmerksame Runde nicht hängen bleibt.
+ * Die Spieluhr läuft während des Vorspanns nicht, er kostet also keine Spielzeit.
  */
-export const INTRO_DURATION_MS = 3 * 60 * 1000;
+export const INTRO_DURATION_MS = 30_000;
+
+/**
+ * Wie lange eine gelöste Prüfung noch stehen bleibt, bevor der Übergang kommt.
+ *
+ * Ohne diese Pause überschreibt der Siegel-Bildschirm die Erfolgsanimation im
+ * selben Moment, in dem sie beginnt: Die Maschine läuft an, das Tor öffnet
+ * sich, die Energie fliesst - und niemand sieht davon ein einziges Bild. Die
+ * Eingabe ist währenddessen bereits gesperrt.
+ */
+export const SOLVED_HOLD_MS = 2_600;
 
 /** Seal reveal / room change between two trials. */
 export const TRANSITION_DURATION_MS = 4_000;

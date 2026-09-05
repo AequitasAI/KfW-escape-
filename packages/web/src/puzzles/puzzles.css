@@ -462,9 +462,8 @@
   font-weight: var(--kfw-font-weight-bold);
   color: var(--game-fx-seal);
 }
-
 /* ------------------------------------------------------------------ */
-/* P4 Operations gears                                                 */
+/* P4 Minen des Betriebs - Kettenmechanik                              */
 /* ------------------------------------------------------------------ */
 
 .gears__machine {
@@ -472,63 +471,40 @@
   width: 100%;
 }
 
+/*
+ * Die Maschine scrollt bewusst nicht seitlich. Bei diesem Rätsel muss man alle
+ * Kontakte gleichzeitig sehen können - sonst steht ausgerechnet der, der klemmt,
+ * ausserhalb des Bildes.
+ */
 .gears__svg {
   width: 100%;
   height: auto;
   overflow: visible;
 }
 
-.gears__motor rect {
-  fill: #3a3126;
-  stroke: var(--game-fx-metal-dark);
-}
+/* --- Radkörper ----------------------------------------------------- */
 
-.gears__motor-core {
-  fill: #211a12;
-  stroke: var(--game-fx-metal-dark);
+.gear__teeth,
+.gear__body {
+  fill: #75643f;
+  stroke: #2b2318;
   stroke-width: 3;
-}
-
-.gears__motor.is-live .gears__motor-core {
-  fill: color-mix(in srgb, var(--game-fx-energy) 45%, #241a0e);
-  stroke: var(--game-fx-energy);
-  filter: drop-shadow(0 0 12px var(--game-fx-energy-glow));
-}
-
-.gears__shaft {
-  stroke: var(--game-fx-metal-dark);
-  stroke-width: 8;
-  stroke-linecap: round;
-  transition: stroke var(--game-dur) var(--game-ease);
-}
-
-.gears__shaft.is-powered {
-  stroke: var(--game-fx-energy);
-  stroke-dasharray: 8 10;
-  animation: energy-dash 700ms linear infinite;
-  filter: drop-shadow(0 0 6px var(--game-fx-energy-glow));
-}
-
-.gear__teeth {
-  fill: url(#gear-metal);
-  stroke: #2b2018;
-  stroke-width: 2;
+  stroke-linejoin: round;
   transition: fill var(--game-dur) var(--game-ease);
 }
 
-.gear.is-powered .gear__teeth {
-  fill: url(#gear-live);
-  filter: drop-shadow(0 0 10px var(--game-fx-energy-soft));
+.gear__body {
+  fill: #8a7649;
 }
 
 .gear__hub {
-  fill: #2a231a;
-  stroke: var(--game-fx-metal-dark);
-  stroke-width: 2;
+  fill: #3b332a;
+  stroke: #2b2318;
+  stroke-width: 3;
 }
 
 .gear__bore {
-  fill: #14100b;
+  fill: #17120c;
 }
 
 .gear__marker {
@@ -538,12 +514,9 @@
 }
 
 /*
- * transform-box is the whole story here. Its initial value for SVG elements is
- * view-box, so "transform-origin: center" means the centre of the entire SVG -
- * a rotated gear then swings around the middle of the machine and leaves the
- * picture. fill-box makes the origin the element's own bounding box, and the
- * invisible pin circle in the markup keeps that box symmetric around the gear
- * centre for every tooth profile.
+ * transform-box: fill-box ist hier Pflicht. Der Ausgangswert view-box legt den
+ * Drehpunkt in die Mitte der ganzen Maschine - das erste Antippen warf das Rad
+ * damit aus dem Bild.
  */
 .gear__spin {
   transition: transform var(--game-dur) var(--game-ease-out);
@@ -555,8 +528,9 @@
   cursor: pointer;
 }
 
-.gear.is-turnable:hover .gear__teeth {
-  stroke: var(--game-fx-energy);
+.gear.is-turnable:hover .gear__teeth,
+.gear.is-turnable:hover .gear__body {
+  fill: #a08a56;
 }
 
 .gear:focus-visible {
@@ -564,33 +538,153 @@
 }
 
 .gear:focus-visible .gear__hub {
-  stroke: var(--game-ui-focus);
-  stroke-width: 4;
-}
-
-.gear--fixed .gear__hub {
   stroke: var(--game-fx-rune);
+  stroke-width: 5;
 }
 
-/* the machine start: all five turn together, alternating direction */
+/* --- Anschlüsse ---------------------------------------------------- */
+
+.connector__neck {
+  fill: #75643f;
+  stroke: #2b2318;
+  stroke-width: 3;
+}
+
+.connector__shape {
+  stroke: #2b2318;
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+/* Zapfen sind aus demselben Metall wie das Rad und stehen heraus. */
+.connector--peg .connector__shape {
+  fill: #c9963c;
+}
+
+/* Kerben sind Löcher: dunkel, mit einer angedeuteten Fase. */
+.connector--socket .connector__shape {
+  fill: #1b1610;
+  stroke: #4a4133;
+}
+
+.connector--fixed .connector__shape {
+  fill: #b9873a;
+}
+
+/* --- Wellen und Kontakte ------------------------------------------- */
+
+.gears__shaft {
+  stroke: #4a4133;
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke var(--game-dur) var(--game-ease);
+}
+
+.gears__shaft.is-powered {
+  stroke: var(--game-fx-energy);
+  stroke-dasharray: 8 10;
+  animation: energy-dash 700ms linear infinite;
+  filter: drop-shadow(0 0 6px var(--game-fx-energy-glow));
+}
+
+/*
+ * Ein passender Kontakt leuchtet für sich - auch wenn die Gesamtlösung noch
+ * falsch ist. Genau das ist der Reiz: lokal richtig heisst hier nicht global
+ * richtig.
+ */
+.gears__contact {
+  animation: contact-appear var(--game-dur) var(--game-ease-out) both;
+  pointer-events: none;
+}
+
+@keyframes contact-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Motor und Tor -------------------------------------------------- */
+
+.gears__motor rect {
+  fill: #3a3126;
+  stroke: #2b2318;
+  stroke-width: 3;
+}
+
+.gears__motor-core {
+  fill: #211a12;
+  stroke: #4a4133;
+  stroke-width: 3;
+  transition: fill var(--game-dur) var(--game-ease);
+}
+
+.gears__motor.is-live .gears__motor-core {
+  fill: var(--game-fx-energy);
+  filter: drop-shadow(0 0 10px var(--game-fx-energy-glow));
+}
+
+.gears__gate-frame {
+  fill: #241d15;
+  stroke: #4a4133;
+  stroke-width: 3;
+}
+
+.gears__gate-door {
+  fill: #3a3126;
+  stroke: #2b2318;
+  stroke-width: 3;
+  transition: transform var(--game-dur-slow) var(--game-ease-out);
+}
+
+.gears__gate.is-live .gears__gate-frame {
+  stroke: var(--game-fx-seal);
+}
+
+.gears__gate.is-open .gears__gate-door--l {
+  transform: translateX(-38px);
+}
+
+.gears__gate.is-open .gears__gate-door--r {
+  transform: translateX(38px);
+}
+
+/* --- Erfolg: alles läuft, benachbarte Räder gegensinnig ------------- */
+
+@keyframes gear-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .gear--running .gear__spin {
-  transition: none;
+  animation: gear-spin 4s linear infinite;
 }
 
 .gear--running.gear--cw .gear__spin {
-  animation: spin-cw 3.4s linear infinite;
+  animation-direction: normal;
 }
 
 .gear--running.gear--ccw .gear__spin {
-  animation: spin-ccw 3.4s linear infinite;
+  animation-direction: reverse;
 }
 
-/* Regler ausserhalb der Zeichnung: feste Tippziele, unabhängig davon, wie klein
- * die Maschine auf einem schmalen Gerät skaliert. */
+.puzzle--gears.is-running .gear__teeth,
+.puzzle--gears.is-running .gear__body,
+.puzzle--gears.is-running .connector__neck {
+  fill: #a8843a;
+}
+
+/* --- Regler --------------------------------------------------------- */
+
 .gears__controls {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.4rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
   margin-top: 0.6rem;
 }
 
@@ -604,12 +698,11 @@
   font-size: var(--kfw-font-size-xsmall);
   color: var(--game-ui-text-muted);
   text-align: center;
-  line-height: 1.15;
 }
 
 .gears__control-row {
   display: flex;
-  gap: 0.3rem;
+  gap: 0.25rem;
 }
 
 .gears__turn {
@@ -619,7 +712,7 @@
   border: 1px solid color-mix(in srgb, var(--game-fx-metal) 60%, transparent);
   background: color-mix(in srgb, var(--game-fx-stone-deep) 88%, transparent);
   color: var(--game-fx-rune);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   cursor: pointer;
   transition: background var(--game-dur-fast) var(--game-ease);
 }
@@ -632,135 +725,87 @@
   transform: translateY(1px);
 }
 
-/*
- * Zustandsloser Merker am Berührungspunkt. Er zeigt, wo hinzusehen ist, und
- * verrät bewusst nicht, ob die beiden Zahnformen zusammenpassen.
- */
-.gear__focus {
-  fill: none;
-  stroke: color-mix(in srgb, var(--game-fx-metal) 55%, transparent);
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
-.gears__gate-frame {
-  fill: #241b12;
-  stroke: var(--game-fx-metal-dark);
-  stroke-width: 2;
-}
-
-.gears__gate-door {
-  fill: #35271a;
-  stroke: #150f09;
-  transition: transform var(--game-dur-slow) var(--game-ease-out);
-}
-
-.gears__gate.is-open .gears__gate-door--l {
-  transform: translateX(-38px);
-}
-
-.gears__gate.is-open .gears__gate-door--r {
-  transform: translateX(38px);
-}
+/* --- Zwerg und Kontaktliste ----------------------------------------- */
 
 .gears__dwarf {
   position: absolute;
-  right: 1.5%;
-  bottom: -0.25rem;
-  /* decorative character: it must never sit between a finger and a gear */
+  right: 0;
+  bottom: -0.5rem;
+  width: min(34%, 260px);
   pointer-events: none;
 }
 
-/*
- * On a phone the five gear machine cannot shrink further without becoming
- * unusable, so it scrolls inside its own container (allowed by the UX spec)
- * and the dwarf moves below the machine instead of over it.
- */
-.puzzle--compact .gears__machine {
-  overflow-x: auto;
-  overflow-y: hidden;
-  width: 100%;
-  padding-bottom: 0.35rem;
-  -webkit-overflow-scrolling: touch;
+/* Sonst bricht die Sprechblase in eine Spalte aus einzelnen Wörtern um. */
+.gears__dwarf .dwarf__bubble {
+  min-width: 11rem;
 }
 
-.puzzle--compact .gears__svg {
-  min-width: 620px;
-}
-
-.puzzle--compact .gears__dwarf {
-  position: static;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  margin-top: 0.25rem;
+.puzzle--wide .gears__dwarf {
+  width: min(30%, 330px);
 }
 
 .gears__legend {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.gears__legend-note {
+  font-size: var(--kfw-font-size-small);
+  color: var(--game-ui-text-muted);
+}
+
+/*
+ * Die Kontaktliste in Worten. Sie ersetzt kein Hinsehen, sondern macht das
+ * Rätsel ohne Farbsehen und mit Vorleseprogramm bedienbar - Status nie nur
+ * über Farbe.
+ */
+.gears__contact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.gears__contact-item {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.4rem 1rem;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--game-radius-s);
+  border: 1px solid transparent;
   font-size: var(--kfw-font-size-xsmall);
   color: var(--game-ui-text-muted);
 }
 
-.gears__legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+.gears__contact-item.is-live {
+  border-color: color-mix(in srgb, var(--game-fx-seal) 60%, transparent);
+  background: color-mix(in srgb, var(--game-fx-energy) 12%, transparent);
+  color: var(--game-ui-text);
 }
 
-.gears__legend-swatch {
-  display: inline-block;
-  width: 16px;
-  border-radius: 2px;
-  background: var(--game-fx-metal);
+.gears__contact-name {
+  min-width: 9rem;
+  font-weight: var(--kfw-font-weight-bold);
 }
 
-.gears__legend-swatch--1 {
-  height: 5px;
-}
-.gears__legend-swatch--2 {
-  height: 11px;
-}
-.gears__legend-swatch--3 {
-  height: 11px;
-  background: repeating-linear-gradient(90deg, var(--game-fx-metal) 0 3px, transparent 3px 6px);
-}
-
-.gears__legend-note {
-  width: 100%;
-  text-align: center;
-}
-
-/* the dwarf stands in front of the gate on the big screen, and gets room for it */
-.puzzle--wide .gears__dwarf .dwarf {
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
-}
-
-.puzzle--wide .gears__dwarf {
-  right: 2%;
-  bottom: -1.25rem;
-}
-
-.puzzle--wide .dwarf__figure {
-  width: clamp(150px, 14vw, 235px);
-}
-
-.puzzle--wide .dwarf__bubble {
-  font-size: var(--kfw-font-size-medium);
-}
-
-.puzzle--wide .dwarf__bubble::after {
-  right: 28px;
-  bottom: -7px;
+.gears__contact-item.is-live .gears__contact-name::after {
+  content: ' greift';
+  font-weight: var(--kfw-font-weight-regular);
+  color: var(--game-fx-rune);
 }
 
 .puzzle--wide .gears__svg {
   max-height: 52vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gear--running .gear__spin,
+  .gears__shaft.is-powered {
+    animation: none;
+  }
 }
 
 /* ------------------------------------------------------------------ */

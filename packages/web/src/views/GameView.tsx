@@ -154,7 +154,13 @@ export function GameView(): JSX.Element {
             />
           ) : null}
 
-          {snapshot.status === 'INTRO' ? <Intro /> : null}
+          {snapshot.status === 'INTRO' ? (
+            <Intro
+              ready={me?.ready === true}
+              waitingFor={snapshot.players.filter((p) => p.connected && !p.ready).length}
+              onReady={() => channel.emit('player:ready')}
+            />
+          ) : null}
 
           {snapshot.status === 'PAUSED' ? (
             <section className="stage stage--message">
@@ -358,7 +364,38 @@ function Lobby({
   );
 }
 
-function Intro(): JSX.Element {
+/**
+ * Der Vorspann wartet auf die Gruppe, nicht auf eine Stoppuhr. Wer gelesen hat,
+ * klickt weiter und steht schon in der ersten Halle; das Rätsel und der gewählte
+ * Gefährte erscheinen erst, wenn alle dort angekommen sind.
+ */
+function Intro({
+  ready,
+  waitingFor,
+  onReady,
+}: {
+  ready: boolean;
+  waitingFor: number;
+  onReady: () => void;
+}): JSX.Element {
+  if (ready) {
+    return (
+      <section className="stage stage--message">
+        <h2 className="stage__title">Das Archiv der alten Bestände</h2>
+        <p className="stage__text">
+          Ihr steht zwischen den Regalen. Die erste Prüfung öffnet sich, sobald alle da sind.
+        </p>
+        <p className="stage__task">
+          {waitingFor === 0
+            ? 'Alle sind da. Es geht gleich los.'
+            : waitingFor === 1
+              ? 'Es fehlt noch ein Gefährte.'
+              : `Es fehlen noch ${waitingFor} Gefährten.`}
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="stage stage--intro">
       {INTRO_LINES.map((line, index) => (
@@ -366,12 +403,17 @@ function Intro(): JSX.Element {
           {line}
         </p>
       ))}
-      <p
-        className="intro__wait"
-        style={{ animationDelay: `${INTRO_LINES.length * 420 + 200}ms` }}
-      >
+      <p className="intro__wait" style={{ animationDelay: `${INTRO_LINES.length * 420 + 200}ms` }}>
         {INTRO_WAIT_LINE}
       </p>
+      <button
+        type="button"
+        className="btn btn--primary btn--large intro__go"
+        style={{ animationDelay: `${INTRO_LINES.length * 420 + 400}ms` }}
+        onClick={onReady}
+      >
+        Gelesen – weiter zur ersten Halle
+      </button>
     </section>
   );
 }

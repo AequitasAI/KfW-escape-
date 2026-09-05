@@ -32,18 +32,23 @@ import {
   DIFF_ANTI_SPAM_COOLDOWN_MS,
 } from '../src/puzzles/testmastersDiff.js';
 import {
+  CONTACT_COUNT,
+  GATE_CONNECTOR,
   GEAR_COUNT,
-  GEAR_PROFILES,
   GEAR_SOLUTION,
   GEAR_START_ORIENTATIONS,
-  HOLE,
-  PEG,
+  GEAR_STEPS,
+  MOTOR_CONNECTOR,
+  chainBranching,
   computeContacts,
+  connectorsFit,
   createOperationsGearsState,
   enumerateGearSolutions,
   isGearsSolved,
+  leftConnector,
   reduceOperationsGears,
   poweredUpTo,
+  rightConnector,
 } from '../src/puzzles/operationsGears.js';
 import {
   GATE_SOLUTION,
@@ -254,91 +259,117 @@ describe('P3 Halle der Prüfmeister', () => {
 /* ------------------------------------------------------------------ */
 
 describe('P4 Minen des Betriebs', () => {
-  it('has exactly one global solution across all 8^4 movable configurations', () => {
+  it('hat über alle 8^5 Stellungen genau eine globale Lösung', () => {
     const solutions = enumerateGearSolutions();
     expect(solutions).toHaveLength(1);
     expect(solutions[0]).toEqual([...GEAR_SOLUTION]);
   });
 
-  it('enumerates the full 4096 state space', () => {
+  it('zählt den vollständigen Zustandsraum auf', () => {
     let count = 0;
-    for (let a = 0; a < 8; a += 1)
-      for (let b = 0; b < 8; b += 1)
-        for (let c = 0; c < 8; c += 1)
-          for (let d = 0; d < 8; d += 1) {
-            count += 1;
-            const solved = isGearsSolved([0, a, b, c, d]);
-            const [, s1, s2, s3, s4] = GEAR_SOLUTION;
-            expect(solved).toBe(a === s1 && b === s2 && c === s3 && d === s4);
-          }
-    expect(count).toBe(4096);
+    const orientations = [0, 0, 0, 0, 0];
+    const walk = (gear: number): void => {
+      if (gear === GEAR_COUNT) {
+        count += 1;
+        expect(isGearsSolved(orientations)).toBe(
+          orientations.every((o, i) => o === GEAR_SOLUTION[i]),
+        );
+        return;
+      }
+      for (let o = 0; o < GEAR_STEPS; o += 1) {
+        orientations[gear] = o;
+        walk(gear + 1);
+      }
+    };
+    walk(0);
+    expect(count).toBe(GEAR_STEPS ** GEAR_COUNT);
   });
 
-  it('treibt nur über Zapfen in Loch, nie über glatten Rand', () => {
-    const contacts = computeContacts(GEAR_SOLUTION);
-    expect(contacts).toEqual([true, true, true, true]);
-    expect(poweredUpTo(contacts)).toBe(4);
-
-    // die ersten beiden Räder richtig, der Rest nicht: die Kette endet dort
-    const [, s1, s2] = GEAR_SOLUTION;
-    const partial = computeContacts([0, s1 as number, s2 as number, 0, 0]);
-    expect(partial[0]).toBe(true);
-    expect(partial[1]).toBe(true);
-    expect(partial[2]).toBe(false);
-    expect(poweredUpTo(partial)).toBe(2);
+  it('greift nur bei gleicher Form und entgegengesetzter Ausprägung', () => {
+    const peg = { shape: 'triangle', polarity: 'peg' } as const;
+    const socket = { shape: 'triangle', polarity: 'socket' } as const;
+    expect(connectorsFit(peg, socket)).toBe(true);
+    expect(connectorsFit(socket, peg)).toBe(true);
+    // gleiche Form, gleiche Ausprägung
+    expect(connectorsFit(peg, peg)).toBe(false);
+    // andere Form, passende Ausprägung
+    expect(connectorsFit(peg, { shape: 'circle', polarity: 'socket' })).toBe(false);
+    // blosse Verzahnung greift nie
+    expect(connectorsFit(peg, null)).toBe(false);
+    expect(connectorsFit(null, null)).toBe(false);
   });
 
-  it('gibt jedem treibenden Rad genau einen Zapfen - daher die Eindeutigkeit', () => {
+  it('ist lokal mehrdeutig - genau das macht es zum Kettenrätsel', () => {
     /*
-     * Der Beweis hängt daran: "Zapfen zeigt nach rechts" legt die Stellung
-     * eines Rades eindeutig fest. Mit zwei Zapfen gäbe es mehrere Lösungen.
-     * Das Torrad treibt nichts mehr und braucht dafür genau ein Loch.
+     * Wäre je Rad nur eine Stellung lokal passend, könnte man die Kette von
+     * links nach rechts stur abhaken. Der Reiz entsteht erst dadurch, dass
+     * mehrere Stellungen lokal passen und sich erst weiter rechts als falsch
+     * erweisen.
      */
-    const pegs = (gear: number): number =>
-      (GEAR_PROFILES[gear] as readonly number[]).filter((v) => v === PEG).length;
-    const holes = (gear: number): number =>
-      (GEAR_PROFILES[gear] as readonly number[]).filter((v) => v === HOLE).length;
-
-    for (let gear = 0; gear < GEAR_COUNT - 1; gear += 1) expect(pegs(gear)).toBe(1);
-    expect(holes(GEAR_COUNT - 1)).toBe(1);
-    // und jedes Rad hat überhaupt Löcher, sonst könnte es nichts aufnehmen
-    for (let gear = 1; gear < GEAR_COUNT; gear += 1) expect(holes(gear)).toBeGreaterThan(0);
+    const branching = chainBranching();
+    expect(branching).toHaveLength(GEAR_COUNT + 1);
+    expect(branching[0]).toBeGreaterThanOrEqual(3);
+    expect(Math.max(...branching)).toBeGreaterThanOrEqual(5);
+    expect(branching[branching.length - 1]).toBe(1);
   });
 
-  it('never moves the fixed motor gear and only solves on the full chain', () => {
-    const state = createOperationsGearsState();
+  it('verankert die Kette an Motor und Tor', () => {
+    // ohne feste Enden wäre jede Kette beliebig verschiebbar
+    expect(MOTOR_CONNECTOR.polarity).toBe('peg');
+    expect(GATE_CONNECTOR.polarity).toBe('socket');
+
+    const solved = [...GEAR_SOLUTION];
+    expect(connectorsFit(MOTOR_CONNECTOR, leftConnector(0, solved[0] as number))).toBe(true);
+    expect(
+      connectorsFit(rightConnector(GEAR_COUNT - 1, solved[GEAR_COUNT - 1] as number), GATE_CONNECTOR),
+    ).toBe(true);
+  });
+
+  it('lässt einzelne Kontakte greifen, ohne dass die Kette steht', () => {
+    // Rad I nimmt den Motor in mehreren Stellungen auf - nur eine davon trägt weiter
+    const accepting = [];
+    for (let o = 0; o < GEAR_STEPS; o += 1) {
+      if (connectorsFit(MOTOR_CONNECTOR, leftConnector(0, o))) accepting.push(o);
+    }
+    expect(accepting.length).toBeGreaterThanOrEqual(3);
+    for (const o of accepting) {
+      const contacts = computeContacts([o, 0, 0, 0, 0]);
+      expect(contacts[0]).toBe(true);
+      expect(contacts.every(Boolean)).toBe(false);
+    }
+  });
+
+  it('startet ungelöst und ohne greifenden Kontakt', () => {
     expect(isGearsSolved(GEAR_START_ORIENTATIONS)).toBe(false);
-    expect(reduceOperationsGears(state, { type: 'rotate', gear: 0, dir: 1 })).toBeNull();
-    expect(reduceOperationsGears(state, { type: 'rotate', gear: 5, dir: 1 })).toBeNull();
+    expect(computeContacts([...GEAR_START_ORIENTATIONS]).some(Boolean)).toBe(false);
+  });
+
+  it('dreht jedes Rad und sperrt die Eingabe, sobald die Maschine läuft', () => {
+    const state = createOperationsGearsState();
+    expect(reduceOperationsGears(state, { type: 'rotate', gear: -1, dir: 1 })).toBeNull();
+    expect(reduceOperationsGears(state, { type: 'rotate', gear: GEAR_COUNT, dir: 1 })).toBeNull();
 
     let current = state;
-    const plan: [number, number][] = GEAR_SOLUTION.slice(1).map((target, index) => [
-      index + 1,
-      target,
-    ]);
-    for (const [gear, target] of plan) {
+    GEAR_SOLUTION.forEach((target, gear) => {
       for (let i = 0; i < target; i += 1) {
         const next = reduceOperationsGears(current, { type: 'rotate', gear, dir: 1 });
         expect(next).not.toBeNull();
-        current = next!;
+        current = next as typeof current;
       }
-    }
+    });
     expect(current.orientations).toEqual([...GEAR_SOLUTION]);
     expect(current.solved).toBe(true);
-    // input is locked once the machine runs
-    expect(reduceOperationsGears(current, { type: 'rotate', gear: 1, dir: 1 })).toBeNull();
+    expect(current.contacts).toEqual([true, true, true, true, true, true]);
+    expect(poweredUpTo(current.contacts)).toBe(CONTACT_COUNT);
+    expect(reduceOperationsGears(current, { type: 'rotate', gear: 0, dir: 1 })).toBeNull();
   });
 
   it('wraps orientations in both directions', () => {
     const state = createOperationsGearsState();
-    const back = reduceOperationsGears(state, { type: 'rotate', gear: 4, dir: -1 })!;
-    expect(back.orientations[4]).toBe(7);
+    const back = reduceOperationsGears(state, { type: 'rotate', gear: 4, dir: -1 });
+    expect(back?.orientations[4]).toBe(7);
   });
 });
-
-/* ------------------------------------------------------------------ */
-/* A10 - Puzzle 5: 042 including the leading zero                      */
-/* ------------------------------------------------------------------ */
 
 describe('P5 Das Schwarze Tor', () => {
   it('has exactly one code in 000..999 matching all five statements', () => {

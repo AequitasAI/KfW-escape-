@@ -17,6 +17,8 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Art Direction auf warme Märchenfantasy umgestellt (kein Cyan, Cinzel/EB Garamond, KfW-Flavour)
 - [x] Login der Spielleitung (`HOST_PASSWORD`), Steuerung von jedem Gerät aus
 - [x] Dreissig Sigel der Gefährten, serverseitig und dopplungsfrei vergeben
+- [x] Rätsel 4 als Kettenrätsel mit Steckverbindungen, Eindeutigkeit bewiesen
+- [x] Vorspann mit 30 s Lesezeit; jeder geht selbst vor, das Rätsel öffnet für alle gemeinsam
 
 ## Funktioniert
 
@@ -61,7 +63,7 @@ Siehe `git log -1` auf `claude/mvp-build`.
 | 1 | 120 Permutationen gegen die drei Hinweise | genau eine Lösung |
 | 2 | Startzustand aus 15 legalen Slides erzeugt, BFS-Solver | lösbar in 13 optimalen Zügen (Ziel 8–16) |
 | 3 | Hotspot-Registry | genau vier, jeder einmal zählbar |
-| 4 | alle 8⁴ = 4096 Konfigurationen enumeriert | genau eine Lösung `[0,3,6,2,5]`, 10 Drehungen |
+| 4 | alle 8⁵ = 32768 Konfigurationen enumeriert | genau eine Lösung `[2,1,4,4,3]`, Verzweigung 3→5→3→4→4→1 |
 | 5 | alle 1000 Codes gegen die fünf Aussagen | genau einer (`042`) |
 
 **Views**
@@ -79,7 +81,33 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - Accessibility: Tastaturbedienung, sichtbare Fokuszustände, 44-px-Touchziele,
   Tap-/Keyboard-Alternative zu jeder Drag-Interaktion, Status nie nur über Farbe.
 
-## Bewusste Abweichung von der Spec: Rätsel 4
+## Bewusste Abweichung von der Spec: Rätsel 4 (Stand 2)
+
+`03_puzzles/PUZZLE_SPEC.md` gibt Profilwerte 1/2/3 mit der Regel „Summe 4" vor. Auf Ansage des
+Auftraggebers ist daraus ein echtes **Kettenrätsel mit Steckverbindungen** geworden:
+
+- Vier Formen – Dreieck, Kreis, Quadrat, Diamant – je als **Zapfen** und als **Kerbe**.
+  Es greift nur gleiche Form mit entgegengesetzter Ausprägung.
+- Fünf drehbare Räder zwischen einem **festen Motor** links und dem **festen Tor** rechts.
+  Sechs Kontakte. Die festen Enden verankern die Kette und verhindern Drehsymmetrie.
+- **Lokale Mehrdeutigkeit ist Absicht.** Rad I trägt drei Dreieck-Kerben, nimmt den Motor also in
+  drei Stellungen auf – gegenüber sitzen aber drei verschiedene Zapfen, sodass rechts einmal
+  Quadrat, einmal Diamant, einmal Dreieck herauskommt. Ein Kontakt für sich zu lösen bringt nichts.
+- Ein passender Kontakt **leuchtet einzeln**, auch wenn die Gesamtlösung falsch ist. Das ist hier
+  unbedenklich, weil lokal richtig nicht mehr global richtig heisst.
+
+Nachgewiesen durch `enumerateGearSolutions()` über alle 8^5 = 32 768 Stellungen: **genau eine
+Lösung** `[2,1,4,4,3]`. `chainBranching()` belegt die Mehrdeutigkeit: 3 → 5 → 3 → 4 → 4 → 1
+lebende Teilketten. Beides ist Test, nicht Kommentar.
+
+Aufbauwissen für spätere Änderungen: Links- und Rechtsanschluss eines Rades liegen immer genau
+gegenüber (vier Sektoren auseinander). Ein Rad ist damit nichts als vier gegenüberliegende Paare –
+darüber steuert man, wie viele Eingänge lokal passen und was dabei rechts herauskommt. Eine
+Zufallssuche über Millionen Layouts fand **kein einziges** brauchbares: Ein exakter Treffer aus Form
+*und* Ausprägung ist pro Anschluss nur 1:8. Das Layout ist deshalb konstruiert und anschliessend
+bewiesen, nicht gesucht.
+
+### Vorgänger: Zapfen-und-Loch-Fassung
 
 `03_puzzles/PUZZLE_SPEC.md` gibt fünf Räder mit Profilwerten 1/2/3 und der Regel „Summe 4" vor,
 Lösung `[0,3,3,6,7]`. Diese Regel bildet sich **nicht zeichnen**: `2+2` ergibt laut Regel einen

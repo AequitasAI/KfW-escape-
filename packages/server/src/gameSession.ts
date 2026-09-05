@@ -7,6 +7,7 @@ import {
   INTRO_DURATION_MS,
   PUZZLES,
   PUZZLE_COUNT,
+  SOLVED_HOLD_MS,
   TRANSITION_DURATION_MS,
   createPuzzleState,
   getPuzzle,
@@ -36,6 +37,8 @@ export interface Player {
   connected: boolean;
   solverCount: number;
   declinedCurrentPuzzle: boolean;
+  /** hat den Vorspann gelesen und weitergeklickt */
+  ready: boolean;
   createdAt: number;
   lastSeenAt: number;
 }
@@ -219,6 +222,7 @@ export class GameSession {
       connected: false,
       solverCount: 0,
       declinedCurrentPuzzle: false,
+      ready: false,
       createdAt: now,
       lastSeenAt: now,
     };
@@ -355,11 +359,30 @@ export class GameSession {
   }
 
   /**
+   * Ein Gefährte hat den Vorspann gelesen. Sobald alle verbundenen Gefährten so
+   * weit sind, öffnet die erste Prüfung - niemand muss auf eine Stoppuhr warten,
+   * und niemand wird von den Schnellsten überfahren.
+   */
+  markReady(playerId: string): boolean {
+    if (this.status !== 'INTRO') return false;
+    const player = this.players.get(playerId);
+    if (!player || player.ready) return false;
+    player.ready = true;
+    this.emit({ type: 'players' }, { type: 'snapshot' });
+    if (this.connectedPlayers.every((p) => p.ready)) this.advancePhase();
+    return true;
+  }
+
+  /**
    * Bringt eine wartende Phase sofort weiter: Intro, Übergang oder Finale.
    * Das Intro wird dadurch von der Spielleitung getaktet statt von einer
    * Stoppuhr - man liest es vor und klickt weiter, wenn alle so weit sind.
    */
   advancePhase(): boolean {
+    if (this.status === 'PUZZLE_ACTIVE' && this.phaseEndsAt !== null) {
+      this.beginTransition();
+      return true;
+    }
     if (this.status === 'INTRO') {
       this.enterPuzzle(0);
       return true;
@@ -432,13 +455,23 @@ export class GameSession {
     const index = this.currentPuzzleIndex;
     this.puzzleStatuses[index] = 'SOLVED';
     this.repo.recordEvent(this.id, 'puzzle.solved', this.currentPuzzle.id, this.solverId, null);
-    this.emit({
-      type: 'puzzleSolved',
-      puzzleIndex: index,
-      puzzleId: this.currentPuzzle.id,
-      seals: this.seals,
-    });
-    this.beginTransition();
+    /*
+     * Die Prüfung bleibt kurz stehen. Sonst überschreibt der Übergang die
+     * Erfolgsanimation in dem Moment, in dem sie anfängt. Die Eingabe ist zu
+     * diesem Zeitpunkt schon gesperrt: ein gelöster Zustand nimmt keine Züge
+     * mehr an.
+     */
+    this.phaseEndsAt = Date.now() + SOLVED_HOLD_MS;
+    this.persist();
+    this.emit(
+      {
+        type: 'puzzleSolved',
+        puzzleIndex: index,
+        puzzleId: this.currentPuzzle.id,
+        seals: this.seals,
+      },
+      { type: 'snapshot' },
+    );
   }
 
   get seals(): number {
@@ -467,6 +500,7 @@ export class GameSession {
      */
     this.startedAt = null;
     this.pausedAt = null;
+    for (const player of this.players.values()) player.ready = false;
     this.totalPausedMs = 0;
     this.phaseEndsAt = now + INTRO_DURATION_MS;
     this.persist();
@@ -500,6 +534,7 @@ export class GameSession {
 
   private beginTransition(): void {
     const now = Date.now();
+    this.phaseEndsAt = null;
     const from = this.currentPuzzleIndex;
     const to = from + 1;
     this.solverId = null;
@@ -564,6 +599,11 @@ export class GameSession {
     }
 
     if (this.phaseEndsAt !== null && now >= this.phaseEndsAt) {
+      if (this.status === 'PUZZLE_ACTIVE') {
+        // die Nachschau auf die gelöste Prüfung ist vorbei
+        this.beginTransition();
+        return;
+      }
       if (this.status === 'INTRO') {
         this.enterPuzzle(0);
         return;
@@ -700,6 +740,7 @@ export class GameSession {
     this.currentPuzzleIndex = 0;
     this.startedAt = null;
     this.pausedAt = null;
+    for (const player of this.players.values()) player.ready = false;
     this.totalPausedMs = 0;
     this.bonusMs = 0;
     this.phaseEndsAt = null;
@@ -740,6 +781,7 @@ export class GameSession {
       isCandidate: this.candidateId === p.id,
       isSolver: this.solverId === p.id,
       declinedCurrent: p.declinedCurrentPuzzle,
+      ready: p.ready,
     }));
   }
 
@@ -870,6 +912,8 @@ export class GameSession {
         connected: false,
         solverCount: row.solver_count,
         declinedCurrentPuzzle: row.declined_current_puzzle === 1,
+        // Bereitschaft gilt nur für den laufenden Vorspann, nie über einen Neustart hinweg
+        ready: false,
         createdAt: row.created_at,
         lastSeenAt: row.last_seen_at,
       });

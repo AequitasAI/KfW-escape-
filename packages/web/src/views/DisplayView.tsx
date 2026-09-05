@@ -32,6 +32,15 @@ import './views.css';
  * only title, station, progress, timer, the puzzle itself, the companion's name
  * and short status copy (10_design/DISPLAY_SCREEN_REQUIREMENTS.md).
  */
+/** Auf der Grossbildansicht zählt der Fortschritt der Gruppe, nicht die Ansage. */
+function readyCount(players: { connected: boolean; ready: boolean }[]): string {
+  const here = players.filter((p) => p.connected).length;
+  const ready = players.filter((p) => p.connected && p.ready).length;
+  if (here === 0) return INTRO_WAIT_LINE;
+  if (ready === here) return 'Alle sind vorgegangen. Die erste Prüfung öffnet sich.';
+  return `${ready} von ${here} Gefährten sind schon vorgegangen.`;
+}
+
 export function DisplayView(): JSX.Element {
   const { code = '' } = useParams();
   const normalized = code.toUpperCase();
@@ -132,7 +141,7 @@ export function DisplayView(): JSX.Element {
                 className="intro__wait"
                 style={{ animationDelay: `${INTRO_LINES.length * 500 + 200}ms` }}
               >
-                {INTRO_WAIT_LINE}
+                {readyCount(snapshot.players)}
               </p>
             </div>
           ) : null}

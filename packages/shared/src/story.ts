@@ -33,8 +33,9 @@ export const INTRO_LINES: readonly string[] = [
   'Wählt eure Gefährten. Öffnet die Tore. Vollendet den Release.',
 ];
 
-/** Steht unter dem Intro, solange die Spielleitung noch nicht weitergeklickt hat. */
-export const INTRO_WAIT_LINE = 'Die Spielleitung führt euch weiter, sobald alle so weit sind.';
+/** Steht unter dem Vorspann, solange noch nicht alle weitergeklickt haben. */
+export const INTRO_WAIT_LINE =
+  'Lest in Ruhe. Wer so weit ist, geht schon vor – die erste Prüfung öffnet, sobald alle da sind.';
 
 export const LOBBY_HEADLINE = 'Die Reisegruppe versammelt sich';
 export const LOBBY_SUBLINE = 'Tretet der Reisegruppe bei und wartet auf das Zeichen der Spielleitung.';
@@ -53,8 +54,8 @@ export function companionsGathered(count: number): string {
  * Antrieb wirklich durch mehrere Räder greift.
  */
 export const DWARF_LINES = {
-  progress: 'Hm. Drei Räder greifen ineinander. Das war vermutlich Absicht.',
-  almost: 'Vier. Eins fehlt. Und jetzt bloß nicht kreativ werden.',
+  progress: 'Hm. Es greift schon ein Stück. Das war vermutlich Absicht.',
+  almost: 'Fast. Ein Anschluss fehlt noch. Und jetzt bloß nicht kreativ werden.',
   success: 'ES LÄUFT! JETZT BLOSS NICHTS MEHR ANFASSEN!',
 } as const;
 

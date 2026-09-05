@@ -43,6 +43,8 @@ export interface PlayerView {
   isSolver: boolean;
   /** true when this player declined the current puzzle */
   declinedCurrent: boolean;
+  /** true when this player has read the intro and moved on */
+  ready: boolean;
 }
 
 export interface TimerView {
@@ -248,6 +250,8 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   'player:rename': (payload: { displayName: string }) => void;
+  /** Vorspann gelesen - die Prüfung öffnet, sobald alle so weit sind. */
+  'player:ready': () => void;
   'solver:accept': () => void;
   'solver:decline': () => void;
   'puzzle:action': (payload: PuzzleActionEnvelope) => void;

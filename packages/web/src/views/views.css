@@ -995,3 +995,8 @@
   font-size: var(--kfw-font-size-small);
   animation: rise-in var(--game-dur-slow) var(--game-ease-out) both;
 }
+
+.intro__go {
+  margin-top: var(--game-space-2);
+  animation: rise-in var(--game-dur-slow) var(--game-ease-out) both;
+}
