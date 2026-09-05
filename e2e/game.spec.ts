@@ -589,6 +589,29 @@ test.describe('Minen des Betriebs: Kette statt Einzelkontakte', () => {
 
     await expect(atGears.page.locator('.gears__contact')).toHaveCount(0);
 
+    /*
+     * Und die vollständige Kette: alle sechs Kontakte greifen, die Maschine
+     * läuft an. Dass das überhaupt zu sehen ist, hängt an der kurzen Nachschau
+     * nach dem Lösen - vorher hat der Übergang die Animation im selben Moment
+     * überschrieben, in dem sie begann.
+     */
+    for (let gear = 0; gear < GEAR_SOLUTION.length; gear += 1) {
+      const label = GEAR_LABELS[gear] as string;
+      const target = GEAR_SOLUTION[gear] as number;
+      const current = gear === 0 ? orientation : 0;
+      const steps = (target - current + 8) % 8;
+      for (let i = 0; i < steps; i += 1) {
+        await atGears.page.locator(`[aria-label="${label} im Uhrzeigersinn drehen"]`).click();
+        await atGears.page.waitForTimeout(120);
+      }
+    }
+
+    await expect(atGears.page.locator('.puzzle--gears.is-running')).toHaveCount(1);
+    await expect(atGears.page.locator('.gears__contact')).toHaveCount(6);
+    await expect(atGears.page.locator('.gears__gate.is-open')).toHaveCount(1);
+    // gesperrt: die Regler verschwinden, sobald die Maschine läuft
+    await expect(atGears.page.locator('.gears__turn')).toHaveCount(0);
+
     await closeTable(table);
   });
 });
