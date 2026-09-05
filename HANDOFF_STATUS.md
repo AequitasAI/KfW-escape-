@@ -331,6 +331,14 @@ auch nicht: Sie stehen als dunkles Gebirge am Horizont, alle sehen sie, und alle
 woanders zu sein. Die eine Zeile dazu („Nur wenige kennen noch alle Wege durch diese Hallen.") steht
 auf der Brücke.
 
+**Auch in der Sprache.** Jede Prüfung liegt jetzt in einem benannten Flügel, klein unter der Station:
+Flügel der Bildung · Bestände, Werk der Wohnlande, Kammer der Nachweise, Stollen der
+Bestandsführung, Wacht der Berechtigungen, Auf der Brücke. Der Vorspann benennt die Landkarte
+(Chroniken der Bildung, Register der Wohnlande, die Gewölbe für Verpflichtungen aus vergangenen
+Zeitaltern), das dritte Siegel heisst „Siegel der Durchführung", die Prüfmeister sagen, dass es das
+erst nach der Prüfung gibt, und der Betriebszwerg hat zwei Sprüche dazubekommen („Bestand ist
+Bestand. Auch nach dem dritten Zeitalter.").
+
 **Auf dem Telefon** bleiben die Marken nur dort stehen, wo ohnehin gewartet wird – Vorhalle und
 Brücke. In den Rätselräumen gehört der Platz dem Rätsel.
 

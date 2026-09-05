@@ -25,8 +25,10 @@ export const INTRO_LINES: readonly string[] = [
   'Man prüfte. Man bewilligte. Man baute eine Brücke zur Zwei-Programme-Welt.',
   'Dann legte man sie ordnungsgemäß ab – und vergaß, wo.',
   'Seither ist sie versiegelt. Fünf Siegel, fünf Prüfungen, keine Ausnahmegenehmigung.',
-  'Im Archiv liegen die alten Bestände. In den Minen wartet ein Betriebszwerg,',
-  'der jeden Release seit dem Wiederaufbau gesehen hat und entsprechend gut gelaunt ist.',
+  'Im Archiv liegen die alten Bestände: Chroniken der Bildung, Register der Wohnlande –',
+  'und ganz hinten die Gewölbe, in denen Verpflichtungen aus vergangenen Zeitaltern verwahrt werden.',
+  'In den Minen wartet ein Betriebszwerg, der jeden Release seit dem Wiederaufbau gesehen hat',
+  'und entsprechend gut gelaunt ist.',
   'Ihr habt zehn Minuten. Die Uhr läuft erst, wenn die erste Prüfung beginnt –',
   'so viel Kulanz muss sein.',
   'Immer nur eine Person darf bedienen. Alle anderen dürfen reden. Laut.',
@@ -66,6 +68,8 @@ export const DWARF_LINES = {
  */
 export const DWARF_IDLE_LINES: readonly string[] = [
   'Wer hat euch denn hier runtergelassen?',
+  'Bestand ist Bestand. Auch nach dem dritten Zeitalter.',
+  'Freitags keine neuen Expeditionen. Steht am Schild. Seit Zeitaltern.',
   'Vorsicht. Das Ding ist älter als die meisten Vorschriften.',
   'Zapfen ins Loch. Nicht Loch auf Zapfen. Das ist schon der ganze Trick.',
   'Ich hab das mal dokumentiert. Liegt im Archiv. Irgendwo.',
@@ -88,7 +92,7 @@ export function dwarfIdleLine(moves: number): string {
 }
 
 export const TESTMASTER_LINE =
-  'Nur was geprüft wurde, darf diese Halle verlassen. Fünf Abweichungen. Wir zählen mit.';
+  'Nur was geprüft wurde, darf diese Halle verlassen. Fünf Abweichungen, und wir zählen mit. Danach gibt es das Siegel der Durchführung – vorher nicht.';
 
 export const GUARD_LINES = {
   start: 'HALT.',
@@ -119,6 +123,7 @@ export const WIN_LINES: readonly string[] = [
   'DIE BRÜCKE STEHT.',
   'Die fünf Siegel erwachen.',
   'Die Zwei-Programme-Welt ist erreicht.',
+  'Bestände geführt, Nachweise erbracht, Brücke abgenommen.',
   'Wiederaufbau abgeschlossen. Mission erfüllt.',
 ];
 
@@ -167,7 +172,7 @@ export const RUNE_MASTER_LINE =
 export const SEAL_NAMES: readonly string[] = [
   'Siegel der Bestandsführung',
   'Siegel der Verbindung',
-  'Siegel der Prüfung',
+  'Siegel der Durchführung',
   'Siegel des Betriebs',
   'Siegel der Bewilligung',
 ];

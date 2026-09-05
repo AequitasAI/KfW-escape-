@@ -180,7 +180,10 @@ export function DisplayView(): JSX.Element {
           {snapshot.status === 'PUZZLE_ACTIVE' && puzzle ? (
             <div className="display__room">
               <div className="display__room-head">
-                <span className="display__station-badge">{puzzle.station}</span>
+                <span className="display__station-badge">
+                  {puzzle.station}
+                  {puzzle.hall ? <span className="stage__hall">{puzzle.hall}</span> : null}
+                </span>
                 <h2 className="display__room-title">{puzzle.title}</h2>
                 <p className="display__atmosphere">{puzzle.atmosphere}</p>
                 <p className="display__lead">{puzzle.task}</p>

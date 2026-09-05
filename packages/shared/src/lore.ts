@@ -151,6 +151,17 @@ export const LORE_MARKS: readonly LoreMark[] = Object.freeze([
     wideOnly: true,
   },
 
+  {
+    id: 'connection-herberge',
+    scene: 'connection',
+    kind: 'academy',
+    x: 91,
+    y: 72,
+    rune: '173',
+    label: 'Herberge der Studentenwerke',
+    wideOnly: true,
+  },
+
   /* --- Die Halle der Prüfmeister ------------------------------------ */
   {
     id: 'testmasters-erlass',
@@ -210,6 +221,16 @@ export const LORE_MARKS: readonly LoreMark[] = Object.freeze([
     y: 66,
     rune: 'BnD',
     label: 'Pult der Nachweise',
+  },
+
+  {
+    id: 'gate-kreditbuch',
+    scene: 'gate',
+    kind: 'sign',
+    x: 90,
+    y: 30,
+    label: 'Das offene Kreditbuch',
+    wideOnly: true,
   },
 
   /* --- Die Brücke ---------------------------------------------------- */

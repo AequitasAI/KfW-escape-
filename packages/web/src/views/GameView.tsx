@@ -204,7 +204,11 @@ export function GameView(): JSX.Element {
           {snapshot.status === 'PUZZLE_ACTIVE' && puzzle ? (
             <section className="stage">
               <header className="stage__head">
-                <p className="stage__station">{puzzle.station}</p>
+                <p className="stage__station">
+                  {puzzle.station}
+                  {/* der Flügel, in dem das hier liegt - Weltgebäude, kein Hinweis */}
+                  {puzzle.hall ? <span className="stage__hall">{puzzle.hall}</span> : null}
+                </p>
                 <h2 className="stage__title">{puzzle.title}</h2>
                 <p className="stage__atmosphere">{puzzle.atmosphere}</p>
                 <p className="stage__task">{puzzle.task}</p>

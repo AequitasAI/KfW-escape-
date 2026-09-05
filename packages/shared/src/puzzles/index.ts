@@ -17,6 +17,12 @@ export interface PuzzleDefinition {
   index: number;
   id: PuzzleId;
   station: string;
+  /**
+   * Der Flügel, in dem die Prüfung liegt. Steht klein neben der Station und ist
+   * reines Weltgebäude - wer die Namen wiedererkennt, freut sich; wer nicht,
+   * liest einen Ortsnamen.
+   */
+  hall?: string;
   title: string;
   /** short in-world instruction shown to every client */
   task: string;
@@ -44,10 +50,11 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     index: 0,
     id: 'archive_runes',
     station: 'Station 1/5',
+    hall: 'Flügel der Bildung · Bestände',
     title: 'Das Archiv der alten Bestände',
     task: 'Ordnet die fünf Runen in die richtige Reihenfolge.',
     atmosphere:
-      'Schwebende Register, uralte Bestände – und irgendwo darin die Ordnung, die alles zusammenhält.',
+      'Schwebende Register, Bestände aus fünf Zeitaltern – von den Akademien bis in die Wohnlande – und irgendwo darin die Ordnung, die alles zusammenhält.',
     hint: 'Fangt beim sichersten Posten an: Der Fluss steht ganz rechts fest. Danach bleibt für Hammer und Mond nur eine Möglichkeit.',
     successLine: 'Der Bestand ist geordnet. Das erste Siegel ist geborgen.',
   },
@@ -55,6 +62,7 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     index: 1,
     id: 'cable_labyrinth',
     station: 'Station 2/5',
+    hall: 'Werk der Wohnlande',
     title: 'Die verlorene Verbindung',
     task: 'Schiebt die Platten, bis die Energie von der Quelle bis in die Fassung läuft.',
     atmosphere:
@@ -66,9 +74,11 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     index: 2,
     id: 'testmasters_diff',
     station: 'Station 3/5',
+    hall: 'Kammer der Nachweise',
     title: 'Die Halle der Prüfmeister',
     task: 'Findet die fünf Fehler im Prüfexemplar.',
-    atmosphere: 'Hier wird nichts durchgewunken. Hier wird geprüft – zweimal, und dann noch einmal.',
+    atmosphere:
+      'Hier wird nichts durchgewunken. Hier wird geprüft – zweimal, und dann noch einmal. Ohne Nachweis kein Siegel.',
     hint: 'Geht den Plan in Abschnitten durch statt kreuz und quer: Siegelband oben, Ventil und Kreuzung in der Mitte, das grosse Rad unten links, und ganz rechts die Steigleitung bis zum Behälter.',
     successLine: 'Kein Fehler bleibt verborgen. Die Prüfmeister stempeln – das dritte Siegel ist euer.',
   },
@@ -76,6 +86,7 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     index: 3,
     id: 'operations_gears',
     station: 'Station 4/5',
+    hall: 'Stollen der Bestandsführung',
     title: 'Die Minen des Betriebs',
     task: 'Dreht die Zahnräder, bis alle Verbindungen passen.',
     atmosphere: 'Serverglut, Zahnräder – und ein Zwerg, der jeden Release seit dem Wiederaufbau gesehen hat.',
@@ -86,6 +97,7 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     index: 4,
     id: 'black_gate_code',
     station: 'Station 5/5',
+    hall: 'Wacht der Berechtigungen',
     title: 'Das Schwarze Tor',
     task: 'Ermittelt den dreistelligen Code aus den fünf Aussagen des Wächters.',
     atmosphere:
@@ -97,6 +109,7 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     index: 5,
     id: 'rune_master',
     station: 'Die letzte Prüfung',
+    hall: 'Auf der Brücke',
     title: 'Die Prüfung des Runenmeisters',
     task: 'Nennt das Tor, das den Weg freigibt – und die Inschrift, die als einzige wahr ist.',
     atmosphere:
