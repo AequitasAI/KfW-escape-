@@ -327,9 +327,18 @@ Zuständigkeiten haben sich zuletzt verschoben, und ein überholtes Kürzel wär
 
 **HuHi.** Der Witz gilt ausschliesslich dem Alter der Anwendung und dem Pflegeaufwand, nie dem Zweck
 der Stiftung und nie den Menschen, um die es dort geht. Deshalb betritt man diese Hallen im Spiel
-auch nicht: Sie stehen als dunkles Gebirge am Horizont, alle sehen sie, und alle sind froh, heute
-woanders zu sein. Die eine Zeile dazu („Nur wenige kennen noch alle Wege durch diese Hallen.") steht
-auf der Brücke.
+auch nicht. Erkennbar sind sie an drei Stellen: als „Die uralten Hallen von HuHi" am Horizont der
+Vorhalle und der Brücke, und als gesperrter Stollen in den Minen. Dazu je eine Zeile über das Alter
+der Wege – „Die Chroniken reichen weiter zurück als jede bekannte Release-Dokumentation.", „Nur
+wenige kennen noch alle Wege durch diese Hallen.", „Man sagt, jeder Umbau weckt drei weitere
+Abhängigkeiten." – und ein Spruch des Betriebszwergs über den gesperrten Stollen. Der Zweck der
+Stiftung kommt nirgends vor, weder als Witz noch als Erklärung. Die Schreibweise bleibt „HuHi": aus
+Versalien würde ein Wort, das niemandem etwas sagt.
+
+**Der Erste Baumeister.** Ein Standbild in der Vorhalle, ohne Namen, mit einer freundlichen Zeile
+(„Er soll gesagt haben, man müsse eine Brücke von beiden Seiten bauen."). Eine reale Person mit Namen
+steht bewusst in keinem Artefakt dieses Repos – wer den Namen dennoch will, ändert eine Zeile in
+`lore.ts`.
 
 **Auch in der Sprache.** Jede Prüfung liegt jetzt in einem benannten Flügel, klein unter der Station:
 Flügel der Bildung · Bestände, Werk der Wohnlande, Kammer der Nachweise, Stollen der

@@ -197,11 +197,15 @@
   opacity: 0.9;
 }
 
+/*
+ * Keine Grossbuchstaben: „HuHi" ist als Kürzel nur in seiner eigenen
+ * Schreibweise zu erkennen, und aus „HUHI" wird ein Wort, das niemandem etwas
+ * sagt.
+ */
 .lore__label {
-  font-size: clamp(0.55rem, 0.75vw, 0.72rem);
+  font-size: clamp(0.58rem, 0.78vw, 0.75rem);
   letter-spacing: 0.06em;
   color: var(--game-ui-text-muted);
-  text-transform: uppercase;
 }
 
 .lore__line {

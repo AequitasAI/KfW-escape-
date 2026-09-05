@@ -42,6 +42,8 @@ export type LoreMarkKind =
   | 'sign'
   /** ein versiegelter Seitentrakt */
   | 'vault'
+  /** ein Standbild auf einem Sockel */
+  | 'statue'
   /** Kisten, Fässer, Loren */
   | 'crate';
 
@@ -94,10 +96,21 @@ export const LORE_MARKS: readonly LoreMark[] = Object.freeze([
     id: 'lobby-huhi',
     scene: 'lobby',
     kind: 'massif',
-    x: 88,
-    y: 24,
-    label: 'HuHi – Altbestand',
+    x: 80,
+    y: 22,
+    label: 'Die uralten Hallen von HuHi',
+    line: 'Die Chroniken reichen weiter zurück als jede bekannte Release-Dokumentation.',
     scale: 1.2,
+  },
+  {
+    id: 'lobby-baumeister',
+    scene: 'lobby',
+    kind: 'statue',
+    x: 6,
+    y: 30,
+    label: 'Der Erste Baumeister',
+    line: 'Er soll gesagt haben, man müsse eine Brücke von beiden Seiten bauen.',
+    wideOnly: true,
   },
 
   /* --- Das Archiv --------------------------------------------------- */
@@ -212,6 +225,17 @@ export const LORE_MARKS: readonly LoreMark[] = Object.freeze([
     wideOnly: true,
   },
 
+  {
+    id: 'mine-huhi-stollen',
+    scene: 'mine',
+    kind: 'vault',
+    x: 88,
+    y: 30,
+    label: 'Stollen nach HuHi · gesperrt',
+    line: 'Man sagt, jeder Umbau weckt drei weitere Abhängigkeiten.',
+    wideOnly: true,
+  },
+
   /* --- Das Schwarze Tor --------------------------------------------- */
   {
     id: 'gate-pult',
@@ -240,7 +264,7 @@ export const LORE_MARKS: readonly LoreMark[] = Object.freeze([
     kind: 'massif',
     x: 12,
     y: 40,
-    label: 'HuHi – Altbestand',
+    label: 'Die uralten Hallen von HuHi',
     line: 'Nur wenige kennen noch alle Wege durch diese Hallen.',
     wideOnly: true,
   },

@@ -96,6 +96,17 @@ function MarkArt({ mark }: { mark: LoreMark }): JSX.Element {
           <circle className="lore__glow lore__glow--faint" cx="45" cy="74" r="6" />
         </svg>
       );
+    case 'statue':
+      return (
+        <svg viewBox="0 0 70 120" className="lore__art">
+          <rect className="lore__stone" x="14" y="96" width="42" height="24" rx="2" />
+          <rect className="lore__stone" x="20" y="86" width="30" height="12" rx="2" />
+          <path className="lore__stone" d="M 28 86 L 28 40 A 7 7 0 0 1 42 40 L 42 86 Z" />
+          <circle className="lore__stone" cx="35" cy="28" r="9" />
+          {/* der Winkel in der Hand - er war schliesslich Baumeister */}
+          <path className="lore__line-art" d="M 44 48 L 56 60 L 44 72" />
+        </svg>
+      );
     case 'crate':
       return (
         <svg viewBox="0 0 100 70" className="lore__art">

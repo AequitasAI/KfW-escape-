@@ -70,6 +70,7 @@ export const DWARF_IDLE_LINES: readonly string[] = [
   'Wer hat euch denn hier runtergelassen?',
   'Bestand ist Bestand. Auch nach dem dritten Zeitalter.',
   'Freitags keine neuen Expeditionen. Steht am Schild. Seit Zeitaltern.',
+  'Der Stollen nach HuHi? Gesperrt. Und fragt bitte nicht, wer den Schlüssel hat.',
   'Vorsicht. Das Ding ist älter als die meisten Vorschriften.',
   'Zapfen ins Loch. Nicht Loch auf Zapfen. Das ist schon der ganze Trick.',
   'Ich hab das mal dokumentiert. Liegt im Archiv. Irgendwo.',
