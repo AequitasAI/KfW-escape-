@@ -770,6 +770,21 @@
   margin-top: 0.6rem;
 }
 
+/*
+ * Fünf Regler nebeneinander brauchen mindestens 480 px - auf dem Telefon lief
+ * die Reihe deshalb aus dem Bild. Dort brechen sie um, statt zu schrumpfen: Die
+ * Knöpfe bleiben 44 px gross, sonst trifft sie niemand mit dem Daumen.
+ */
+@media (max-width: 40rem) {
+  .gears__controls {
+    /* ohne feste Breite schrumpft das Raster auf eine Spalte, weil die Regler
+       als Flex-Element nur so breit werden wie ihr Inhalt */
+    width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 0.5rem 0.35rem;
+  }
+}
+
 .gears__control {
   display: grid;
   gap: 0.25rem;
@@ -826,10 +841,52 @@
   width: min(30%, 330px);
 }
 
+/*
+ * Auf dem Telefon ist der Zwerg samt Sprechblase breiter als der Bildschirm.
+ * Absolut positioniert lief er deshalb rechts aus dem Kasten heraus und schob
+ * die ganze Seite seitlich - die Radbeschriftungen standen halb ausserhalb.
+ * Hier steht er im Fluss unter der Maschine und darf umbrechen.
+ */
+@media (max-width: 40rem) {
+  .gears__dwarf {
+    position: static;
+    width: 100%;
+    margin-top: 0.4rem;
+  }
+
+  .gears__dwarf .dwarf {
+    justify-content: center;
+  }
+
+  .gears__dwarf .dwarf__bubble {
+    min-width: 0;
+  }
+}
+
+/*
+ * Erklärtext und Kontaktliste lagen bisher blank auf dem Minen-Hintergrund -
+ * Glut, Streben und Fackeln unter kleiner Schrift, das war kaum zu lesen. Sie
+ * bekommen dieselbe Steintafel wie die Inschrift im Archiv und die Aussagen des
+ * Wächters, damit die Ruhe an der Stelle entsteht, wo gelesen wird.
+ */
 .gears__legend {
   margin-top: 0.7rem;
   display: grid;
   gap: 0.4rem;
+  width: 100%;
+  max-width: 46rem;
+  padding: var(--game-space-2);
+  border-radius: var(--game-radius-m);
+  border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 60%, transparent);
+  /* Die Glut der Mine schlägt sonst durch die Tafel; deshalb fast deckend und
+     zusätzlich weichgezeichnet, was dahinter liegt. */
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 93%, transparent);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+}
+
+.puzzle--wide .gears__legend {
+  max-width: 64rem;
 }
 
 .gears__legend-note {
@@ -877,6 +934,16 @@
   content: ' greift';
   font-weight: var(--kfw-font-weight-regular);
   color: var(--game-fx-rune);
+}
+
+/* Die Schlusszeile gehört zum selben Lesebereich und darf nicht als einzige
+   wieder auf der Glut liegen. */
+.puzzle--gears .puzzle__status {
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--game-radius-s);
+  background: color-mix(in srgb, var(--game-fx-stone-deep) 93%, transparent);
+  border: 1px solid color-mix(in srgb, var(--game-fx-metal-dark) 45%, transparent);
+  backdrop-filter: blur(3px);
 }
 
 .puzzle--wide .gears__svg {

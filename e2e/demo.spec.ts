@@ -39,6 +39,28 @@ test.describe('Übungsraum', () => {
     await expect(page.getByText(PUZZLES[3]!.successLine)).toHaveCount(0);
   });
 
+  /*
+   * Im Übungsraum aufgefallen: Der Betriebszwerg samt Sprechblase war breiter
+   * als ein Telefon und schob die ganze Seite seitlich, die fünf Regler
+   * ebenso. Auf einem Handy stand die Hälfte des Rätsels ausserhalb des Bildes.
+   */
+  test('Die Minen des Betriebs laufen auf einem Telefon nicht aus dem Bild', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await page.goto('/demo/4');
+    await expect(page.getByText('Station 4/5')).toBeVisible();
+
+    const overflow = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      client: document.documentElement.clientWidth,
+    }));
+    expect(overflow.scroll).toBeLessThanOrEqual(overflow.client);
+
+    // die Regler brechen um, statt zu schrumpfen - 44 px bleiben 44 px
+    const turn = await page.locator('.gears__turn').first().boundingBox();
+    expect(turn?.height ?? 0).toBeGreaterThanOrEqual(44);
+    expect(turn?.width ?? 0).toBeGreaterThanOrEqual(44);
+  });
+
   test('ist ohne Anmeldung von der Startseite aus erreichbar', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Zum Übungsraum' }).click();

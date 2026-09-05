@@ -23,6 +23,7 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Gezielte Übergabe der Prüfung durch Gefährte und Spielleitung
 - [x] Rätsel 2 zeigt Ein- und Austritt am Brett statt nur im Hinweistext
 - [x] Übungsraum `/demo`: alle fünf Prüfungen ohne Session, ohne Anmeldung, ohne Gefährten
+- [x] Rätsel 4 lesbar (Steintafel statt blanker Glut) und ohne Seitenüberlauf auf dem Telefon
 
 ## Funktioniert
 
@@ -241,6 +242,29 @@ eines Snapshots entgegen – die Demo hat keinen.
 Anders als die Gefährtenleiste im Spiel klebt diese Leiste nicht am unteren Rand: Sie ist deutlich
 höher und hätte auf dem Telefon sonst das halbe Rätsel verdeckt.
 
+## Rätsel 4: Lesbarkeit und Telefon
+
+Beim Testen im Übungsraum aufgefallen.
+
+**Lesbar.** Erklärtext und Kontaktliste lagen blank auf dem Minen-Hintergrund – Glut, Streben und
+Fackeln unter kleiner Schrift. Sie liegen jetzt auf derselben Steintafel wie die Inschrift im
+Archiv und die Aussagen des Wächters (fast deckend plus Weichzeichner, weil die Glut sonst
+durchschlägt); die Schlusszeile („Die Maschine steht still.") bekommt dieselbe Fläche, damit sie
+nicht als einzige wieder auf dem Feuer liegt.
+
+**Telefon.** Die Seite liess sich auf einem Handy seitlich schieben, ein Teil des Rätsels stand
+ausserhalb des Bildes. Zwei Ursachen, beide gemessen statt geraten:
+1. Der Betriebszwerg war absolut positioniert (`right: 0`), seine Sprechblase aber breiter als der
+   Kasten – er ragte 151 px nach rechts heraus. Unter 40 rem steht er jetzt im Fluss unter der
+   Maschine.
+2. Fünf Regler nebeneinander brauchen mindestens 480 px. Unter 40 rem brechen sie um
+   (`auto-fit`, drei plus zwei) statt zu schrumpfen; die Knöpfe bleiben 44 px.
+   Wichtig dabei: Die Reglerreihe ist ein Flex-Element und wird sonst nur so breit wie ihr Inhalt –
+   ohne `width: 100%` fällt `auto-fit` auf eine einzige Spalte zurück.
+
+Ein E2E-Test hält das fest: `/demo/4` bei 360 px Breite, `scrollWidth <= clientWidth`, Knopfgrösse
+mindestens 44 px.
+
 ## Bekannte Bugs
 - keine offenen
 
@@ -264,7 +288,7 @@ Beim Durchspielen im echten Browser gefunden und behoben:
   - 1 Lasttest mit 30 gleichzeitigen Socket-Clients
   - 15 Tests zu Spielleitungs-Login (Token, Ablauf, Neustart, Sperre) und Sigel-Vergabe
 - `npm run test:e2e` (Playwright gegen den echten Produktions-Build, mit gesetztem
-  `HOST_PASSWORD`): **30/30 grün**
+  `HOST_PASSWORD`): **31/31 grün**
   - Beitritt, gleiche Namen, Reload-Wiederherstellung
   - Solver-Autorisierung, Weitergabe, Host-Reroll
   - Timer inkl. Reload und Pause/Resume
@@ -278,6 +302,7 @@ Beim Durchspielen im echten Browser gefunden und behoben:
     identisch auf Host- und Grossbildansicht
   - Übungsraum: alle fünf Prüfungen ohne Session durchgespielt, Direktsprung über die URL,
     Zurücksetzen, Erreichbarkeit von der Startseite ohne jede Anmeldung
+  - Rätsel 4 auf 360 px Breite ohne Seitenüberlauf, Regler bleiben 44 px
 
 ## Nächste Schritte
 1. Auf dem Zielhost `docker compose up --build -d` ausführen und `PUBLIC_BASE_URL` setzen
@@ -296,6 +321,6 @@ Der MVP ist funktionsfähig, getestet, committet und gepusht. Für den nächsten
 git checkout claude/mvp-build
 npm install
 npm run verify          # 87 Tests
-npm run test:e2e        # 30 E2E-Tests, baut und startet die App selbst
+npm run test:e2e        # 31 E2E-Tests, baut und startet die App selbst
 npm run dev             # Host: http://localhost:5173/host
 ```
