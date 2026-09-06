@@ -861,14 +861,27 @@
   fill: #c9963c;
 }
 
-/* Kerben sind Löcher: dunkel, mit einer angedeuteten Fase. */
+/*
+ * Kerben sind Löcher: dunkel, mit heller Fase an der Kante. Der helle Rand ist
+ * kein Schmuck - er ist das, woran man eine Vertiefung von einer Fläche
+ * unterscheidet.
+ */
 .connector--socket .connector__shape {
-  fill: #1b1610;
-  stroke: #4a4133;
+  fill: #120e09;
+  stroke: #8a7649;
+  stroke-width: 3;
 }
 
-.connector--fixed .connector__shape {
+/* Der feste Zapfen des Motors bleibt Metall. */
+.connector--fixed.connector--peg .connector__shape {
   fill: #b9873a;
+}
+
+/* Die Kerbe im Tor sitzt in einer ausgefrästen Stirnfläche. */
+.connector__recess {
+  fill: #17120c;
+  stroke: #4a4133;
+  stroke-width: 3;
 }
 
 /* --- Wellen und Kontakte ------------------------------------------- */
@@ -1106,11 +1119,18 @@
  * ein schmales Band ohne freie Ecke, und absolut positioniert hat er auf dem
  * Telefon die Seite seitlich geschoben.
  */
+/*
+ * Der Zwerg steht am Ende der Kette, dort wo das Tor ist, und mit den Füssen
+ * auf derselben Linie wie die Maschine. Vorher hing er mit Abstand darunter im
+ * leeren Raum.
+ */
 .gears__dwarf {
   display: flex;
   justify-content: flex-end;
+  align-items: flex-end;
   width: 100%;
-  margin-top: 0.2rem;
+  margin-top: -0.9rem;
+  padding-right: clamp(0px, 4vw, 64px);
 }
 
 .gears--column .gears__dwarf {

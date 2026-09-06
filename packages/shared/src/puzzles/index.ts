@@ -54,7 +54,7 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     title: 'Das Archiv der alten Bestände',
     task: 'Ordnet die fünf Runen in die richtige Reihenfolge.',
     atmosphere:
-      'Schwebende Register, Bestände aus fünf Zeitaltern – von den Akademien bis in die Wohnlande – und irgendwo darin die Ordnung, die alles zusammenhält.',
+      'Schwebende Register: Chroniken der Bildung, Bestände der Wohnlande, und ganz hinten die Gewölbe der Altschulden, in denen Verpflichtungen aus vergangenen Zeitaltern verwahrt werden. Manche überdauern selbst Königreiche.',
     hint: 'Fangt beim sichersten Posten an: Der Fluss steht ganz rechts fest. Danach bleibt für Hammer und Mond nur eine Möglichkeit.',
     successLine: 'Der Bestand ist geordnet. Das erste Siegel ist geborgen.',
   },
@@ -66,7 +66,7 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     title: 'Die verlorene Verbindung',
     task: 'Schiebt die Platten, bis die Energie von der Quelle bis in die Fassung läuft.',
     atmosphere:
-      'Die Energie erwacht links im Runenstein und sucht rechts ihre Fassung. Zwei Welten, getrennt durch tote Kanäle – eine Schnittstelle ist auch nur eine Brücke mit Kabeln.',
+      'Ein Werk der Wohnlande: sanierte Türme, neue Höfe, und dazwischen tote Kanäle. Die Energie erwacht links im Runenstein und sucht rechts ihre Fassung – eine Schnittstelle ist auch nur eine Brücke mit Kabeln.',
     hint: 'Schiebt zuerst am rechten Rand Platz – von dort aus lässt sich die Leitung nach hinten aufrollen.',
     successLine: 'Die Verbindung steht. Energie fließt wieder durch die alten Leitungen.',
   },
@@ -89,7 +89,8 @@ export const PUZZLES: readonly PuzzleDefinition[] = Object.freeze([
     hall: 'Stollen der Bestandsführung',
     title: 'Die Minen des Betriebs',
     task: 'Dreht die Zahnräder, bis alle Verbindungen passen.',
-    atmosphere: 'Serverglut, Zahnräder – und ein Zwerg, der jeden Release seit dem Wiederaufbau gesehen hat.',
+    atmosphere:
+      'Serverglut, Zahnräder – und ein Zwerg, der jeden Release seit dem Wiederaufbau gesehen hat. Der Seitenstollen nach HuHi ist gesperrt; fragt besser nicht, wer den Schlüssel hat.',
     hint: 'Ein Zapfen fasst nur in eine Kerbe derselben Form. Fangt beim Motor an – dort passen mehrere Stellungen, aber nur eine trägt bis zum Tor.',
     successLine: 'Die Maschine läuft. Der Betrieb nickt knapp. Das vierte Siegel gehört euch.',
   },

@@ -12,6 +12,8 @@
  * it stays affectionate.
  */
 
+import { FIRST_BUILDER, HUHI_LINES, REGIONS } from './lore.js';
+
 export const GAME_TITLE = 'Die Brücke zur Zwei-Programme-Welt';
 export const GAME_SUBTITLE = 'Ein Fantasy-Escape-Adventure für das KBS-BA-Team';
 
@@ -23,12 +25,13 @@ export const GAME_SUBTITLE = 'Ein Fantasy-Escape-Adventure für das KBS-BA-Team'
 export const INTRO_LINES: readonly string[] = [
   'Vor langer Zeit beschloss man den Wiederaufbau.',
   'Man prüfte. Man bewilligte. Man baute eine Brücke zur Zwei-Programme-Welt.',
+  `${FIRST_BUILDER.name}, ${FIRST_BUILDER.epithet}, soll gesagt haben, man müsse sie von beiden Seiten bauen.`,
   'Dann legte man sie ordnungsgemäß ab – und vergaß, wo.',
   'Seither ist sie versiegelt. Fünf Siegel, fünf Prüfungen, keine Ausnahmegenehmigung.',
-  'Im Archiv liegen die alten Bestände: Chroniken der Bildung, Register der Wohnlande –',
-  'und ganz hinten die Gewölbe, in denen Verpflichtungen aus vergangenen Zeitaltern verwahrt werden.',
-  'In den Minen wartet ein Betriebszwerg, der jeden Release seit dem Wiederaufbau gesehen hat',
-  'und entsprechend gut gelaunt ist.',
+  `Zwischen euch und ihr liegen das Archiv der Bestände, ${REGIONS.wohnlande}, ${REGIONS.studoria}`,
+  'und die Minen des Betriebs, in denen ein Zwerg wartet, der jeden Release seit dem Wiederaufbau',
+  'gesehen hat und entsprechend gut gelaunt ist.',
+  `Am Horizont ${REGIONS.huhi}. Da geht heute niemand hin.`,
   'Ihr habt zehn Minuten. Die Uhr läuft erst, wenn die erste Prüfung beginnt –',
   'so viel Kulanz muss sein.',
   'Immer nur eine Person darf bedienen. Alle anderen dürfen reden. Laut.',
@@ -40,7 +43,8 @@ export const INTRO_WAIT_LINE =
   'Lest in Ruhe. Wer so weit ist, geht schon vor – die erste Prüfung öffnet, sobald alle da sind.';
 
 export const LOBBY_HEADLINE = 'Die Reisegruppe versammelt sich';
-export const LOBBY_SUBLINE = 'Tretet der Reisegruppe bei und wartet auf das Zeichen der Spielleitung.';
+export const LOBBY_SUBLINE =
+  `Tretet der Reisegruppe bei und wartet auf das Zeichen der Spielleitung. Draussen liegt die Karte: ${REGIONS.wohnlande}, ${REGIONS.studoria} – und weit hinten ${REGIONS.huhi}.`;
 
 export function companionsGathered(count: number): string {
   if (count === 0) return 'Noch niemand hat sich versammelt.';
@@ -70,7 +74,7 @@ export const DWARF_IDLE_LINES: readonly string[] = [
   'Wer hat euch denn hier runtergelassen?',
   'Bestand ist Bestand. Auch nach dem dritten Zeitalter.',
   'Freitags keine neuen Expeditionen. Steht am Schild. Seit Zeitaltern.',
-  'Der Stollen nach HuHi? Gesperrt. Und fragt bitte nicht, wer den Schlüssel hat.',
+  `Der Stollen nach HuHi? Gesperrt. ${HUHI_LINES[1] as string}`,
   'Vorsicht. Das Ding ist älter als die meisten Vorschriften.',
   'Zapfen ins Loch. Nicht Loch auf Zapfen. Das ist schon der ganze Trick.',
   'Ich hab das mal dokumentiert. Liegt im Archiv. Irgendwo.',

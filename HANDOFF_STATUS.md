@@ -27,7 +27,7 @@ Siehe `git log -1` auf `claude/mvp-build`.
 - [x] Rätsel 3 als Fehlersuche in zwei gezeichneten Prüfplänen, fünf subtile Abweichungen
 - [x] Rätsel 4 auf die Maschine reduziert: kein Erklärtext, Drehen am Rad, zwei Kettenlagen
 - [x] Falscher Sieg nach dem Schwarzen Tor und eine sechste, verborgene Prüfung
-- [x] Lore-Pass: die Förderwelt als Landkarte, rund zwanzig Anspielungen im Hintergrund
+- [x] Lore in den Spieltexten statt als Marken über dem Artwork
 
 ## Funktioniert
 
@@ -302,61 +302,35 @@ Knopf sagt, was noch fehlt („Zuerst ein Tor wählen" → „Jetzt die wahre In
 durchschreiten"), und vor der Abgabe wird einmal nachgefragt, mit der Folge im Klartext. Wer hier
 verliert, soll wissen, worauf er geklickt hat.
 
-## Lore-Pass: die Förderwelt als Landkarte
+## Lore: in den Texten, nicht über den Bildern
 
-**Dosis.** Ein bis drei erkennbare Anspielungen pro Bild, alles andere bleibt Fantasy. Nichts davon
-wird erklärt, nichts ist Teil einer Aufgabe, nichts muss man kennen, um zu gewinnen. Wer den Kontext
-hat, erkennt es; wer nicht, sieht eine Kulisse.
+Ein erster Versuch legte kleine Marken – Runensteine, Schilder, ein Gebirge – als eigene Ebene über
+die gemalten Szenen. Das sah aufgeklebt aus und ist wieder raus: Ein gemaltes Artwork verträgt keine
+Beschriftung, die nicht mitgemalt wurde. Die Anspielungen leben jetzt dort, wo sie nichts kaputt
+machen können – in der Sprache:
 
-**Wo sie stehen.** `packages/shared/src/lore.ts` hält alle Marken samt Ort in Prozent, Text und
-Sichtbarkeit – neue Anspielungen brauchen keine Zeile Code, nur einen Eintrag. Gezeichnet werden sie
-von `SceneLore` als eigene Ebene über dem Szenenbild und unter der Vignette.
+- **Vorspann:** Stefan der Weise als Erster Baumeister, das Archiv der Bestände, die Wohnlande, die
+  Akademien von Studoria, die Minen des Betriebs – und am Horizont die uralten Hallen von HuHi,
+  „da geht heute niemand hin".
+- **Vorhalle:** die Karte in einer Zeile unter der Überschrift.
+- **Atmosphäre je Station:** Chroniken der Bildung und die Gewölbe der Altschulden im Archiv
+  („manche überdauern selbst Königreiche"), sanierte Türme und neue Höfe der Wohnlande beim
+  Kabelrätsel, der gesperrte Seitenstollen nach HuHi in den Minen.
+- **Flügel unter der Station:** Flügel der Bildung · Bestände, Werk der Wohnlande, Kammer der
+  Nachweise, Stollen der Bestandsführung, Wacht der Berechtigungen, Auf der Brücke.
+- **Figuren:** der Zwerg über den gesperrten Stollen, der Wächter mit „Nachweis?", „Berechtigung?",
+  „Dokumentiert?", das dritte Siegel als Siegel der Durchführung.
+- **Auf den Prüfplänen:** „BAUREIHE 261", „AKTE 174", „PRÜFSTEMPEL · BnD" – die sind Teil der
+  Zeichnung, nicht darübergelegt, und stehen auf beiden Blättern gleich.
 
-Diese Ebene ist nötig, nicht bequem: Wo ein gemaltes Artwork liegt, verdeckt es das generierte
-Szenen-SVG vollständig. Marken darin wären ausgerechnet in den Räumen unsichtbar, die am Spieleabend
-tatsächlich zu sehen sind.
-
-| Szene | Anspielungen |
-|---|---|
-| Vorhalle | Akademien von Studoria (174), Die Wohnlande (124), HuHi als dunkles Gebirge am Horizont |
-| Archiv | Bildung – laufende Chroniken (173 · 174), Bestände vergangener Zeitalter (170), Gewölbe der Altschulden |
-| Verbindung | Der sanierte Turm (261), Neue Höfe (297 · 298) |
-| Prüfmeister | Erlass aus der Hauptstadt, BnD – Siegel der Durchführung; auf den Plänen „BAUREIHE 261", „AKTE 174", „PRÜFSTEMPEL · BnD" |
-| Minen | „Freitags keine neuen Expeditionen.", Loren mit BnD/Bestand, Gilde des Aufstiegs (172) |
-| Schwarzes Tor | Pult der Nachweise (BnD); der Wächter fragt bei jedem Fehlversuch knapper: „Nachweis?", „Berechtigung?", „Dokumentiert?" |
-| Brücke | HuHi am Horizont, Studoria (173) |
-
-**Regeln, die dabei galten.** Nur öffentlich bekannte Programmnummern und Aufgabenbereiche sowie die
-im Projekt vorgegebenen Kürzel; keine Kunden-, Vertrags- oder Produktionsdaten; keine echten
-Dokumente. Erlasse kommen von „der Hauptstadt" und nicht von einem Ministerium mit Namen – die
-Zuständigkeiten haben sich zuletzt verschoben, und ein überholtes Kürzel wäre schlicht falsch.
+`packages/shared/src/lore.ts` hält die Namen zentral (Regionen, HuHi-Zeilen, der Erste Baumeister)
+und wird von `story.ts` benutzt, steht also nicht daneben herum. Eine neue Anspielung ist ein Name
+dort und eine Zeile, die ihn verwendet.
 
 **HuHi.** Der Witz gilt ausschliesslich dem Alter der Anwendung und dem Pflegeaufwand, nie dem Zweck
-der Stiftung und nie den Menschen, um die es dort geht. Deshalb betritt man diese Hallen im Spiel
-auch nicht. Erkennbar sind sie an drei Stellen: als „Die uralten Hallen von HuHi" am Horizont der
-Vorhalle und der Brücke, und als gesperrter Stollen in den Minen. Dazu je eine Zeile über das Alter
-der Wege – „Die Chroniken reichen weiter zurück als jede bekannte Release-Dokumentation.", „Nur
-wenige kennen noch alle Wege durch diese Hallen.", „Man sagt, jeder Umbau weckt drei weitere
-Abhängigkeiten." – und ein Spruch des Betriebszwergs über den gesperrten Stollen. Der Zweck der
-Stiftung kommt nirgends vor, weder als Witz noch als Erklärung. Die Schreibweise bleibt „HuHi": aus
-Versalien würde ein Wort, das niemandem etwas sagt.
+der Stiftung und nie den Menschen, um die es dort geht. Betreten wird dort nichts.
 
-**Stefan der Weise.** Ein Standbild in der Vorhalle: „Erster Baumeister der Brücke. Lädt zum Met mit
-dem Meister, jeden Mondwechsel." Auf ausdrücklichen Wunsch und in der Form, die dafür verabredet
-wurde: Vorname und Beiname wie in einer Sage, kein Nachname, kein Amt, kein Abbild – und freundlich.
-Die zweite Zeile ist für die, die das alliterierende Vorstandsformat kennen. Wie alles hier steht sie
-in `lore.ts` und ist eine Zeile weit von einer Änderung entfernt.
-
-**Auch in der Sprache.** Jede Prüfung liegt jetzt in einem benannten Flügel, klein unter der Station:
-Flügel der Bildung · Bestände, Werk der Wohnlande, Kammer der Nachweise, Stollen der
-Bestandsführung, Wacht der Berechtigungen, Auf der Brücke. Der Vorspann benennt die Landkarte
-(Chroniken der Bildung, Register der Wohnlande, die Gewölbe für Verpflichtungen aus vergangenen
-Zeitaltern), das dritte Siegel heisst „Siegel der Durchführung", die Prüfmeister sagen, dass es das
-erst nach der Prüfung gibt, und der Betriebszwerg hat zwei Sprüche dazubekommen („Bestand ist
-Bestand. Auch nach dem dritten Zeitalter.").
-
-**Auf dem Telefon** bleiben die Marken nur dort stehen, wo ohnehin gewartet wird – Vorhalle und
-Brücke. In den Rätselräumen gehört der Platz dem Rätsel.
+**Stefan der Weise.** Vorname und Beiname wie in einer Sage, kein Nachname, kein Amt, kein Abbild.
 
 ## Usability-Durchgang (gemessen, nicht geschätzt)
 

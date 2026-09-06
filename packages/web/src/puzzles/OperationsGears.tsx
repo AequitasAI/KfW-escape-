@@ -437,16 +437,40 @@ function ConnectorMark({ connector, sector }: { connector: Connector; sector: nu
     <g transform={`rotate(${angle})`} className={`connector connector--${connector.polarity}`}>
       {peg ? <rect className="connector__neck" x={ROOT - 4} y={-7} width={PEG_TIP - ROOT - 8} height={14} /> : null}
       <g transform={`translate(${distance} 0)`}>
-        <ShapeMark shape={connector.shape} size={peg ? 17 : 15} />
+        <ShapeMark shape={connector.shape} size={peg ? 17 : 15} opening={!peg} />
       </g>
     </g>
   );
 }
 
-function ShapeMark({ shape, size }: { shape: ConnectorShape; size: number }): JSX.Element {
+/**
+ * Die Form eines Anschlusses.
+ *
+ * `opening` dreht die Form um: Ein Zapfen zeigt mit der Spitze nach aussen, die
+ * Kerbe muss ihm entgegen offen stehen. Ohne diese Spiegelung zeigten beim
+ * Dreieck Zapfen und Kerbe in dieselbe Richtung - es sah aus, als könnten die
+ * beiden gar nicht ineinandergreifen, und genau das war die Verwirrung.
+ * Kreis, Quadrat und Diamant sind symmetrisch, dort ändert sich nichts.
+ */
+function ShapeMark({
+  shape,
+  size,
+  opening = false,
+}: {
+  shape: ConnectorShape;
+  size: number;
+  opening?: boolean;
+}): JSX.Element {
+  const mirror = opening ? 'scale(-1 1)' : undefined;
   switch (shape) {
     case 'triangle':
-      return <path className="connector__shape" d={`M ${size} 0 L ${-size * 0.7} ${-size} L ${-size * 0.7} ${size} Z`} />;
+      return (
+        <path
+          className="connector__shape"
+          transform={mirror}
+          d={`M ${size} 0 L ${-size * 0.7} ${-size} L ${-size * 0.7} ${size} Z`}
+        />
+      );
     case 'circle':
       return <circle className="connector__shape" r={size * 0.9} />;
     case 'square':
@@ -509,14 +533,32 @@ function Gate({
   );
 }
 
-/** Der Anschluss eines festen Endes; `at` ist positiv nach rechts. */
+/**
+ * Der Anschluss eines festen Endes; `at` ist positiv nach rechts.
+ *
+ * Motor und Tor haben eine Ausprägung wie jedes Rad, und sie muss auch so
+ * aussehen: Der Motor treibt mit einem Zapfen, das Tor nimmt mit einer Kerbe
+ * auf. Bisher wurde beides als goldener Zapfen gezeichnet - am Tor stand damit
+ * Gold gegen Gold, und die Regel „Zapfen fasst in Kerbe" war dort nicht mehr
+ * abzulesen.
+ */
 function FixedConnector({ connector, at }: { connector: Connector; at: number }): JSX.Element {
   const pointsRight = at > 0;
+  const peg = connector.polarity === 'peg';
+  const distance = Math.abs(at);
   return (
-    <g className="connector connector--peg connector--fixed" transform={pointsRight ? undefined : 'rotate(180)'}>
-      <rect className="connector__neck" x={Math.abs(at) - 24} y={-7} width="22" height="14" />
-      <g transform={`translate(${Math.abs(at)} 0)`}>
-        <ShapeMark shape={connector.shape} size={17} />
+    <g
+      className={`connector connector--${connector.polarity} connector--fixed`}
+      transform={pointsRight ? undefined : 'rotate(180)'}
+    >
+      {peg ? (
+        <rect className="connector__neck" x={distance - 24} y={-7} width="22" height="14" />
+      ) : (
+        /* eine Kerbe sitzt in der Stirnfläche, nicht auf einem Hals */
+        <rect className="connector__recess" x={distance - 4} y={-24} width="26" height="48" rx="4" />
+      )}
+      <g transform={`translate(${distance} 0)`}>
+        <ShapeMark shape={connector.shape} size={17} opening={!peg} />
       </g>
     </g>
   );

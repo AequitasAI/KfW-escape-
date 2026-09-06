@@ -431,10 +431,30 @@
   pointer-events: none;
 }
 
+/*
+ * Der Zwerg steht, er schwebt nicht. Eine freigestellte Figur ohne Boden wirkt
+ * wie ausgeschnitten und aufgelegt; der weiche Schatten unter den Füssen ist
+ * das, was sie in die Halle stellt. Die Atembewegung geht deshalb nur noch nach
+ * oben - wer auf dem Boden steht, wackelt nicht am Boden herum.
+ */
 .dwarf__figure {
+  position: relative;
   width: clamp(78px, 9vw, 136px);
   flex: none;
   animation: dwarf-idle 4.5s var(--game-ease) infinite alternate;
+}
+
+.dwarf__figure::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 78%;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 55%), transparent 70%);
+  pointer-events: none;
 }
 
 @keyframes dwarf-idle {

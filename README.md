@@ -91,16 +91,15 @@ Die Sequenz ist eine eigene Phase (`FALSE_VICTORY`, 6,5 s), getaktet vom Server,
 Grossbild- und Spielleitungsansicht im selben Moment umschlagen. Die Spielleitung kann sie
 überspringen; bei `prefers-reduced-motion` bleiben beide Bilder ohne Bewegung stehen.
 
-## Anspielungen im Hintergrund
+## Anspielungen
 
-Die Fantasywelt ist die Förderwelt als Landkarte: Akademien von Studoria, die Wohnlande, die
-Gewölbe der Altschulden, HuHi als dunkles Gebirge am Horizont – dazu kleine Runensteine mit
-Programmnummern und ein wiederkehrendes BnD-Siegel. Ein bis drei erkennbare Anspielungen pro Bild,
-sonst Fantasy; erklärt wird nichts.
+Die Fantasywelt ist die Förderwelt in Fantasy übersetzt: Akademien von Studoria, die Wohnlande, die
+Gewölbe der Altschulden, HuHi als Gebirge am Horizont, dazu Programmnummern auf den Prüfplänen und
+ein wiederkehrendes BnD-Siegel. Sie stehen in den **Texten** – Vorspann, Atmosphärezeilen, Namen der
+Flügel, Sprüche der Figuren – und nicht als Beschriftung über den gemalten Szenen; erklärt wird
+nichts.
 
-Alle Marken stehen zentral in `packages/shared/src/lore.ts` (Ort in Prozent, Text, Sichtbarkeit)
-und werden von `SceneLore` als eigene Ebene über dem Szenenbild gezeichnet. Eine neue Anspielung ist
-ein Eintrag in dieser Datei, keine Codeänderung.
+Die Namen liegen zentral in `packages/shared/src/lore.ts` und werden von `story.ts` verwendet.
 
 ## Befehle
 
