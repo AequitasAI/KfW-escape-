@@ -352,3 +352,58 @@ Neubau ist also nicht nötig.
 Die Hostansicht warnt zusätzlich, wenn der Join-Link auf eine andere Herkunft zeigt als die Seite,
 auf der die Spielleitung gerade steht – der Fehler fällt sonst erst auf, wenn dreissig Leute den
 QR-Code scannen.
+
+
+## Die App unter dem Tunnel von jemand anderem betreiben
+
+Ausgangslage: Die eigene Domain ist im Firmennetz gesperrt, die Domain eines Bekannten kommt durch.
+Die App soll dort erreichbar sein, ohne den Rechner zu wechseln.
+
+### Der saubere Weg: eigener Tunnel, fremdes Konto, Connector bei uns
+
+**Der Besitzer der Domain macht drei Klicks:**
+
+1. Zero Trust → Networks → Tunnels → **Create a tunnel** → Cloudflared → Name z. B. `kfw-escape`.
+2. Den angezeigten **Token** kopieren (die lange Zeichenkette hinter `--token`).
+3. Beim neuen Tunnel **Public Hostname** anlegen: Subdomain frei wählbar, Domain seine eigene,
+   **Service: `http://app:3001`**.
+
+Den CNAME legt Cloudflare dabei selbst an; am DNS muss niemand etwas tun.
+
+**Wir tragen den Token ein und starten den Connector mit:**
+
+```bash
+echo "TUNNEL_TOKEN=<token>" >> .env
+docker compose --profile tunnel up -d
+```
+
+Der Connector läuft dann als zweiter Container neben der App, im selben Netz. Deshalb steht als
+Service `http://app:3001` und nicht `localhost` – kein offener Port im LAN, keine IP, die sich
+ändern kann, und der Rechner der Domainbesitzerin bleibt aussen vor.
+
+### Was man dabei nicht tun sollte
+
+Den **bestehenden** Tunnel um einen zweiten Connector auf unserem Rechner zu erweitern, sieht
+verlockend aus und geht schief: Mehrere Connectors an einem Tunnel sind Repliken. Cloudflare
+verteilt die Anfragen auf beide, und die Ingress-Regeln sind für beide dieselben. Die Hälfte der
+Aufrufe landet dann auf dem Rechner, auf dem die jeweils andere App gar nicht läuft – mal geht es,
+mal nicht, und die Ursache sieht aus wie ein Netzproblem. Ein Tunnel je App, oder beide Apps auf
+demselben Rechner.
+
+### Alternative im selben LAN
+
+Läuft der vorhandene Connector im selben Netz wie unser Rechner, genügt am **bestehenden** Tunnel
+ein weiterer Public Hostname mit Service `http://<ip-unseres-rechners>:3001`. Dann muss Port 3001
+im LAN erreichbar sein und die IP sollte fest sein.
+
+### In der App
+
+| Variable | Wert |
+|---|---|
+| `PUBLIC_BASE_URL` | leer – Join-Link und QR-Code richten sich dann nach der aufgerufenen Adresse |
+| `COOKIE_SECURE` | `1` |
+| `HOST_PASSWORD` | gesetzt. Unter einer fremden Domain ist die Seite öffentlich erreichbar; ohne Passwort kann jeder, der die URL kennt, Sessions anlegen. |
+
+Ein Neubau des Frontends ist nicht nötig: API und Socket laufen relativ zur aufgerufenen Adresse.
+Die Hostansicht warnt von selbst, wenn der Join-Link auf eine andere Herkunft zeigt als die Seite,
+auf der die Spielleitung gerade steht.
