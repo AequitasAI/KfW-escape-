@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { GAME_TITLE, PUZZLES, companionsGathered } from '@kfw-escape/shared';
+import { GAME_TITLE, PUZZLES, companionsGathered, joinLinkMismatch } from '@kfw-escape/shared';
 import type { SocketAuth } from '@kfw-escape/shared';
 import { Avatar } from '../components/Avatar.js';
 import { ConnectionPill, HandoverPicker, ProgressTrail, SealRow, Timer } from '../components/Chrome.js';
@@ -278,6 +278,12 @@ export function HostView(): JSX.Element {
   }
 
   const displayUrl = `${window.location.origin}/display/${normalized}`;
+  /*
+   * Zeigt der Join-Link woandershin als die Seite, auf der wir gerade stehen,
+   * ist PUBLIC_BASE_URL falsch gesetzt - und der QR-Code führt ins Leere. Das
+   * merkt man sonst erst, wenn dreissig Leute davorstehen.
+   */
+  const linkElsewhere = joinLinkMismatch(joinUrl, window.location.origin);
   const canStart = snapshot?.status === 'LOBBY' && (snapshot?.players.length ?? 0) > 0;
   const paused = snapshot?.status === 'PAUSED';
   const finished = snapshot?.status === 'WON' || snapshot?.status === 'LOST';
@@ -328,6 +334,13 @@ export function HostView(): JSX.Element {
                   <img src={api.qrUrl(normalized)} alt={`QR-Code zum Beitreten von Session ${normalized}`} />
                 </figure>
               </div>
+              {linkElsewhere ? (
+                <p className="notice notice--warn" role="alert">
+                  Achtung: Der Join-Link zeigt auf <strong>{linkElsewhere}</strong>, ihr seid gerade
+                  auf <strong>{window.location.origin}</strong>. Der QR-Code führt dann woandershin –
+                  <code> PUBLIC_BASE_URL</code> auf dem Server prüfen oder leer lassen.
+                </p>
+              ) : null}
               <CopyRow label="Join-Link" value={joinUrl || `${window.location.origin}/join/${normalized}`} />
               <CopyRow label="Großbildansicht" value={displayUrl} />
               <a className="btn btn--block" href={`/display/${normalized}`} target="_blank" rel="noreferrer">

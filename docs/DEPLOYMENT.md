@@ -321,3 +321,34 @@ docker compose exec app printenv HOST_PASSWORD | cat -A
 
 Leerzeichen und Zeilenumbrüche am Rand werden inzwischen auf beiden Seiten
 weggeschnitten – ein Passwort, dessen Sinn an einem Leerzeichen hängt, ist keins.
+
+
+## Unter einer anderen Domain betreiben (Tunnel tauschen)
+
+Wenn die eigentliche Adresse im Firmennetz nicht freigegeben ist, kann das Spiel unter einem
+bereits erreichbaren Hostnamen laufen. In Cloudflare Zero Trust muss dafür kein Tunnel getauscht
+werden: Ein Tunnel kann mehrere Public Hostnames bedienen.
+
+1. Zero Trust → Networks → Tunnels → den **erreichbaren** Tunnel → **Public Hostname** hinzufügen.
+2. Subdomain/Domain: der Hostname, der im Firmennetz durchkommt.
+3. Service: `http://localhost:3001` – sofern der Connector dieses Tunnels auf demselben Rechner
+   läuft wie die App. Läuft er woanders, dort `http://<ip-des-app-rechners>:3001` eintragen
+   (dann muss Port 3001 im LAN erreichbar sein) oder auf dem App-Rechner einen zweiten Connector
+   installieren und den Hostnamen dort andocken.
+
+Die alte Adresse kann bestehen bleiben; beide zeigen dann auf dieselbe App.
+
+**Was in der App angepasst werden muss:** fast nichts.
+
+| Variable | Was tun |
+|---|---|
+| `PUBLIC_BASE_URL` | **leer lassen** oder auf die neue Adresse setzen. Leer heisst: Join-Link und QR-Code richten sich automatisch nach der Adresse, unter der die Spielleitung gerade arbeitet. Steht hier noch die alte Adresse, führt der QR-Code ins Leere. |
+| `CORS_ORIGINS` | leer lassen. Oberfläche und API kommen von derselben Herkunft, es wird nichts gebraucht. Steht dort die alte Domain, bricht die Socket-Verbindung. |
+| `COOKIE_SECURE` | bei `https` auf `1`. |
+
+Das Frontend selbst kennt keine Domain: API und Socket laufen relativ zur aufgerufenen Adresse, ein
+Neubau ist also nicht nötig.
+
+Die Hostansicht warnt zusätzlich, wenn der Join-Link auf eine andere Herkunft zeigt als die Seite,
+auf der die Spielleitung gerade steht – der Fehler fällt sonst erst auf, wenn dreissig Leute den
+QR-Code scannen.

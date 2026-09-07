@@ -73,6 +73,7 @@ import {
   RUNE_MASTER_SOLUTION,
   trueInscriptionCount,
 } from '../src/puzzles/runeMaster.js';
+import { joinLinkMismatch } from '../src/links.js';
 
 /* ------------------------------------------------------------------ */
 /* A06 - Puzzle 1: unique rune solution                                */
@@ -557,5 +558,34 @@ describe('P6 Prüfung des Runenmeisters', () => {
     const state = createRuneMasterState();
     expect(reduceRuneMaster(state, { type: 'pick', slot: 'gate', index: 3 }, 0)).toBeNull();
     expect(reduceRuneMaster(state, { type: 'pick', slot: 'gate', index: -1 }, 0)).toBeNull();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* Join-Link gegen die eigene Adresse                                  */
+/* ------------------------------------------------------------------ */
+
+describe('Join-Link und aktuelle Adresse', () => {
+  /*
+   * Der teuerste denkbare Konfigurationsfehler: Die App läuft unter einer
+   * neuen Adresse, PUBLIC_BASE_URL zeigt noch auf die alte, und dreissig Leute
+   * scannen einen QR-Code ins Leere - in dem Moment, in dem alle im Raum
+   * stehen. Deshalb wird es geprüft, statt darauf zu vertrauen.
+   */
+  it('flags a join link that points somewhere else', () => {
+    expect(joinLinkMismatch('https://alt.example/join/ABC234', 'https://neu.example')).toBe(
+      'https://alt.example',
+    );
+    expect(joinLinkMismatch('https://neu.example/join/ABC234', 'https://neu.example')).toBeNull();
+    // anderer Port ist eine andere Herkunft - und im Zweifel auch ein Fehler
+    expect(joinLinkMismatch('http://host:3001/join/ABC234', 'http://host:8080')).toBe(
+      'http://host:3001',
+    );
+  });
+
+  it('stays quiet when there is nothing to compare', () => {
+    expect(joinLinkMismatch('', 'https://neu.example')).toBeNull();
+    expect(joinLinkMismatch('https://neu.example/join/ABC234', '')).toBeNull();
+    expect(joinLinkMismatch('kein-link', 'https://neu.example')).toBeNull();
   });
 });

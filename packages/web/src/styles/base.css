@@ -284,6 +284,17 @@ svg {
   color: #ffcac6;
 }
 
+/* Kein Fehler, aber etwas, das man vor dem Spieleabend gesehen haben will. */
+.notice--warn {
+  border-color: color-mix(in srgb, var(--game-fx-rune) 60%, transparent);
+  color: var(--game-fx-rune);
+}
+
+.notice--warn code {
+  font-size: 0.95em;
+  color: inherit;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
