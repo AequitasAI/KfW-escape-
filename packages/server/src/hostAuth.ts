@@ -34,7 +34,16 @@ export class HostAuth {
   private readonly tokenSecret: string;
 
   constructor(repo: Repository, password: string) {
-    this.password = password;
+    /*
+     * Getrimmt, und zwar auf beiden Seiten der Prüfung.
+     *
+     * Das Passwort kommt aus einer .env-Datei, und dort landet erschreckend
+     * leicht ein Leerzeichen oder ein Zeilenumbruch hinter dem Wert. Der Server
+     * lehnt dann ein Passwort ab, das für jeden Menschen richtig aussieht, und
+     * niemand kommt darauf, warum - der Fehler ist unsichtbar. Ein Passwort,
+     * dessen Sinn an einem Leerzeichen am Rand hängt, ist ohnehin keins.
+     */
+    this.password = password.trim();
     /*
      * Persisted rather than generated per boot: a restart during the event
      * would otherwise log the game master out at the worst possible moment.
@@ -58,8 +67,12 @@ export class HostAuth {
 
   verifyPassword(input: unknown): boolean {
     if (!this.enabled) return false;
-    if (typeof input !== 'string' || input.length === 0 || input.length > 512) return false;
-    return constantTimeEquals(input, this.password);
+    if (typeof input !== 'string' || input.length > 512) return false;
+    // dasselbe für die Eingabe: getippt auf dem Handy hängt schnell ein
+    // Leerzeichen dran, und die Autovervollständigung setzt gern eines dazu
+    const value = input.trim();
+    if (value.length === 0) return false;
+    return constantTimeEquals(value, this.password);
   }
 
   /** `expiry.nonce.signature`; carries no identity because there is none. */

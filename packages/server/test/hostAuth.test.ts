@@ -484,3 +484,38 @@ describe('Gezielte Übergabe', () => {
     expect(game.candidateId).not.toBe(first);
   });
 });
+
+/* ------------------------------------------------------------------ */
+/* Leerzeichen am Rand                                                 */
+/* ------------------------------------------------------------------ */
+
+describe('Passwort mit Leerraum am Rand', () => {
+  /*
+   * Das Passwort kommt aus einer .env-Datei. Dort landet erschreckend leicht
+   * ein Leerzeichen oder ein Zeilenumbruch hinter dem Wert - und dann lehnt der
+   * Server ein Passwort ab, das für jeden Menschen richtig aussieht. Der Fehler
+   * ist unsichtbar, deshalb darf es ihn nicht geben.
+   */
+  it('ignores stray whitespace around the configured password and the input', () => {
+    const repo = new Repository(openDatabase(':memory:'));
+    const auth = new HostAuth(repo, '  zwerg\n');
+
+    expect(auth.enabled).toBe(true);
+    expect(auth.verifyPassword('zwerg')).toBe(true);
+    expect(auth.verifyPassword(' zwerg ')).toBe(true);
+    expect(auth.verifyPassword('zwerg\n')).toBe(true);
+
+    // aber sonst nichts: ein anderes Passwort bleibt falsch
+    expect(auth.verifyPassword('zwergi')).toBe(false);
+    expect(auth.verifyPassword('')).toBe(false);
+    expect(auth.verifyPassword('   ')).toBe(false);
+  });
+
+  /* Nur Leerraum konfiguriert heisst: kein Login eingerichtet. */
+  it('treats a whitespace-only password as no password at all', () => {
+    const repo = new Repository(openDatabase(':memory:'));
+    const auth = new HostAuth(repo, '   ');
+    expect(auth.enabled).toBe(false);
+    expect(auth.verifyPassword('   ')).toBe(false);
+  });
+});

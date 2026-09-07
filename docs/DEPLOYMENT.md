@@ -291,3 +291,33 @@ Gespeichert werden ausschließlich Anzeigename, eine servergenerierte opake Play
 Spielfortschritt. Keine Mailadresse, kein Passwort, kein Mitarbeiterkennzeichen, keine dauerhafte
 IP-Speicherung (IP-Adressen werden nur flüchtig im Arbeitsspeicher für Rate-Limits genutzt).
 Alle Daten einer Veranstaltung verschwinden mit `docker compose down -v`.
+
+
+## Login der Spielleitung geht nicht
+
+Drei Ursachen, drei verschiedene Meldungen – die Meldung sagt, welche es ist:
+
+| Meldung | Ursache | Abhilfe |
+|---|---|---|
+| „Für diese Installation ist kein Spielleitungs-Login eingerichtet." | Der Container sieht `HOST_PASSWORD` nicht | `.env` prüfen, `docker compose up -d` neu ausführen |
+| „Passwort stimmt nicht." | anderes Passwort gesetzt als getippt | siehe unten |
+| „Zu viele Fehlversuche. Bitte einige Minuten warten." | zehn Fehlversuche in fünf Minuten von derselben IP | fünf Minuten warten, dann geht es wieder |
+
+Ob der Server überhaupt ein Passwort kennt, sagt die Statusseite ohne Anmeldung:
+
+```bash
+curl -s https://<deine-domain>/api/health
+# "hostLogin": true  -> ein Passwort ist gesetzt
+# "hostLogin": false -> der Container hat keins
+```
+
+Und was im Container wirklich ankommt:
+
+```bash
+docker compose exec app printenv HOST_PASSWORD | cat -A
+# zwerg$      -> sauber
+# zwerg $     -> ein Leerzeichen dahinter (wird seit 2026-09 ignoriert)
+```
+
+Leerzeichen und Zeilenumbrüche am Rand werden inzwischen auf beiden Seiten
+weggeschnitten – ein Passwort, dessen Sinn an einem Leerzeichen hängt, ist keins.
